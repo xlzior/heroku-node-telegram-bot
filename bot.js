@@ -42,6 +42,17 @@ const updateUserOnXPChange = (chatId, type, xpData) => {
   })
 }
 
+const sendAndPin = (chatId, message) => {
+  return bot.sendMessage(chatId, message)
+  .then(botMsg => {
+    bot.pinChatMessage(chatId, botMsg.message_id);
+    return botMsg.message_id;
+  })
+}
+
+const FORCE_REPLY = { reply_markup: { force_reply: true } };
+const MARKDOWN = { parse_mode: "MarkdownV2" };
+
 /* BOT RESPONSES */
 
 const continueConversation = {};
@@ -54,18 +65,10 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(msg.chat.id, match[1]);
 });
 
-const sendAndPin = (chatId, message) => {
-  return bot.sendMessage(chatId, message)
-  .then(botMsg => {
-    bot.pinChatMessage(chatId, botMsg.message_id);
-    return botMsg.message_id;
-  })
-}
-
 bot.onText(/\/start/, msg => {
   const userId = msg.from.id;
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journaling chatbot.`);
+  bot.sendMessage(chatId, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journalling chatbot.`);
 
   createUser(userId)
   .then(() => sendAndPin(chatId, formatLevel(0)))
@@ -74,13 +77,13 @@ bot.onText(/\/start/, msg => {
 
 bot.onText(/\/help/, msg => {
   const helpMessage = [
-    "Welcome to LifeXP, a gamified journaling chatbot.\n",
+    "Welcome to LifeXP, a gamified journalling chatbot.\n",
     "I'm here to help you pen down your thoughts in a safe and convenient environment.\n",
     "Use /open to start a new journal entry.",
     "If you need a prompt to start off, let me know using /prompt.",
     "If you did something that you're proud of and want to celebrate it, try /ididathing.",
     "Finally, /close the journal entry and let your mind rest.\n",
-    "I hope you have a meaningful journaling session."
+    "I hope you have a meaningful journalling session."
   ].join("\n");
   bot.sendMessage(msg.chat.id, helpMessage)
 })
@@ -92,7 +95,7 @@ bot.onText(/\/tour/, msg => {
 bot.onText(/\/open/, msg => {
   openReflection(msg.from.id, msg.message_id)
   .then(() => {
-    bot.sendMessage(msg.chat.id, "Let's start a journaling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
+    bot.sendMessage(msg.chat.id, "Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
   })
   .catch(error => {
     bot.sendMessage(msg.chat.id, error);
@@ -100,9 +103,8 @@ bot.onText(/\/open/, msg => {
 })
 
 bot.onText(/\/close/, msg => {
-  bot.sendMessage(msg.chat.id, "Whew! Nice journaling session. How would you like to name this conversation for future browsing?")
+  bot.sendMessage(msg.chat.id, "Whew! Nice journalling session. How would you like to name this conversation for future browsing?", FORCE_REPLY)
   updatePrevCommand(msg.from.id, { command: "close" })
-  // TODO: force user to reply
 })
 
 continueConversation["close"] = msg => {
@@ -118,6 +120,7 @@ continueConversation["close"] = msg => {
   })
   .catch(error => {
     bot.sendMessage(msg.chat.id, error);
+    // TODO: this should happen on /close, not at this stage
   });
 }
 
@@ -126,15 +129,18 @@ bot.onText(/\/hashtags/, msg => {
   .then(hashtags => {
     const message = hashtags
       .map(({ hashtag, messages }) => {
-        const firstLine = `#${hashtag}: ${messages.length}`
+        const firstLine = `*\\#${hashtag}: ${messages.length}*`
         const nextLines = messages
-          .map(({ messageId, name }) => `/goto${messageId} ${name}`)
+          .map(({ messageId, name }) => `\\- /goto${messageId} ${name}`)
           .join('\n')
         return `${firstLine}\n${nextLines}`;
       })
       .join('\n\n');
-    bot.sendMessage(msg.chat.id, message);
-  });
+    bot.sendMessage(msg.chat.id, message, MARKDOWN);
+  })
+  .catch(error => {
+    bot.sendMessage(msg.chat.id, error);
+  })
 });
 
 bot.onText(/\/goto(\d+)/, (msg, match) => {
@@ -159,18 +165,20 @@ bot.onText(/\/lifexp/, msg => {
 })
 
 bot.onText(/\/ididathing/, msg => {
-  bot.sendMessage(msg.chat.id, "Congrats! Whether it's a small win or a big win, let's celebrate it!");
-  bot.sendMessage(msg.chat.id, "So tell me, what did you do?");
+  bot.sendMessage(msg.chat.id, "Congrats! Whether it's a small win or a big win, let's celebrate it!")
+  .then(() => {
+    bot.sendMessage(msg.chat.id, "So tell me, what did you do?", FORCE_REPLY);
+  })
   updatePrevCommand(msg.from.id, { command: "ididathing - what" });
 })
 
 continueConversation["ididathing - what"] = msg => {
-  bot.sendMessage(msg.chat.id, "Amazing! How do you feel about it now?");
+  bot.sendMessage(msg.chat.id, "Amazing! How do you feel about it now?", FORCE_REPLY);
   updatePrevCommand(msg.from.id, { command: "ididathing - feeling" });
 }
 
 continueConversation["ididathing - feeling"] = msg => {
-  bot.sendMessage(msg.chat.id, "Nice~ On a scale of 1 to 10, how difficult would you rate it?");
+  bot.sendMessage(msg.chat.id, "Nice~ On a scale of 1 to 10, how difficult would you rate it?", FORCE_REPLY);
   updatePrevCommand(msg.from.id, { command: "ididathing - difficulty" });
 }
 
@@ -208,8 +216,7 @@ continueConversation["ididathing - difficulty"] = msg => {
 bot.on('message', msg => {
   const userId = msg.from.id;
 
-
-  // TODO: automatically open a conversation for a smoother journaling experience?
+  // TODO: automatically open a conversation for a smoother journalling experience?
 
   if (msg.entities) {
     const hashtags = msg.entities
