@@ -120,6 +120,59 @@ bot.onText(/\/emojis/, msg => {
 
 })
 
+bot.onText(/\/lifexp/, msg => {
+  getXP(msg.from.id)
+  .then(xp => {
+    bot.sendMessage(msg.chat.id, `Level ${getLevel(xp)} (${xp} XP)`);
+  });
+  // TODO: x more points to the next level
+})
+
+bot.onText(/\/ididathing/, msg => {
+  bot.sendMessage(msg.chat.id, "Congrats! Whether it's a small win or a big win, let's celebrate it!");
+  bot.sendMessage(msg.chat.id, "So tell me, what did you do?");
+  updatePrevCommand(msg.from.id, { command: "ididathing - what" });
+})
+
+continueConversation["ididathing - what"] = msg => {
+  bot.sendMessage(msg.chat.id, "Amazing! How do you feel about it now?");
+  updatePrevCommand(msg.from.id, { command: "ididathing - feeling" });
+}
+
+continueConversation["ididathing - feeling"] = msg => {
+  bot.sendMessage(msg.chat.id, "Nice~ On a scale of 1 to 10, how difficult would you rate it?");
+  updatePrevCommand(msg.from.id, { command: "ididathing - difficulty" });
+}
+
+const DIFFICULTY_XP_MULTIPLIER = 100;
+
+continueConversation["ididathing - difficulty"] = msg => {
+  const difficulty = parseInt(msg.text.match(/\d{1,2}/)[0]);
+  const send = message => bot.sendMessage(msg.chat.id, message);
+  if (difficulty < 1 || difficulty > 10) {
+    send("Please enter a valid number between 1 and 10 (inclusive)");
+  } else {
+    if (difficulty <= 3) {
+      send("That's cool! Small wins count too~");
+    } else if (difficulty <= 6) {
+      send("Nice, good job!")
+    } else if (difficulty <= 9) {
+      send("Wowowow, big win right there :D");
+    } else if (difficulty === 10) {
+      send("THAT'S AMAZING!! YOOOO I'M SO PROUD OF YOU!!")
+    }
+
+    return updateXP(msg.from.id, difficulty * DIFFICULTY_XP_MULTIPLIER)
+    .then(([oldXP, changeInXP, newXP]) => {
+      send(`You've earned ${changeInXP} XP for your achievement!`);
+      if (getLevel(newXP) > getLevel(oldXP)) {
+        send(`You've levelled up! You are now level ${getLevel(newXP)}`);
+      }
+      return resetPrevCommand(msg.from.id);
+    })
+  }
+}
+
 // Messages with no command
 
 bot.on('message', msg => {
