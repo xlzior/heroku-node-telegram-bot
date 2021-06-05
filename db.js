@@ -11,7 +11,6 @@ const getUserDb = userId => usersDbRef.child(userId);
 const INITIAL_USER = {
   "progress": {
     "xp": 0,
-    "level": 1
   },
 };
 
@@ -56,19 +55,23 @@ const getPrevCommand = (userId) => {
 
 /* EXP */
 
+const setPinnedMessageId = (userId, pinnedMessageId) => {
+  const xpDb = getUserDb(userId).child('progress/pinned_message_id')
+  xpDb.set(pinnedMessageId);
+}
+
 const updateXP = (userId, newXP) => {
-  const xpDb = getUserDb(userId).child('progress/xp');
-  return xpDb.get()
-  .then(snapshot => {
-    const currentXP = snapshot.exists() ? snapshot.val() : 0;
-    xpDb.set(currentXP + newXP);
-    return [currentXP, newXP, currentXP + newXP];
+  const xpDb = getUserDb(userId).child('progress');
+  return get(xpDb)
+  .then(({ xp: currentXP, pinned_message_id: pinnedMessageId }) => {
+    xpDb.update({ xp: currentXP + newXP });
+    return [currentXP, newXP, currentXP + newXP, pinnedMessageId];
   })
 }
 
 const getXP = (userId) => {
   const userDb = getUserDb(userId);
-  return get(userDb.child('progress/xp'));
+  return get(userDb.child('progress'));
 }
 
 /* Reflections */
@@ -121,8 +124,8 @@ const addHashtags = (userId, hashtags = []) => {
   const userDb = getUserDb(userId);
   return getCurrentReflectionId(userId)
   .then(reflectionId => {
-    const currentReflection = userDb.child(`reflections/${reflectionId}`)
     // update reflection's hashtags
+    const currentReflection = userDb.child(`reflections/${reflectionId}`)
     const currentHashtags = currentReflection.child('hashtags');
     const updates = {}
     hashtags.map(tag => {
@@ -182,7 +185,7 @@ const addEmojis = (userId, emojis = {}) => {
 
 module.exports = {
   createUser,
-  updateXP, getXP,
+  setPinnedMessageId, updateXP, getXP,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
   openReflection, closeReflection,
   addHashtags, getHashtags,

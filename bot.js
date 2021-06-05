@@ -2,7 +2,7 @@ const Bot = require('node-telegram-bot-api');
 
 const {
   createUser,
-  updateXP, getXP,
+  setPinnedMessageId, updateXP, getXP,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
   openReflection, closeReflection,
   addHashtags, getHashtags,
@@ -22,6 +22,24 @@ if(process.env.NODE_ENV === 'production') {
 
 console.log('Bot server started in ' + process.env.NODE_ENV + ' mode');
 
+/* BOT UTILITIES */
+
+const getLevel = xp => Math.floor(xp / 1000) + 1;
+
+const formatLevel = xp => `Level ${getLevel(xp)} (${xp} XP)`;
+
+const updateUserOnXPChange = (chatId, type, xpData) => {
+  const [oldXP, changeInXP, newXP, pinnedMessageId] = xpData;
+  bot.sendMessage(chatId, `You earned ${changeInXP} XP for ${type}!`);
+  if (getLevel(newXP) > getLevel(oldXP)) {
+    bot.sendMessage(chatId, `You levelled up! You are now level ${getLevel(newXP)}`);
+  }
+  bot.editMessageText(formatLevel(newXP), {
+    chat_id: chatId,
+    message_id: pinnedMessageId,
+  })
+}
+
 /* BOT RESPONSES */
 
 const continueConversation = {};
@@ -34,10 +52,22 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(msg.chat.id, match[1]);
 });
 
-bot.onText(/\/start/, msg => {
-  bot.sendMessage(msg.chat.id, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journaling chatbot.`)
+const sendAndPin = (chatId, message) => {
+  return bot.sendMessage(chatId, message)
+  .then(botMsg => {
+    bot.pinChatMessage(chatId, botMsg.message_id);
+    return botMsg.message_id;
+  })
+}
 
-  createUser(msg.from.id);
+bot.onText(/\/start/, msg => {
+  const userId = msg.from.id;
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journaling chatbot.`);
+
+  createUser(userId)
+  .then(() => sendAndPin(chatId, formatLevel(0)))
+  .then(messageId => setPinnedMessageId(userId, messageId));
 })
 
 bot.onText(/\/help/, msg => {
@@ -73,8 +103,6 @@ bot.onText(/\/close/, msg => {
   // TODO: force user to reply
 })
 
-const getLevel = xp => Math.floor(xp / 1000) + 1;
-
 continueConversation["close"] = msg => {
   const userId = msg.from.id;
   closeReflection(userId, msg.message_id, msg.text)
@@ -82,11 +110,8 @@ continueConversation["close"] = msg => {
     bot.sendMessage(msg.chat.id, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
     return updateXP(msg.from.id, convoLength);
   })
-  .then(([oldXP, changeInXP, newXP]) => {
-    bot.sendMessage(msg.chat.id, `You've earned ${changeInXP} XP for this conversation!`);
-    if (getLevel(newXP) > getLevel(oldXP)) {
-      bot.sendMessage(msg.chat.id, `You've levelled up! You are now level ${getLevel(newXP)}`);
-    }
+  .then(xpData => {
+    updateUserOnXPChange(msg.chat.id, "this conversation", xpData);
     return resetPrevCommand(userId);
   })
   .catch(error => {
@@ -121,9 +146,13 @@ bot.onText(/\/emojis/, msg => {
 })
 
 bot.onText(/\/lifexp/, msg => {
-  getXP(msg.from.id)
-  .then(xp => {
-    bot.sendMessage(msg.chat.id, `Level ${getLevel(xp)} (${xp} XP)`);
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+  getXP(userId)
+  .then(({ xp, pinnedMessageId }) => {
+    bot.unpinChatMessage(chatId, pinnedMessageId);
+    sendAndPin(chatId, formatLevel(xp))
+    .then(messageId => setPinnedMessageId(userId, messageId));
   });
   // TODO: x more points to the next level
 })
@@ -163,11 +192,8 @@ continueConversation["ididathing - difficulty"] = msg => {
     }
 
     return updateXP(msg.from.id, difficulty * DIFFICULTY_XP_MULTIPLIER)
-    .then(([oldXP, changeInXP, newXP]) => {
-      send(`You've earned ${changeInXP} XP for your achievement!`);
-      if (getLevel(newXP) > getLevel(oldXP)) {
-        send(`You've levelled up! You are now level ${getLevel(newXP)}`);
-      }
+    .then(xpData => {
+      updateUserOnXPChange(msg.chat.id, "your achievement", xpData);
       return resetPrevCommand(msg.from.id);
     })
   }
@@ -177,6 +203,7 @@ continueConversation["ididathing - difficulty"] = msg => {
 
 bot.on('message', msg => {
   const userId = msg.from.id;
+
 
   // TODO: automatically open a conversation for a smoother journaling experience?
 
