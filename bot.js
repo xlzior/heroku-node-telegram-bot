@@ -4,7 +4,7 @@ const {
   createUser,
   setPinnedMessageId, updateXP, getXP,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
-  openReflection, closeReflection,
+  openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
   addEmojis
 } = require('./db');
@@ -103,8 +103,15 @@ bot.onText(/\/open/, msg => {
 })
 
 bot.onText(/\/close/, msg => {
-  bot.sendMessage(msg.chat.id, "Whew! Nice journalling session. How would you like to name this conversation for future browsing?", FORCE_REPLY)
-  updatePrevCommand(msg.from.id, { command: "close" })
+  isReflectionOpen(msg.from.id)
+  .then(isOpen => {
+    if (isOpen) {
+      bot.sendMessage(msg.chat.id, "Whew! Nice journalling session. How would you like to name this conversation for future browsing?", FORCE_REPLY)
+      updatePrevCommand(msg.from.id, { command: "close" })
+    } else {
+      bot.sendMessage(msg.chat.id, "You have not started a reflection. Use /open to start a new reflection");
+    }
+  })
 })
 
 continueConversation["close"] = msg => {
@@ -120,7 +127,6 @@ continueConversation["close"] = msg => {
   })
   .catch(error => {
     bot.sendMessage(msg.chat.id, error);
-    // TODO: this should happen on /close, not at this stage
   });
 }
 

@@ -18,7 +18,7 @@ const get = db => {
   return db.get()
   .then(snapshot => {
     if (snapshot.exists()) {
-      return Promise.resolve(snapshot.val());
+      return snapshot.val();
     } else {
       return Promise.reject("No snapshot");
     }
@@ -88,6 +88,12 @@ const getCurrentReflection = (userId) => {
   const userDb = getUserDb(userId);
   return getCurrentReflectionId(userId)
   .then(reflectionId => userDb.child(`reflections/${reflectionId}`));
+}
+
+const isReflectionOpen = (userId) => {
+  return getCurrentReflection(userId)
+  .then(() => true)
+  .catch(() => false);
 }
 
 const openReflection = (userId, start) => {
@@ -187,7 +193,7 @@ module.exports = {
   createUser,
   setPinnedMessageId, updateXP, getXP,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
-  openReflection, closeReflection,
+  openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
   addEmojis
 }
