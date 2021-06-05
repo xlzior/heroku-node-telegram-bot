@@ -2,6 +2,7 @@ const Bot = require('node-telegram-bot-api');
 
 const {
   createUser,
+  updateXP, getXP,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
   openReflection, closeReflection,
   addHashtags, getHashtags,
@@ -22,6 +23,8 @@ if(process.env.NODE_ENV === 'production') {
 console.log('Bot server started in ' + process.env.NODE_ENV + ' mode');
 
 /* BOT RESPONSES */
+
+const continueConversation = {};
 
 bot.onText(/\/prompt/, msg => {
   bot.sendMessage(msg.chat.id, getRandomPrompt());
@@ -70,6 +73,27 @@ bot.onText(/\/close/, msg => {
   // TODO: force user to reply
 })
 
+const getLevel = xp => Math.floor(xp / 1000) + 1;
+
+continueConversation["close"] = msg => {
+  const userId = msg.from.id;
+  closeReflection(userId, msg.message_id, msg.text)
+  .then(convoLength => {
+    bot.sendMessage(msg.chat.id, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
+    return updateXP(msg.from.id, convoLength);
+  })
+  .then(([oldXP, changeInXP, newXP]) => {
+    bot.sendMessage(msg.chat.id, `You've earned ${changeInXP} XP for this conversation!`);
+    if (getLevel(newXP) > getLevel(oldXP)) {
+      bot.sendMessage(msg.chat.id, `You've levelled up! You are now level ${getLevel(newXP)}`);
+    }
+    return resetPrevCommand(userId);
+  })
+  .catch(error => {
+    bot.sendMessage(msg.chat.id, error);
+  });
+}
+
 bot.onText(/\/hashtags/, msg => {
   getHashtags(msg.from.id)
   .then(hashtags => {
@@ -113,20 +137,11 @@ bot.on('message', msg => {
   addEmojis(userId, countEmojis(msg.text));
 
   getPrevCommand(userId)
-  .then(prevCommand => {
-    switch (prevCommand.command) {
-      case 'close':
-        closeReflection(msg.from.id, msg.message_id, msg.text)
-        .then(() => {
-          bot.sendMessage(msg.from.id, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
-          return resetPrevCommand(msg.from.id);
-        })
-        .catch(error => {
-          bot.sendMessage(msg.chat.id, error);
-        });
-        break;
-      default:
-        console.log('Encountered unfamiliar command:', prevCommand)
+  .then(({ command }) => {
+    if (continueConversation[command]) {
+      continueConversation[command](msg);
+    } else {
+      console.log('Encountered unfamiliar command: ', command)
     }
   })
   .catch(error => console.log(error));

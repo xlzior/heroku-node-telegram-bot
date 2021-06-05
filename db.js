@@ -57,8 +57,18 @@ const getPrevCommand = (userId) => {
 /* EXP */
 
 const updateXP = (userId, newXP) => {
+  const xpDb = getUserDb(userId).child('progress/xp');
+  return xpDb.get()
+  .then(snapshot => {
+    const currentXP = snapshot.exists() ? snapshot.val() : 0;
+    xpDb.set(currentXP + newXP);
+    return [currentXP, newXP, currentXP + newXP];
+  })
+}
+
+const getXP = (userId) => {
   const userDb = getUserDb(userId);
-  // TODO: how to increment efficiently?
+  return get(userDb.child('progress/xp'));
 }
 
 /* Reflections */
@@ -91,11 +101,12 @@ const openReflection = (userId, start) => {
 
 const closeReflection = (userId, end, name) => {
   const userDb = getUserDb(userId);
-  return getCurrentReflection(userId)
-  .then(currentReflection => {
+  return getCurrentReflectionId(userId)
+  .then(start => {
+    const currentReflection = userDb.child(`reflections/${start}`)
     currentReflection.update({ end, name });
     userDb.child(`current_reflection`).set(null);
-    // TODO: add XP based on length of conversation? length = end - start
+    return end - start + 1;
   })
   .catch(() => {
     return Promise.reject("You have not started a reflection. Use /open to start a new reflection");
@@ -106,8 +117,9 @@ const closeReflection = (userId, end, name) => {
 
 const addHashtags = (userId, hashtags = []) => {
   if (hashtags.length === 0) return;
+
   const userDb = getUserDb(userId);
-  getCurrentReflectionId(userId)
+  return getCurrentReflectionId(userId)
   .then(reflectionId => {
     const currentReflection = userDb.child(`reflections/${reflectionId}`)
     // update reflection's hashtags
@@ -137,10 +149,7 @@ const getHashtags = (userId) => {
       const rawMessageIds = Object.values(rawHashtags[hashtag]);
       const dedupedIds = [...new Set(rawMessageIds)];
       const messages = dedupedIds.map(messageId => ({ messageId, name: reflections[messageId].name }))
-      return {
-        hashtag,
-        messages,
-      }
+      return { hashtag, messages }
     });
     return hashtagsWithCount;
   })
@@ -154,7 +163,7 @@ const getHashtags = (userId) => {
 const addEmojis = (userId, emojis = {}) => {
   if (Object.keys(emojis).length === 0) return;
 
-  getCurrentReflection(userId)
+  return getCurrentReflection(userId)
   .then(currentReflection => {
     return get(currentReflection.child('emoji'))
     .then(oldEmojis => {
@@ -173,6 +182,7 @@ const addEmojis = (userId, emojis = {}) => {
 
 module.exports = {
   createUser,
+  updateXP, getXP,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
   openReflection, closeReflection,
   addHashtags, getHashtags,
