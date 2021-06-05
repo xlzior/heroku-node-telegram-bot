@@ -26,7 +26,9 @@ console.log('Bot server started in ' + process.env.NODE_ENV + ' mode');
 
 const getLevel = xp => Math.floor(xp / 1000) + 1;
 
-const formatLevel = xp => `Level ${getLevel(xp)} (${xp} XP)`;
+const pointsToNextLevel = xp => Math.ceil(xp / 1000) * 1000 - xp;
+
+const formatLevel = xp => `Level ${getLevel(xp)} (${xp} XP)            \n${pointsToNextLevel(xp)} XP to the next level`;
 
 const updateUserOnXPChange = (chatId, type, xpData) => {
   const [oldXP, changeInXP, newXP, pinnedMessageId] = xpData;
@@ -154,7 +156,6 @@ bot.onText(/\/lifexp/, msg => {
     sendAndPin(chatId, formatLevel(xp))
     .then(messageId => setPinnedMessageId(userId, messageId));
   });
-  // TODO: x more points to the next level
 })
 
 bot.onText(/\/ididathing/, msg => {
