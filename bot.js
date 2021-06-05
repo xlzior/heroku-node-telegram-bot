@@ -38,8 +38,16 @@ bot.onText(/\/start/, msg => {
 })
 
 bot.onText(/\/help/, msg => {
-  bot.sendMessage(msg.chat.id, "/open to start a new journal entry")
-  // TODO: write help message
+  const helpMessage = [
+    "Welcome to LifeXP, a gamified journaling chatbot.\n",
+    "I'm here to help you pen down your thoughts in a safe and convenient environment.\n",
+    "Use /open to start a new journal entry.",
+    "If you need a prompt to start off, let me know using /prompt.",
+    "If you did something that you're proud of and want to celebrate it, try /ididathing.",
+    "Finally, /close the journal entry and let your mind rest.\n",
+    "I hope you have a meaningful journaling session."
+  ].join("\n");
+  bot.sendMessage(msg.chat.id, helpMessage)
 })
 
 bot.onText(/\/tour/, msg => {
@@ -49,7 +57,7 @@ bot.onText(/\/tour/, msg => {
 bot.onText(/\/open/, msg => {
   openReflection(msg.from.id, msg.message_id)
   .then(() => {
-    bot.sendMessage(msg.chat.id, "Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
+    bot.sendMessage(msg.chat.id, "Let's start a journaling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
   })
   .catch(error => {
     bot.sendMessage(msg.chat.id, error);
@@ -67,16 +75,19 @@ bot.onText(/\/hashtags/, msg => {
   .then(hashtags => {
     const message = hashtags
       .map(({ hashtag, messages }) => {
-        return `#${hashtag}: ${messages.length}\n${messages.map(
-          ({ messageId, name }) => `/goto${messageId} ${name}`).join('\n')}`
+        const firstLine = `#${hashtag}: ${messages.length}`
+        const nextLines = messages
+          .map(({ messageId, name }) => `/goto${messageId} ${name}`)
+          .join('\n')
+        return `${firstLine}\n${nextLines}`;
       })
       .join('\n\n');
-    bot.sendMessage(msg.from.id, message);
+    bot.sendMessage(msg.chat.id, message);
   });
 });
 
 bot.onText(/\/goto(\d+)/, (msg, match) => {
-  bot.sendMessage(msg.from.id, "The conversation started here!", {
+  bot.sendMessage(msg.chat.id, "The conversation started here!", {
     reply_to_message_id: match[1]
   })
 })
@@ -85,10 +96,12 @@ bot.onText(/\/emojis/, msg => {
 
 })
 
+// Messages with no command
+
 bot.on('message', msg => {
   const userId = msg.from.id;
 
-  // TODO: automatically open a conversation for a smoother journalling experience?
+  // TODO: automatically open a conversation for a smoother journaling experience?
 
   if (msg.entities) {
     const hashtags = msg.entities
