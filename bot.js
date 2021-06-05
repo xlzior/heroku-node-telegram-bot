@@ -176,8 +176,11 @@ continueConversation["ididathing - feeling"] = msg => {
 const DIFFICULTY_XP_MULTIPLIER = 100;
 
 continueConversation["ididathing - difficulty"] = msg => {
-  const difficulty = parseInt(msg.text.match(/\d{1,2}/)[0]);
   const send = message => bot.sendMessage(msg.chat.id, message);
+  const match = msg.text.match(/\d+/);
+  if (!match) return send("Please enter a valid number between 1 and 10 (inclusive)");
+
+  const difficulty = parseInt(match[0]);
   if (difficulty < 1 || difficulty > 10) {
     send("Please enter a valid number between 1 and 10 (inclusive)");
   } else {
@@ -224,7 +227,7 @@ bot.on('message', msg => {
       console.log('Encountered unfamiliar command: ', command)
     }
   })
-  .catch(error => console.log(error));
+  .catch(() => {});
 });
 
 bot.on("polling_error", (err) => console.log(err));
