@@ -3,3 +3,7 @@ node_modules/*
 # Heroku environment configuration
 .env
 env.cmd
+
+reference/
+prompts/
+firebaseConfig.js

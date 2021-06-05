@@ -13,7 +13,9 @@
   "dependencies": {
     "body-parser": "^1.15.0",
     "dotenv": "^4.0.0",
+    "emoji-tree": "^1.1.2",
     "express": "^4.13.4",
+    "firebase": "^8.6.3",
     "node-telegram-bot-api": "^0.30.0"
   }
 }
