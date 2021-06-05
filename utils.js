@@ -7,16 +7,16 @@ const getRandomPrompt = () => {
 }
 
 const countEmojis = (rawText) => {
-  const emojiCounts = {};
+  const result = {};
   
-  const emojis = emojiTree(rawText)
-  .filter(char => char.type === 'emoji')
-  .map(emoji => emoji.text)
-  emojis.map(emoji => {
-    if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
-    emojiCounts[emoji]++;
-  })
-  return emojiCounts;
+  emojiTree(rawText)
+    .filter(char => char.type === 'emoji')
+    .map(emojiData => emojiData.text)
+    .map(emoji => {
+      if (!result[emoji]) result[emoji] = 0;
+      result[emoji]++;
+    })
+  return result;
 }
 
 module.exports = {
