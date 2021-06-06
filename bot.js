@@ -6,9 +6,10 @@ const {
   updatePrevCommand, resetPrevCommand, getPrevCommand,
   openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
-  addEmojis
+  addEmojis, getEmojis,
 } = require('./db');
-const { getRandomPrompt, countEmojis } = require('./utils');
+
+const { getRandomPrompt, countEmojis, emojiChart } = require('./utils');
 
 const token = process.env.TOKEN;
 
@@ -114,20 +115,23 @@ bot.onText(/\/close/, msg => {
   })
 })
 
-continueConversation["close"] = msg => {
-  const userId = msg.from.id;
-  closeReflection(userId, msg.message_id, msg.text)
-  .then(convoLength => {
-    bot.sendMessage(msg.chat.id, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
-    return updateXP(msg.from.id, convoLength);
-  })
-  .then(xpData => {
+continueConversation["close"] = async (msg) => {
+  try {
+    const userId = msg.from.id;
+    const emojis = await getEmojis(userId);
+    const convoLength = await closeReflection(userId, msg.message_id, msg.text);
+  
+    await bot.sendMessage(msg.chat.id, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
+    // TODO: only send if more than 5 emojis total and 2 distinct types
+    await bot.sendMessage(msg.chat.id, `You used these emojis in this entry:\n${emojiChart(emojis)}`)
+  
+    const xpData = await addXP(msg.from.id, convoLength);
+    
     updateUserOnXPChange(msg.chat.id, "this conversation", xpData);
-    return resetPrevCommand(userId);
-  })
-  .catch(error => {
-    bot.sendMessage(msg.chat.id, error);
-  });
+    resetPrevCommand(userId);
+  } catch (error) {
+    console.log('error :', error);
+  }
 }
 
 bot.onText(/\/hashtags/, msg => {

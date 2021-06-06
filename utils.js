@@ -19,7 +19,16 @@ const countEmojis = (rawText) => {
   return result;
 }
 
+const emojiChart = (emojiCounts) => {
+  return Object.keys(emojiCounts)
+    .map(emoji => {
+      return emoji.repeat(emojiCounts[emoji])
+    })
+    .join('\n');
+}
+
 module.exports = {
   getRandomPrompt,
-  countEmojis
+  countEmojis,
+  emojiChart,
 }

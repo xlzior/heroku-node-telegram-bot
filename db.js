@@ -189,6 +189,12 @@ const addEmojis = (userId, emojis = {}) => {
   // TODO: how to collate how many emojis i've used this month?
 }
 
+const getEmojis = (userId) => {
+  return getCurrentReflection(userId)
+  .then(currentReflection => get(currentReflection.child('emoji')))
+  .catch(() => {});
+}
+
 module.exports = {
   createUser,
   setPinnedMessageId, updateXP, getXP,
