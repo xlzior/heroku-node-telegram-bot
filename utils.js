@@ -2,8 +2,8 @@ const prompts = require('./prompts/prompts.json');
 const emojiTree = require('emoji-tree');
 
 const getRandomPrompt = () => {
-  const index = Math.floor(Math.random() * prompts.length);
-  return prompts[index];
+  const index = Math.floor(Math.random() * prompts.random.length);
+  return prompts.random[index];
 }
 
 const countEmojis = (rawText) => {
