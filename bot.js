@@ -2,7 +2,7 @@ const Bot = require('node-telegram-bot-api');
 
 const {
   createUser,
-  setPinnedMessageId, updateXP, getXP,
+  setPinnedMessageId, addXP, getProgress,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
   openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
@@ -10,6 +10,7 @@ const {
 } = require('./db');
 
 const { getRandomPrompt, countEmojis, emojiChart } = require('./utils');
+const { formatLevel } = require('./levels');
 
 const token = process.env.TOKEN;
 
@@ -25,19 +26,13 @@ console.log('Bot server started in ' + process.env.NODE_ENV + ' mode');
 
 /* BOT UTILITIES */
 
-const getLevel = xp => Math.floor(xp / 1000) + 1;
-
-const pointsToNextLevel = xp => Math.ceil(xp / 1000) * 1000 - xp;
-
-const formatLevel = xp => `Level ${getLevel(xp)} (${xp} XP)            \n${pointsToNextLevel(xp)} XP to the next level`;
-
 const updateUserOnXPChange = (chatId, type, xpData) => {
-  const [oldXP, changeInXP, newXP, pinnedMessageId] = xpData;
-  bot.sendMessage(chatId, `You earned ${changeInXP} XP for ${type}!`);
-  if (getLevel(newXP) > getLevel(oldXP)) {
-    bot.sendMessage(chatId, `You levelled up! You are now level ${getLevel(newXP)}`);
+  const { level, levelledUp, additionalXP, newXP, pinnedMessageId } = xpData;
+  bot.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
+  if (levelledUp) {
+    bot.sendMessage(chatId, `You levelled up! You are now level ${level}`);
   }
-  bot.editMessageText(formatLevel(newXP), {
+  bot.editMessageText(formatLevel(level, newXP), {
     chat_id: chatId,
     message_id: pinnedMessageId,
   })
@@ -72,7 +67,7 @@ bot.onText(/\/start/, msg => {
   bot.sendMessage(chatId, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journalling chatbot.`);
 
   createUser(userId)
-  .then(() => sendAndPin(chatId, formatLevel(0)))
+  .then(() => sendAndPin(chatId, formatLevel(1, 0)))
   .then(messageId => setPinnedMessageId(userId, messageId));
 })
 
@@ -112,6 +107,9 @@ bot.onText(/\/close/, msg => {
     } else {
       bot.sendMessage(msg.chat.id, "You have not started a reflection. Use /open to start a new reflection");
     }
+  })
+  .catch(error => {
+    console.log(error)
   })
 })
 
@@ -166,10 +164,10 @@ bot.onText(/\/emojis/, msg => {
 bot.onText(/\/lifexp/, msg => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  getXP(userId)
-  .then(({ xp, pinnedMessageId }) => {
+  getProgress(userId)
+  .then(({ level, xp, pinnedMessageId }) => {
     bot.unpinChatMessage(chatId, pinnedMessageId);
-    sendAndPin(chatId, formatLevel(xp))
+    sendAndPin(chatId, formatLevel(level, xp))
     .then(messageId => setPinnedMessageId(userId, messageId));
   });
 })
@@ -213,7 +211,7 @@ continueConversation["ididathing - difficulty"] = msg => {
       send("THAT'S AMAZING!! YOOOO I'M SO PROUD OF YOU!!")
     }
 
-    return updateXP(msg.from.id, difficulty * DIFFICULTY_XP_MULTIPLIER)
+    return addXP(msg.from.id, difficulty * DIFFICULTY_XP_MULTIPLIER)
     .then(xpData => {
       updateUserOnXPChange(msg.chat.id, "your achievement", xpData);
       return resetPrevCommand(msg.from.id);

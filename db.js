@@ -1,5 +1,6 @@
 const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig');
+const { incrementXP } = require('./levels');
 firebase.initializeApp(firebaseConfig);
 
 const dbRef = firebase.database().ref();
@@ -11,6 +12,7 @@ const getUserDb = userId => usersDbRef.child(userId);
 const INITIAL_USER = {
   "progress": {
     "xp": 0,
+    "level": 1
   },
 };
 
@@ -53,23 +55,25 @@ const getPrevCommand = (userId) => {
   })
 }
 
-/* EXP */
+/* Progress */
 
 const setPinnedMessageId = (userId, pinnedMessageId) => {
-  const xpDb = getUserDb(userId).child('progress/pinned_message_id')
-  xpDb.set(pinnedMessageId);
+  getUserDb(userId)
+  .child('progress/pinned_message_id')
+  .set(pinnedMessageId);
 }
 
-const updateXP = (userId, newXP) => {
+const addXP = (userId, additionalXP) => {
   const xpDb = getUserDb(userId).child('progress');
   return get(xpDb)
-  .then(({ xp: currentXP, pinned_message_id: pinnedMessageId }) => {
-    xpDb.update({ xp: currentXP + newXP });
-    return [currentXP, newXP, currentXP + newXP, pinnedMessageId];
+  .then(({ level, xp: originalXP, pinned_message_id: pinnedMessageId }) => {
+    const { newXP, newLevel, levelledUp } = incrementXP(level, originalXP, additionalXP);
+    xpDb.update({ xp: newXP, level: newLevel });
+    return { level: newLevel, levelledUp, originalXP, additionalXP, newXP, pinnedMessageId };
   })
 }
 
-const getXP = (userId) => {
+const getProgress = (userId) => {
   const userDb = getUserDb(userId);
   return get(userDb.child('progress'));
 }
@@ -197,9 +201,9 @@ const getEmojis = (userId) => {
 
 module.exports = {
   createUser,
-  setPinnedMessageId, updateXP, getXP,
+  setPinnedMessageId, addXP, getProgress,
   updatePrevCommand, resetPrevCommand, getPrevCommand,
   openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
-  addEmojis
+  addEmojis, getEmojis,
 }
