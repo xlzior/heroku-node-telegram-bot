@@ -1,6 +1,8 @@
+const { incrementXP } = require('./levels');
+const { sum } = require('./utils');
 const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig');
-const { incrementXP } = require('./levels');
+
 firebase.initializeApp(firebaseConfig);
 
 const dbRef = firebase.database().ref();
@@ -31,7 +33,7 @@ const createUser = (userId) => {
   const userDb = getUserDb(userId);
   return get(userDb)
   .then(val => {
-    console.log(`User ${userId} already exists: ${JSON.stringify(val)}`)
+    console.info(`User ${userId} already exists: ${JSON.stringify(val)}`)
   })
   .catch(() => {
     userDb.set(INITIAL_USER)
@@ -150,7 +152,7 @@ const addHashtags = (userId, hashtags = []) => {
       userDb.child(`hashtags/${tag}`).push(reflectionId);
     })
   })
-  .catch(error => console.log(error));
+  .catch(error => console.error(error));
 }
 
 const getHashtags = (userId) => {
@@ -189,14 +191,14 @@ const addEmojis = (userId, emojis = {}) => {
       currentReflection.child('emoji').set(emojis);
     })
   })
-  .catch(error => console.log(error));
+  .catch(error => console.error(error));
   // TODO: how to collate how many emojis i've used this month?
 }
 
 const getEmojis = (userId) => {
   return getCurrentReflection(userId)
-  .then(currentReflection => get(currentReflection.child('emoji')))
-  .catch(() => {});
+  .then(currentReflection => get(currentReflection.child('emoji')) || {})
+  .catch(() => ({}));
 }
 
 /* Statistics */
@@ -204,11 +206,14 @@ const getEmojis = (userId) => {
 const getStats = (userId) => {
   return get(getUserDb(userId))
   .then(({ progress, reflections = {}, hashtags = {} }) => {
+    const hashtagCount = Object.values(hashtags)
+      .map(tagObj => Object.values(tagObj).length)
+      .reduce((acc, item) => acc + item);
     return {
       level: progress.level,
       xp: progress.xp,
       reflections: Object.keys(reflections).length,
-      hashtags: Object.keys(hashtags).length,
+      hashtags: hashtagCount,
     }
   });
 }

@@ -10,7 +10,7 @@ const {
   getStats,
 } = require('./db');
 
-const { getRandomPrompt, countEmojis, emojiChart } = require('./utils');
+const { getRandomPrompt, countEmojis, emojiChart, sum } = require('./utils');
 const { formatLevel } = require('./levels');
 
 const token = process.env.TOKEN;
@@ -23,7 +23,7 @@ if(process.env.NODE_ENV === 'production') {
   bot = new Bot(token, { polling: true });
 }
 
-console.log('Bot server started in ' + process.env.NODE_ENV + ' mode');
+console.info('Bot server started in ' + process.env.NODE_ENV + ' mode');
 
 /* BOT UTILITIES */
 
@@ -110,26 +110,32 @@ bot.onText(/\/close/, msg => {
     }
   })
   .catch(error => {
-    console.log(error)
+    console.error(error)
   })
 })
 
 continueConversation["close"] = async (msg) => {
   try {
     const userId = msg.from.id;
+    const chatId = msg.chat.id;
+    await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
+
+    // emojis
     const emojis = await getEmojis(userId);
-    const convoLength = await closeReflection(userId, msg.message_id, msg.text);
-  
-    await bot.sendMessage(msg.chat.id, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
-    // TODO: only send if more than 5 emojis total and 2 distinct types
-    await bot.sendMessage(msg.chat.id, `You used these emojis in this entry:\n${emojiChart(emojis)}`)
-  
-    const xpData = await addXP(msg.from.id, convoLength);
+    const emojiCounts = Object.values(emojis);
+    if (emojiCounts.length >= 2 && sum(emojiCounts) >= 5) {
+      await bot.sendMessage(chatId, `You used these emojis in this entry:\n${emojiChart(emojis)}`)
+    }
     
-    updateUserOnXPChange(msg.chat.id, "this conversation", xpData);
+    // gving XP
+    const convoLength = await closeReflection(userId, msg.message_id, msg.text);
+    const xpData = await addXP(msg.from.id, convoLength);
+    updateUserOnXPChange(chatId, "this conversation", xpData);
+
+    // close the loop
     resetPrevCommand(userId);
   } catch (error) {
-    console.log('error :', error);
+    console.error(error);
   }
 }
 
@@ -252,12 +258,12 @@ bot.on('message', msg => {
     if (continueConversation[command]) {
       continueConversation[command](msg);
     } else {
-      console.log('Encountered unfamiliar command: ', command)
+      console.error('Encountered unfamiliar command: ', command)
     }
   })
   .catch(() => {});
 });
 
-bot.on("polling_error", (err) => console.log(err));
+bot.on("polling_error", (err) => console.error(err));
 
 module.exports = bot;

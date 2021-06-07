@@ -27,8 +27,11 @@ const emojiChart = (emojiCounts) => {
     .join('\n');
 }
 
+const sum = (arr) => arr.reduce((x, y) => x + y, 0)
+
 module.exports = {
   getRandomPrompt,
   countEmojis,
   emojiChart,
+  sum
 }
