@@ -199,6 +199,20 @@ const getEmojis = (userId) => {
   .catch(() => {});
 }
 
+/* Statistics */
+
+const getStats = (userId) => {
+  return get(getUserDb(userId))
+  .then(({ progress, reflections = {}, hashtags = {} }) => {
+    return {
+      level: progress.level,
+      xp: progress.xp,
+      reflections: Object.keys(reflections).length,
+      hashtags: Object.keys(hashtags).length,
+    }
+  });
+}
+
 module.exports = {
   createUser,
   setPinnedMessageId, addXP, getProgress,
@@ -206,4 +220,5 @@ module.exports = {
   openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
   addEmojis, getEmojis,
+  getStats,
 }

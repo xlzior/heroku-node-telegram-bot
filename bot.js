@@ -7,6 +7,7 @@ const {
   openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
   addEmojis, getEmojis,
+  getStats,
 } = require('./db');
 
 const { getRandomPrompt, countEmojis, emojiChart } = require('./utils');
@@ -218,6 +219,17 @@ continueConversation["ididathing - difficulty"] = msg => {
     })
   }
 }
+
+bot.onText(/\/stats/, msg => {
+  getStats(msg.from.id)
+  .then(({ level, xp, reflections, hashtags }) => {
+    const progressDisplay = `*Level*: ${level}\n*Total XP*: ${xp}`;
+    const reflectionsDisplay = `*Number of entries*: ${reflections}`;
+    const hashtagsDisplay = `*Number of hashtags used*: ${hashtags}\n_\\(use /hashtags to browse\\)_`;
+    const message = `${progressDisplay}\n\n${reflectionsDisplay}\n\n${hashtagsDisplay}`;
+    bot.sendMessage(msg.chat.id, message, MARKDOWN)
+  })
+})
 
 // Messages with no command
 
