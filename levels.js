@@ -1,4 +1,4 @@
-const xpPerLevel = [ 0, // 0-indexing =/
+const XP_PER_LEVEL = [ 0, // 0-indexing =/
   500,  // 1 -> 2
   1000,
   1500,
@@ -20,52 +20,63 @@ const xpPerLevel = [ 0, // 0-indexing =/
   37000, // 19 -> 20
 ];
 
-const rollingSum = [];
-rollingSum[0] = xpPerLevel[0];
-xpPerLevel.forEach((xpNeeded, index) => {
+const MAX_LEVEL = XP_PER_LEVEL.length;
+
+const ROLLING_SUM = []; // base XP for each level
+ROLLING_SUM[0] = XP_PER_LEVEL[0];
+XP_PER_LEVEL.forEach((xpNeeded, index) => {
   if (index === 0) return;
-  rollingSum[index] = rollingSum[index - 1] + xpNeeded;
+  ROLLING_SUM[index] = ROLLING_SUM[index - 1] + xpNeeded;
 })
 
 const xpForNextLevel = currentLevel => {
-  if (currentLevel < 20) return xpPerLevel[currentLevel];
+  if (currentLevel < MAX_LEVEL) return XP_PER_LEVEL[currentLevel];
   return 0;
 };
 
 const xpBaseForLevel = currentLevel => {
-  const previousLevel = currentLevel - 1;
-  if (currentLevel < 20) return rollingSum[previousLevel];
-  return rollingSum[19];
+  if (currentLevel < MAX_LEVEL) return ROLLING_SUM[currentLevel - 1];
+  return ROLLING_SUM[MAX_LEVEL - 1];
 }
 
 const FILLED_BAR = "█"
 const EMPTY_BAR = "▁"
 const PROGRESS_BAR_LENGTH = 16;
+
+const generateProgressBar = (percentageFilled, length) => {
+  const filled = Math.floor(percentageFilled * length);
+  const empty = length - filled;
+  return `${FILLED_BAR.repeat(filled)}${EMPTY_BAR.repeat(empty)}`;
+}
 // xp is cumulative, over all levels
 const formatLevel = (level, xp) => {
   const levelDisplay = `Level ${level}`
-  const xpBase = xpBaseForLevel(level);
-  const xpNeeded = xpForNextLevel(level);
+  if (level < MAX_LEVEL) {
+    const numer = xp - xpBaseForLevel(level); // display non-cumulative so progress bar is intuitive
+    const denom = xpForNextLevel(level);
+    const progressBar = generateProgressBar(numer / denom, PROGRESS_BAR_LENGTH);
+    return `${levelDisplay}    ${progressBar}    ${numer}/${denom}`
+  }
 
-  const numerator = xp - xpBase; // display non-cumulative
-  const denominator = xpNeeded;
-  const percentageFilled = numerator / denominator;
-  const filled = Math.floor(percentageFilled * PROGRESS_BAR_LENGTH);
-  const empty = PROGRESS_BAR_LENGTH - filled;
-  const progressBar = `${FILLED_BAR.repeat(filled)}${EMPTY_BAR.repeat(empty)}`;
-
-  return `${levelDisplay}    ${progressBar}    ${numerator}/${denominator}`
+  // max level reached
+  const progressBar = generateProgressBar(1, PROGRESS_BAR_LENGTH);
+  return `${levelDisplay} (MAX)    ${progressBar}    ${xp} XP`;
 };
 
 const incrementXP = (level, originalXP, additionalXP) => {
   const xpThreshold = xpBaseForLevel(level + 1);
   const newXP = originalXP + additionalXP;
   const levelledUp = newXP >= xpThreshold;
-  return {
-    newXP,
-    newLevel: levelledUp ? level + 1 : level,
-    levelledUp,
+  if (level < MAX_LEVEL) {
+    return {
+      newXP,
+      newLevel: levelledUp ? level + 1 : level,
+      levelledUp,
+    }
   }
+
+  // max level reached
+  return { newXP, newLevel: level, levelledUp: false };
 }
 
 module.exports = {
