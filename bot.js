@@ -8,6 +8,7 @@ const {
   addHashtags, getHashtags,
   addEmojis, getEmojis,
   getStats,
+  incrementIDAT,
 } = require('./db');
 
 const { getRandomPrompt, countEmojis, emojiChart, sum } = require('./utils');
@@ -184,23 +185,25 @@ bot.onText(/\/ididathing/, msg => {
   .then(() => {
     bot.sendMessage(msg.chat.id, "So tell me, what did you do?", FORCE_REPLY);
   })
-  updatePrevCommand(msg.from.id, { command: "ididathing - what" });
+  updatePrevCommand(msg.from.id, { command: "idat - what" });
 })
 
-continueConversation["ididathing - what"] = msg => {
+continueConversation["idat - what"] = msg => {
   bot.sendMessage(msg.chat.id, "Amazing! How do you feel about it now?", FORCE_REPLY);
-  updatePrevCommand(msg.from.id, { command: "ididathing - feeling" });
+  updatePrevCommand(msg.from.id, { command: "idat - feeling" });
 }
 
-continueConversation["ididathing - feeling"] = msg => {
+continueConversation["idat - feeling"] = msg => {
   bot.sendMessage(msg.chat.id, "Nice~ On a scale of 1 to 10, how difficult would you rate it?", FORCE_REPLY);
-  updatePrevCommand(msg.from.id, { command: "ididathing - difficulty" });
+  updatePrevCommand(msg.from.id, { command: "idat - difficulty" });
 }
 
 const DIFFICULTY_XP_MULTIPLIER = 100;
 
-continueConversation["ididathing - difficulty"] = msg => {
-  const send = message => bot.sendMessage(msg.chat.id, message);
+continueConversation["idat - difficulty"] = async (msg) => {
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+  const send = message => bot.sendMessage(chatId, message);
   const match = msg.text.match(/\d+/);
   if (!match) return send("Please enter a valid number between 1 and 10 (inclusive)");
 
@@ -218,21 +221,23 @@ continueConversation["ididathing - difficulty"] = msg => {
       send("THAT'S AMAZING!! YOOOO I'M SO PROUD OF YOU!!")
     }
 
-    return addXP(msg.from.id, difficulty * DIFFICULTY_XP_MULTIPLIER)
-    .then(xpData => {
-      updateUserOnXPChange(msg.chat.id, "your achievement", xpData);
-      return resetPrevCommand(msg.from.id);
-    })
+    const xpData = await addXP(userId, difficulty * DIFFICULTY_XP_MULTIPLIER);
+    updateUserOnXPChange(chatId, "your achievement", xpData);
+    incrementIDAT(userId);
+    return resetPrevCommand(userId);
   }
 }
 
 bot.onText(/\/stats/, msg => {
   getStats(msg.from.id)
-  .then(({ level, xp, reflections, hashtags }) => {
-    const progressDisplay = `*Level*: ${level}\n*Total XP*: ${xp}`;
-    const reflectionsDisplay = `*Number of entries*: ${reflections}`;
-    const hashtagsDisplay = `*Number of hashtags used*: ${hashtags}\n_\\(use /hashtags to browse\\)_`;
-    const message = `${progressDisplay}\n\n${reflectionsDisplay}\n\n${hashtagsDisplay}`;
+  .then(({ level, xp, reflections, hashtags, idat }) => {
+    const stats = [
+      `*Level*: ${level}\n*Total XP*: ${xp}`,
+      `*Number of entries*: ${reflections}`,
+      `*Number of hashtags used*: ${hashtags}\n_\\(use /hashtags to browse\\)_`,
+      `*Number of great things done*: ${idat}`,
+    ]
+    const message = stats.join('\n\n');
     bot.sendMessage(msg.chat.id, message, MARKDOWN)
   })
 })

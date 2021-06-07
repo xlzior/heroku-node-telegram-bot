@@ -16,6 +16,7 @@ const INITIAL_USER = {
     "xp": 0,
     "level": 1
   },
+  "idat": 0,
 };
 
 const get = db => {
@@ -201,11 +202,20 @@ const getEmojis = (userId) => {
   .catch(() => ({}));
 }
 
+/* I did a thing */
+
+const incrementIDAT = (userId) => {
+  const idatDb = getUserDb(userId).child('idat');
+  return get(idatDb)
+  .then(count => idatDb.set(count + 1))
+  .catch(error => console.error(error));
+}
+
 /* Statistics */
 
 const getStats = (userId) => {
   return get(getUserDb(userId))
-  .then(({ progress, reflections = {}, hashtags = {} }) => {
+  .then(({ progress, reflections = {}, hashtags = {}, idat }) => {
     const hashtagCount = Object.values(hashtags)
       .map(tagObj => Object.values(tagObj).length)
       .reduce((acc, item) => acc + item);
@@ -214,6 +224,7 @@ const getStats = (userId) => {
       xp: progress.xp,
       reflections: Object.keys(reflections).length,
       hashtags: hashtagCount,
+      idat,
     }
   });
 }
@@ -225,5 +236,6 @@ module.exports = {
   openReflection, closeReflection, isReflectionOpen,
   addHashtags, getHashtags,
   addEmojis, getEmojis,
+  incrementIDAT,
   getStats,
 }

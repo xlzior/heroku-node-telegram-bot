@@ -41,7 +41,7 @@ const xpBaseForLevel = currentLevel => {
 
 const FILLED_BAR = "█"
 const EMPTY_BAR = "▁"
-const PROGRESS_BAR_LENGTH = 16;
+const PROGRESS_BAR_LENGTH = 10;
 
 const generateProgressBar = (percentageFilled, length) => {
   const filled = Math.floor(percentageFilled * length);
