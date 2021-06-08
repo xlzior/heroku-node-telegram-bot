@@ -20,7 +20,7 @@ const INITIAL_USER = {
   "idat": 0,
   "achievements": {
     "reflections": 0,
-    "convo_length": 0,
+    "convoLength": 0,
     "emojis": 0,
     "hashtags": 0,
     "idat": 0
@@ -53,14 +53,14 @@ const createUser = (userId) => {
 
 const updatePrevCommand = (userId, command) => {
   const userDb = getUserDb(userId);
-  return userDb.child('prev_command').set(command);
+  return userDb.child('prevCommand').set(command);
 }
 
 const resetPrevCommand = (userId) => updatePrevCommand(userId, {});
 
 const getPrevCommand = (userId) => {
   const userDb = getUserDb(userId);
-  return get(userDb.child('prev_command'))
+  return get(userDb.child('prevCommand'))
   .catch(() => {
     return Promise.reject("No previous command");
   })
@@ -70,14 +70,14 @@ const getPrevCommand = (userId) => {
 
 const setPinnedMessageId = (userId, pinnedMessageId) => {
   getUserDb(userId)
-  .child('progress/pinned_message_id')
+  .child('progress/pinnedMessageId')
   .set(pinnedMessageId);
 }
 
 const addXP = (userId, additionalXP) => {
   const xpDb = getUserDb(userId).child('progress');
   return get(xpDb)
-  .then(({ level, xp: originalXP, pinned_message_id: pinnedMessageId }) => {
+  .then(({ level, xp: originalXP, pinnedMessageId }) => {
     const { newXP, newLevel, levelledUp } = incrementXP(level, originalXP, additionalXP);
     xpDb.update({ xp: newXP, level: newLevel });
     return { level: newLevel, levelledUp, originalXP, additionalXP, newXP, pinnedMessageId };
@@ -93,7 +93,7 @@ const getProgress = (userId) => {
 
 const getCurrentReflectionId = (userId) => {
   const userDb = getUserDb(userId);
-  return get(userDb.child('current_reflection'))
+  return get(userDb.child('currentReflection'))
   .catch(() => {
     return Promise.reject("No current reflection");
   })
@@ -119,20 +119,41 @@ const openReflection = (userId, start) => {
   })
   .catch(() => {
     userDb.child(`reflections/${start}/start`).set(start);
-    userDb.child('current_reflection').set(start);
+    userDb.child('currentReflection').set(start);
   })
 }
 
 const closeReflection = (userId, end, name) => {
   const userDb = getUserDb(userId);
-  return getCurrentReflectionId(userId)
-  .then(start => {
-    const currentReflection = userDb.child(`reflections/${start}`)
-    currentReflection.update({ end, name });
-    userDb.child(`current_reflection`).set(null);
-    return end - start + 1;
+  const achievementsDb = userDb.child('achievements');
+  return get(userDb)
+  .then(({ currentReflection: start, achievements = {} }) => {
+    userDb.child(`reflections/${start}`).update({ end, name });
+    userDb.child(`currentReflection`).set(null);
+
+    const newAchievements = {};
+    const convoLength = end - start + 1;
+    const stats = [
+      { type: "convoLength", value: convoLength },
+    ]
+    stats.forEach(({ type, value }) => {
+      const [hasNewBadge, badgeLevel] = checkForNewBadge(type, achievements[type], value);
+      if (hasNewBadge) {
+        newAchievements[type] = badgeLevel;
+        achievementsDb.update({ [type]: badgeLevel })
+      }
+    })
+
+    return {
+      convoLength,
+      newAchievements,
+    };
+    // TODO: check for reflections achievement
+    // TODO: check for emojis achievement
+    // TODO: check for hashtag achievement
   })
-  .catch(() => {
+  .catch(error => {
+    console.log('error :', error);
     return Promise.reject("You have not started a reflection. Use /open to start a new reflection");
   })
 }
@@ -219,11 +240,11 @@ const incrementIDAT = (userId) => {
   return get(userDb)
   .then(({ idat, achievements = {} }) => {
     idatDb.set(idat + 1);
-    const [hasNewBadge, badgeNumber] = checkForNewBadge('idat', achievements.idat, idat + 1);
+    const [hasNewBadge, badgeLevel] = checkForNewBadge('idat', achievements.idat, idat + 1);
     if (hasNewBadge) {
-      achievementsDb.set({ idat: badgeNumber });
+      achievementsDb.set({ idat: badgeLevel });
     }
-    return [hasNewBadge, badgeNumber];
+    return [hasNewBadge, badgeLevel];
   })
   .catch(error => console.error(error));
 }

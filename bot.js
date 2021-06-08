@@ -29,7 +29,7 @@ console.info('Bot server started in ' + process.env.NODE_ENV + ' mode');
 
 /* BOT UTILITIES */
 
-const updateUserOnXPChange = async (chatId, type, xpData) => {
+const notifyXP = async (chatId, type, xpData) => {
   const { level, levelledUp, additionalXP, newXP, pinnedMessageId } = xpData;
   await bot.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
   if (levelledUp) {
@@ -39,6 +39,12 @@ const updateUserOnXPChange = async (chatId, type, xpData) => {
     chat_id: chatId,
     message_id: pinnedMessageId,
   })
+}
+
+const notifyBadge = (chatId, type, badgeLevel) => {
+  const badgeImage = getBadgeImage(type, badgeLevel);
+  bot.sendPhoto(chatId, badgeImage,
+    { caption: `New Achievement! ${getBadgeLabel(type, badgeLevel)}` });
 }
 
 const sendAndPin = (chatId, message) => {
@@ -87,10 +93,6 @@ bot.onText(/\/help/, msg => {
   bot.sendMessage(msg.chat.id, helpMessage)
 })
 
-bot.onText(/\/tour/, msg => {
-  // TODO: tour to go through all features?
-})
-
 bot.onText(/\/open/, msg => {
   openReflection(msg.from.id, msg.message_id)
   .then(() => {
@@ -130,13 +132,19 @@ continueConversation["close"] = async (msg) => {
     }
     
     // XP
-    const convoLength = await closeReflection(userId, msg.message_id, msg.text);
+    const closureStats = await closeReflection(userId, msg.message_id, msg.text);
+    const { convoLength, newAchievements } = closureStats;
     const xpData = await addXP(msg.from.id, convoLength);
-    updateUserOnXPChange(chatId, "this conversation", xpData);
+    notifyXP(chatId, "this conversation", xpData);
 
-    // achivements
-    // TODO: check for achievements: number of reflections, convo length
-    // TODO: how about emojis used, hashtags used? wouldn't want to interrupt a reflection, so it has to be on closing
+    // achievements
+    for (const type in newAchievements) {
+      const badgeLevel = newAchievements[type];
+      notifyBadge(chatId, type, badgeLevel);
+    }
+    // TODO: reflections achievement
+    // TODO: emojis achievement
+    // TODO: hashtags achievement
 
     // close the loop
     resetPrevCommand(userId);
@@ -229,15 +237,13 @@ continueConversation["idat - difficulty"] = async (msg) => {
 
     // give XP
     const xpData = await addXP(userId, difficulty * DIFFICULTY_XP_MULTIPLIER);
-    await updateUserOnXPChange(chatId, "your achievement", xpData);
+    await notifyXP(chatId, "your achievement", xpData);
     const [hasNewBadge, badgeLevel] = await incrementIDAT(userId);
 
     // give badge
     if (hasNewBadge) {
-      const badgeImage = getBadgeImage('idat', badgeLevel);
+      notifyBadge(chatId, 'idat', badgeLevel);
       // TODO: account for earning two badges at the same time? e.g. bronze and silver
-      bot.sendPhoto(msg.chat.id, badgeImage,
-        { caption: `New Achievement! ${getBadgeLabel('idat', badgeLevel)}` });
     }
     
     return resetPrevCommand(userId);
@@ -256,9 +262,9 @@ bot.onText(/\/stats/, msg => {
     const statsDisplay = [
       `*Level*: ${level}\n*Total XP*: ${xp}`,
       `*Journal entries*: ${reflections}
-      ${totalLength} messages total
-      ${averageLength} message per reflection \\(average\\)
-      Longest entry: ${maximumLength} messages`,
+      ${totalLength} message(s) total
+      ${Math.round(averageLength)} message(s) per reflection \\(average\\)
+      Longest entry: ${maximumLength} message(s)`,
       `*Hashtags used*: ${hashtags}
       ${uniqueHashtags} unique hashtags
       _\\(use /hashtags to browse\\)_`,
