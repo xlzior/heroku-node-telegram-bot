@@ -4,6 +4,5 @@ node_modules/*
 .env
 env.cmd
 
-reference/
 prompts/
 firebaseConfig.js
