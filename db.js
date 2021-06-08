@@ -61,9 +61,7 @@ const resetPrevCommand = (userId) => updatePrevCommand(userId, {});
 const getPrevCommand = (userId) => {
   const userDb = getUserDb(userId);
   return get(userDb.child('prevCommand'))
-  .catch(() => {
-    return Promise.reject("No previous command");
-  })
+  .catch(() => Promise.reject("No previous command"));
 }
 
 /* Progress */
@@ -277,6 +275,11 @@ const getStats = (userId) => {
   });
 }
 
+const getAchievements = (userId) => {
+  const userDb = getUserDb(userId);
+  return get(userDb.child('achievements'));
+}
+
 module.exports = {
   createUser,
   setPinnedMessageId, addXP, getProgress,
@@ -285,5 +288,5 @@ module.exports = {
   addHashtags, getHashtags,
   addEmojis, getEmojis,
   incrementIDAT,
-  getStats,
+  getStats, getAchievements
 }

@@ -9,9 +9,10 @@ const {
   addEmojis, getEmojis,
   getStats,
   incrementIDAT,
+  getAchievements,
 } = require('./db');
 
-const { getRandomPrompt, countEmojis, emojiChart, sum, average } = require('./utils');
+const { getRandomPrompt, countEmojis, emojiChart, sum } = require('./utils');
 const { formatLevel } = require('./levels');
 const { getBadgeImage, getBadgeLabel } = require('./achievements');
 
@@ -41,10 +42,10 @@ const notifyXP = async (chatId, type, xpData) => {
   })
 }
 
-const notifyBadge = (chatId, type, badgeLevel) => {
+const notifyBadge = (chatId, type, badgeLevel, isNew = true) => {
   const badgeImage = getBadgeImage(type, badgeLevel);
-  bot.sendPhoto(chatId, badgeImage,
-    { caption: `New Achievement! ${getBadgeLabel(type, badgeLevel)}` });
+  return bot.sendPhoto(chatId, badgeImage,
+    { caption: `${isNew ? "New Achievement! " : ""}${getBadgeLabel(type, badgeLevel)}` });
 }
 
 const sendAndPin = (chatId, message) => {
@@ -275,8 +276,20 @@ bot.onText(/\/stats/, msg => {
   })
 })
 
-bot.onText(/\/reorganise/, msg => {
-  // TODO: reorganise display cabinet of achievements by re-sending all badges again
+bot.onText(/\/reorganise/, async msg => {
+  try {
+    const achievements = await getAchievements(msg.from.id);
+    await bot.sendMessage(msg.chat.id, "Resending your achievements...");
+    for (const type in achievements) {
+      const badgeLevel = achievements[type];
+      for (let i = badgeLevel; i >= 1; i--) {
+        await notifyBadge(msg.chat.id, type, i, false);
+      }
+    }
+    await bot.sendMessage(msg.chat.id, "Tip: View the 'shared media' to see a display cabinet of all your achievement badges!")
+  } catch (error) {
+    bot.sendMessage(msg.chat.id, "Oh no! You haven't earned any achievements yet. Keep journalling to earn some!")
+  }
 })
 
 // Messages with no command
