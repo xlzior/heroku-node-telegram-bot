@@ -125,7 +125,7 @@ const closeReflection = (userId, end, name) => {
   const userDb = getUserDb(userId);
   const achievementsDb = userDb.child('achievements');
   return get(userDb)
-  .then(({ currentReflection: start, achievements = {}, hashtags }) => {
+  .then(({ currentReflection: start, achievements = {}, hashtags, reflections }) => {
     userDb.child(`reflections/${start}`).update({ end, name });
     userDb.child(`currentReflection`).set(null);
 
@@ -133,7 +133,8 @@ const closeReflection = (userId, end, name) => {
     const convoLength = end - start + 1;
     const stats = [
       { type: "convoLength", value: convoLength },
-      { type: "hashtags", value: countTotalHashtags(hashtags) }
+      { type: "hashtags", value: countTotalHashtags(hashtags) },
+      { type: "reflections", value: Object.keys(reflections).length },
     ]
     stats.forEach(({ type, value }) => {
       const newBadge = checkForNewBadge(type, achievements[type], value);
@@ -145,7 +146,6 @@ const closeReflection = (userId, end, name) => {
     })
 
     return { convoLength, newAchievements };
-    // TODO: check for reflections achievement
     // TODO: check for emojis achievement
   })
   .catch(error => {

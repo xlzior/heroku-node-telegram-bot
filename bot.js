@@ -145,7 +145,6 @@ continueConversation["close"] = async (msg) => {
         await notifyBadge(chatId, type, i);
       }
     }
-    // TODO: reflections achievement
     // TODO: emojis achievement
 
     // close the loop
@@ -286,6 +285,7 @@ bot.onText(/\/reorganise/, async msg => {
       const badgeLevel = achievements[type];
       for (let i = badgeLevel; i >= 1; i--) {
         await notifyBadge(msg.chat.id, type, i, false);
+        // TODO: fill in the badges not yet gotten with empty photos? so that it's all aligned
       }
     }
     await bot.sendMessage(msg.chat.id, "Tip: View the 'shared media' to see a display cabinet of all your achievement badges!")
