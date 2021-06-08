@@ -273,7 +273,8 @@ const getStats = (userId) => {
 
 const getAchievements = (userId) => {
   const userDb = getUserDb(userId);
-  return get(userDb.child('achievements'));
+  return get(userDb.child('achievements'))
+  .catch(() => ({}));
 }
 
 module.exports = {

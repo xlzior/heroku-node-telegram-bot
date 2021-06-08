@@ -42,10 +42,10 @@ const notifyXP = async (chatId, type, xpData) => {
   })
 }
 
-const notifyBadge = (chatId, type, badgeLevel, isNew = true) => {
+const notifyBadge = (chatId, type, badgeLevel) => {
   const badgeImage = getBadgeImage(type, badgeLevel);
   return bot.sendPhoto(chatId, badgeImage,
-    { caption: `${isNew ? "New Achievement! " : ""}${getBadgeLabel(type, badgeLevel)}` });
+    { caption: `New Achievement! ${getBadgeLabel(type, badgeLevel)}` });
 }
 
 const sendAndPin = (chatId, message) => {
@@ -278,21 +278,36 @@ bot.onText(/\/stats/, msg => {
 })
 
 bot.onText(/\/reorganise/, async msg => {
-  try {
-    const achievements = await getAchievements(msg.from.id);
-    await bot.sendMessage(msg.chat.id, "Resending your achievements...");
-    for (const type in achievements) {
-      const badgeLevel = achievements[type];
-      for (let i = badgeLevel; i >= 1; i--) {
-        await notifyBadge(msg.chat.id, type, i, false);
-        // TODO: fill in the badges not yet gotten with empty photos? so that it's all aligned
-      }
+  const achievements = await getAchievements(msg.from.id);
+  const photos = [];
+  for (const type in achievements) {
+    const badgeLevel = achievements[type];
+    for (let i = badgeLevel; i >= 1; i--) {
+      photos.push({
+        type: "photo",
+        media: getBadgeImage(type, i),
+        caption: getBadgeLabel(type, i)
+      });
+      // TODO: fill in the badges not yet gotten with empty photos? so that it's all aligned
     }
-    await bot.sendMessage(msg.chat.id, "Tip: View the 'shared media' to see a display cabinet of all your achievement badges!")
-  } catch (error) {
-    bot.sendMessage(msg.chat.id, "Oh no! You haven't earned any achievements yet. Keep journalling to earn some!")
   }
-})
+
+  if (photos.length === 0) { // no achievements
+    return bot.sendMessage(msg.chat.id, "Oh no! You haven't earned any achievements yet. Keep journalling to earn some!")
+  }
+  
+  await bot.sendMessage(msg.chat.id, "Resending your achievements...");
+  if (photos.length === 1) { // send an individual photo
+    const { media, caption } = photos[0]
+    await bot.sendPhoto(msg.chat.id, media, { caption })
+  } else if (photos.length <= 10) { // send a media group
+    await bot.sendMediaGroup(msg.chat.id, photos);
+  } else { // send 2 media groups
+    await bot.sendMediaGroup(msg.chat.id, photos.slice(0, 10));
+    await bot.sendMediaGroup(msg.chat.id, photos.slice(10));
+  }
+  await bot.sendMessage(msg.chat.id, "Tip: View the chat's 'shared media' to see a display cabinet of all your achievement badges!")
+});
 
 // Messages with no command
 
