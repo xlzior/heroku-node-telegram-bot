@@ -29,9 +29,12 @@ const emojiChart = (emojiCounts) => {
 
 const sum = (arr) => arr.reduce((x, y) => x + y, 0)
 
+const average = (arr) => sum(arr) / arr.length;
+
 module.exports = {
   getRandomPrompt,
   countEmojis,
   emojiChart,
-  sum
+  sum,
+  average,
 }

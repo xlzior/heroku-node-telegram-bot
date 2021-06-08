@@ -1,7 +1,8 @@
 const { incrementXP } = require('./levels');
-const { sum } = require('./utils');
+const { sum, average } = require('./utils');
 const firebase = require('firebase');
 const firebaseConfig = require('./firebaseConfig');
+const { checkForNewBadge } = require('./achievements');
 
 firebase.initializeApp(firebaseConfig);
 
@@ -17,6 +18,13 @@ const INITIAL_USER = {
     "level": 1
   },
   "idat": 0,
+  "achievements": {
+    "reflections": 0,
+    "convo_length": 0,
+    "emojis": 0,
+    "hashtags": 0,
+    "idat": 0
+  }
 };
 
 const get = db => {
@@ -205,9 +213,18 @@ const getEmojis = (userId) => {
 /* I did a thing */
 
 const incrementIDAT = (userId) => {
-  const idatDb = getUserDb(userId).child('idat');
-  return get(idatDb)
-  .then(count => idatDb.set(count + 1))
+  const userDb = getUserDb(userId);
+  const idatDb = userDb.child('idat');
+  const achievementsDb = userDb.child('achievements');
+  return get(userDb)
+  .then(({ idat, achievements = {} }) => {
+    idatDb.set(idat + 1);
+    const [hasNewBadge, badgeNumber] = checkForNewBadge('idat', achievements.idat, idat + 1);
+    if (hasNewBadge) {
+      achievementsDb.set({ idat: badgeNumber });
+    }
+    return [hasNewBadge, badgeNumber];
+  })
   .catch(error => console.error(error));
 }
 
@@ -218,12 +235,22 @@ const getStats = (userId) => {
   .then(({ progress, reflections = {}, hashtags = {}, idat }) => {
     const hashtagCount = Object.values(hashtags)
       .map(tagObj => Object.values(tagObj).length)
-      .reduce((acc, item) => acc + item);
+      .reduce((acc, item) => acc + item, 0);
+    const reflectionLengths = Object.values(reflections)
+      .map(({ start, end }) => end - start + 1);
+    const totalLength = sum(reflectionLengths);
+    const averageLength = average(reflectionLengths);
+    const maximumLength = Math.max(...reflectionLengths);
+
     return {
       level: progress.level,
       xp: progress.xp,
       reflections: Object.keys(reflections).length,
+      totalLength,
+      averageLength,
+      maximumLength,
       hashtags: hashtagCount,
+      uniqueHashtags: Object.keys(hashtags).length,
       idat,
     }
   });

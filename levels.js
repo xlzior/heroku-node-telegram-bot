@@ -42,12 +42,12 @@ const xpBaseForLevel = currentLevel => {
 const FILLED_BAR = "█"
 const EMPTY_BAR = "▁"
 const PROGRESS_BAR_LENGTH = 10;
-
 const generateProgressBar = (percentageFilled, length) => {
   const filled = Math.floor(percentageFilled * length);
   const empty = length - filled;
   return `${FILLED_BAR.repeat(filled)}${EMPTY_BAR.repeat(empty)}`;
 }
+
 // xp is cumulative, over all levels
 const formatLevel = (level, xp) => {
   const levelDisplay = `Level ${level}`

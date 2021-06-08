@@ -11,8 +11,9 @@ const {
   incrementIDAT,
 } = require('./db');
 
-const { getRandomPrompt, countEmojis, emojiChart, sum } = require('./utils');
+const { getRandomPrompt, countEmojis, emojiChart, sum, average } = require('./utils');
 const { formatLevel } = require('./levels');
+const { getBadgeImage, getBadgeLabel } = require('./achievements');
 
 const token = process.env.TOKEN;
 
@@ -28,13 +29,13 @@ console.info('Bot server started in ' + process.env.NODE_ENV + ' mode');
 
 /* BOT UTILITIES */
 
-const updateUserOnXPChange = (chatId, type, xpData) => {
+const updateUserOnXPChange = async (chatId, type, xpData) => {
   const { level, levelledUp, additionalXP, newXP, pinnedMessageId } = xpData;
-  bot.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
+  await bot.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
   if (levelledUp) {
-    bot.sendMessage(chatId, `You levelled up! You are now level ${level}`);
+    await bot.sendMessage(chatId, `You levelled up! You are now Level ${level}.`);
   }
-  bot.editMessageText(formatLevel(level, newXP), {
+  await bot.editMessageText(formatLevel(level, newXP), {
     chat_id: chatId,
     message_id: pinnedMessageId,
   })
@@ -128,10 +129,14 @@ continueConversation["close"] = async (msg) => {
       await bot.sendMessage(chatId, `You used these emojis in this entry:\n${emojiChart(emojis)}`)
     }
     
-    // gving XP
+    // XP
     const convoLength = await closeReflection(userId, msg.message_id, msg.text);
     const xpData = await addXP(msg.from.id, convoLength);
     updateUserOnXPChange(chatId, "this conversation", xpData);
+
+    // achivements
+    // TODO: check for achievements: number of reflections, convo length
+    // TODO: how about emojis used, hashtags used? wouldn't want to interrupt a reflection, so it has to be on closing
 
     // close the loop
     resetPrevCommand(userId);
@@ -211,6 +216,7 @@ continueConversation["idat - difficulty"] = async (msg) => {
   if (difficulty < 1 || difficulty > 10) {
     send("Please enter a valid number between 1 and 10 (inclusive)");
   } else {
+    // user feedback
     if (difficulty <= 3) {
       send("That's cool! Small wins count too~");
     } else if (difficulty <= 6) {
@@ -221,25 +227,50 @@ continueConversation["idat - difficulty"] = async (msg) => {
       send("THAT'S AMAZING!! YOOOO I'M SO PROUD OF YOU!!")
     }
 
+    // give XP
     const xpData = await addXP(userId, difficulty * DIFFICULTY_XP_MULTIPLIER);
-    updateUserOnXPChange(chatId, "your achievement", xpData);
-    incrementIDAT(userId);
+    await updateUserOnXPChange(chatId, "your achievement", xpData);
+    const [hasNewBadge, badgeLevel] = await incrementIDAT(userId);
+
+    // give badge
+    if (hasNewBadge) {
+      const badgeImage = getBadgeImage('idat', badgeLevel);
+      // TODO: account for earning two badges at the same time? e.g. bronze and silver
+      bot.sendPhoto(msg.chat.id, badgeImage,
+        { caption: `New Achievement! ${getBadgeLabel('idat', badgeLevel)}` });
+    }
+    
     return resetPrevCommand(userId);
   }
 }
 
 bot.onText(/\/stats/, msg => {
   getStats(msg.from.id)
-  .then(({ level, xp, reflections, hashtags, idat }) => {
-    const stats = [
+  .then((stats) => {
+    const {
+      level, xp,
+      reflections, totalLength, averageLength, maximumLength,
+      hashtags, uniqueHashtags,
+      idat
+    } = stats;
+    const statsDisplay = [
       `*Level*: ${level}\n*Total XP*: ${xp}`,
-      `*Number of entries*: ${reflections}`,
-      `*Number of hashtags used*: ${hashtags}\n_\\(use /hashtags to browse\\)_`,
-      `*Number of great things done*: ${idat}`,
+      `*Journal entries*: ${reflections}
+      ${totalLength} messages total
+      ${averageLength} message per reflection \\(average\\)
+      Longest entry: ${maximumLength} messages`,
+      `*Hashtags used*: ${hashtags}
+      ${uniqueHashtags} unique hashtags
+      _\\(use /hashtags to browse\\)_`,
+      `*Great things done*: ${idat}`,
     ]
-    const message = stats.join('\n\n');
+    const message = statsDisplay.join('\n\n');
     bot.sendMessage(msg.chat.id, message, MARKDOWN)
   })
+})
+
+bot.onText(/\/reorganise/, msg => {
+  // TODO: reorganise display cabinet of achievements by re-sending all badges again
 })
 
 // Messages with no command
