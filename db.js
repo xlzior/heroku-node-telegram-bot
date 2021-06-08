@@ -135,17 +135,15 @@ const closeReflection = (userId, end, name) => {
       { type: "convoLength", value: convoLength },
     ]
     stats.forEach(({ type, value }) => {
-      const [hasNewBadge, badgeLevel] = checkForNewBadge(type, achievements[type], value);
+      const newBadge = checkForNewBadge(type, achievements[type], value);
+      const { hasNewBadge, previousLevel, currentLevel } = newBadge;
       if (hasNewBadge) {
-        newAchievements[type] = badgeLevel;
-        achievementsDb.update({ [type]: badgeLevel })
+        newAchievements[type] = { previousLevel, currentLevel };
+        achievementsDb.update({ [type]: currentLevel })
       }
     })
 
-    return {
-      convoLength,
-      newAchievements,
-    };
+    return { convoLength, newAchievements };
     // TODO: check for reflections achievement
     // TODO: check for emojis achievement
     // TODO: check for hashtag achievement
@@ -238,11 +236,12 @@ const incrementIDAT = (userId) => {
   return get(userDb)
   .then(({ idat, achievements = {} }) => {
     idatDb.set(idat + 1);
-    const [hasNewBadge, badgeLevel] = checkForNewBadge('idat', achievements.idat, idat + 1);
+    const newBadge = checkForNewBadge('idat', achievements.idat, idat + 1);
+    const { hasNewBadge, previousLevel, currentLevel } = newBadge;
     if (hasNewBadge) {
-      achievementsDb.set({ idat: badgeLevel });
+      achievementsDb.set({ idat: currentLevel });
     }
-    return [hasNewBadge, badgeLevel];
+    return newBadge;
   })
   .catch(error => console.error(error));
 }

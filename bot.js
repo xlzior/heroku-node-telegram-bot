@@ -140,8 +140,10 @@ continueConversation["close"] = async (msg) => {
 
     // achievements
     for (const type in newAchievements) {
-      const badgeLevel = newAchievements[type];
-      notifyBadge(chatId, type, badgeLevel);
+      const { previousLevel, currentLevel } = newAchievements[type];
+      for (let i = previousLevel + 1; i <= currentLevel; i++) {
+        notifyBadge(chatId, type, i);
+      }
     }
     // TODO: reflections achievement
     // TODO: emojis achievement
@@ -239,12 +241,13 @@ continueConversation["idat - difficulty"] = async (msg) => {
     // give XP
     const xpData = await addXP(userId, difficulty * DIFFICULTY_XP_MULTIPLIER);
     await notifyXP(chatId, "your achievement", xpData);
-    const [hasNewBadge, badgeLevel] = await incrementIDAT(userId);
-
+    
     // give badge
+    const { hasNewBadge, previousLevel, currentLevel } = await incrementIDAT(userId);
     if (hasNewBadge) {
-      notifyBadge(chatId, 'idat', badgeLevel);
-      // TODO: account for earning two badges at the same time? e.g. bronze and silver
+      for (let i = previousLevel + 1; i <= currentLevel; i++) {
+        notifyBadge(chatId, 'idat', i);
+      }
     }
     
     return resetPrevCommand(userId);
