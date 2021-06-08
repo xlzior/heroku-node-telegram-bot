@@ -27,14 +27,19 @@ const emojiChart = (emojiCounts) => {
     .join('\n');
 }
 
+const countTotalHashtags = hashtags => {
+  return Object.values(hashtags)
+    .map(tagObj => Object.values(tagObj).length)
+    .reduce((acc, item) => acc + item, 0); // sum
+}
+
 const sum = (arr) => arr.reduce((x, y) => x + y, 0)
 
 const average = (arr) => sum(arr) / arr.length;
 
 module.exports = {
   getRandomPrompt,
-  countEmojis,
-  emojiChart,
-  sum,
-  average,
+  countEmojis, emojiChart,
+  countTotalHashtags,
+  sum, average,
 }

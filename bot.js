@@ -142,12 +142,11 @@ continueConversation["close"] = async (msg) => {
     for (const type in newAchievements) {
       const { previousLevel, currentLevel } = newAchievements[type];
       for (let i = previousLevel + 1; i <= currentLevel; i++) {
-        notifyBadge(chatId, type, i);
+        await notifyBadge(chatId, type, i);
       }
     }
     // TODO: reflections achievement
     // TODO: emojis achievement
-    // TODO: hashtags achievement
 
     // close the loop
     resetPrevCommand(userId);

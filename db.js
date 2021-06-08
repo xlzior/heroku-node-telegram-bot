@@ -1,9 +1,9 @@
 const { incrementXP } = require('./levels');
-const { sum, average } = require('./utils');
-const firebase = require('firebase');
-const firebaseConfig = require('./firebaseConfig');
+const { countTotalHashtags, sum, average } = require('./utils');
 const { checkForNewBadge } = require('./achievements');
 
+const firebase = require('firebase');
+const firebaseConfig = require('./firebaseConfig');
 firebase.initializeApp(firebaseConfig);
 
 const dbRef = firebase.database().ref();
@@ -125,7 +125,7 @@ const closeReflection = (userId, end, name) => {
   const userDb = getUserDb(userId);
   const achievementsDb = userDb.child('achievements');
   return get(userDb)
-  .then(({ currentReflection: start, achievements = {} }) => {
+  .then(({ currentReflection: start, achievements = {}, hashtags }) => {
     userDb.child(`reflections/${start}`).update({ end, name });
     userDb.child(`currentReflection`).set(null);
 
@@ -133,6 +133,7 @@ const closeReflection = (userId, end, name) => {
     const convoLength = end - start + 1;
     const stats = [
       { type: "convoLength", value: convoLength },
+      { type: "hashtags", value: countTotalHashtags(hashtags) }
     ]
     stats.forEach(({ type, value }) => {
       const newBadge = checkForNewBadge(type, achievements[type], value);
@@ -146,7 +147,6 @@ const closeReflection = (userId, end, name) => {
     return { convoLength, newAchievements };
     // TODO: check for reflections achievement
     // TODO: check for emojis achievement
-    // TODO: check for hashtag achievement
   })
   .catch(error => {
     console.log('error :', error);
@@ -251,11 +251,8 @@ const incrementIDAT = (userId) => {
 const getStats = (userId) => {
   return get(getUserDb(userId))
   .then(({ progress, reflections = {}, hashtags = {}, idat }) => {
-    const hashtagCount = Object.values(hashtags)
-      .map(tagObj => Object.values(tagObj).length)
-      .reduce((acc, item) => acc + item, 0);
-    const reflectionLengths = Object.values(reflections)
-      .map(({ start, end }) => end - start + 1);
+    const hashtagCount = countTotalHashtags(hashtags);
+    const reflectionLengths = Object.values(reflections).map(({ start, end }) => end - start + 1);
     const totalLength = sum(reflectionLengths);
     const averageLength = average(reflectionLengths);
     const maximumLength = Math.max(...reflectionLengths);
