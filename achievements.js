@@ -1,6 +1,8 @@
 const BADGE_LEVEL_LABELS = ["", "Bronze", "Silver", "Gold"];
 const BADGE_LEVEL_EMOJIS = ["", "🥉", "🥈", "🥇"];
 
+const BLANK_BADGE = 'AgACAgUAAxkBAAIFqWDAM5P6HN4T0HC5fjJK_cOiheGiAAKIrTEbEjMAAVbc3UHRD6HmW3NcknJ0AAMBAAMCAAN4AANrSwACHwQ';
+
 const BADGES = {
   reflections: {
     values: [0, 3, 10, 50],
@@ -82,4 +84,5 @@ module.exports = {
   checkForNewBadge,
   getBadgeImage,
   getBadgeLabel,
+  BLANK_BADGE,
 }

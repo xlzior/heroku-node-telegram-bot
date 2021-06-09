@@ -239,7 +239,7 @@ const incrementIDAT = (userId) => {
     const newBadge = checkForNewBadge('idat', achievements.idat, idat + 1);
     const { hasNewBadge, previousLevel, currentLevel } = newBadge;
     if (hasNewBadge) {
-      achievementsDb.set({ idat: currentLevel });
+      achievementsDb.update({ idat: currentLevel });
     }
     return newBadge;
   })

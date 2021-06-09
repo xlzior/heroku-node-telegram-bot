@@ -14,7 +14,7 @@ const {
 
 const { getRandomPrompt, countEmojis, emojiChart, sum } = require('./utils');
 const { formatLevel } = require('./levels');
-const { getBadgeImage, getBadgeLabel } = require('./achievements');
+const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require('./achievements');
 
 const token = process.env.TOKEN;
 
@@ -54,6 +54,19 @@ const sendAndPin = (chatId, message) => {
     bot.pinChatMessage(chatId, botMsg.message_id);
     return botMsg.message_id;
   })
+}
+
+// depending on the number of photos, send the appropriate number of media groups
+const sendPhotos = async (chatId, photos) => {
+  if (photos.length === 1) { // send an individual photo
+    const { media, caption } = photos[0]
+    await bot.sendPhoto(chatId, media, { caption })
+  } else if (photos.length <= 10) { // send a media group
+    await bot.sendMediaGroup(chatId, photos);
+  } else { // send multiple media groups
+    await bot.sendMediaGroup(chatId, photos.slice(0, 10)); // send the first 10
+    await sendPhotos(chatId, photos.slice(10));            // recurse for the rest
+  }
 }
 
 const FORCE_REPLY = { reply_markup: { force_reply: true } };
@@ -279,39 +292,32 @@ bot.onText(/\/stats/, msg => {
 
 bot.onText(/\/reorganise/, async msg => {
   const achievements = await getAchievements(msg.from.id);
-  const photos = [];
-  for (const type in achievements) {
-    const badgeLevel = achievements[type];
-    for (let i = badgeLevel; i >= 1; i--) {
-      photos.push({
-        type: "photo",
-        media: getBadgeImage(type, i),
-        caption: getBadgeLabel(type, i)
-      });
-      // TODO: fill in the badges not yet gotten with empty photos? so that it's all aligned
-    }
-  }
+  const achievementsCount = sum(Object.values(achievements));
 
-  if (photos.length === 0) { // no achievements
+  if (achievementsCount === 0) {
     return bot.sendMessage(msg.chat.id, "Oh no! You haven't earned any achievements yet. Keep journalling to earn some!")
   }
   
-  await bot.sendMessage(msg.chat.id, "Resending your achievements...");
-  if (photos.length === 1) { // send an individual photo
-    const { media, caption } = photos[0]
-    await bot.sendPhoto(msg.chat.id, media, { caption })
-  } else if (photos.length <= 10) { // send a media group
-    await bot.sendMediaGroup(msg.chat.id, photos);
-  } else { // send 2 media groups
-    await bot.sendMediaGroup(msg.chat.id, photos.slice(0, 10));
-    await bot.sendMediaGroup(msg.chat.id, photos.slice(10));
+  const photos = [];
+  for (const type in achievements) {
+    const badgeLevel = achievements[type];
+    for (let i = 3; i >= 1; i--) {
+      photos.push({
+        type: "photo",
+        media: i <= badgeLevel ? getBadgeImage(type, i) : BLANK_BADGE,
+        caption: i <= badgeLevel ? getBadgeLabel(type, i) : ""
+      });
+    }
   }
+  await bot.sendMessage(msg.chat.id, "Resending your achievements...");
+  await sendPhotos(msg.chat.id, photos);
   await bot.sendMessage(msg.chat.id, "Tip: View the chat's 'shared media' to see a display cabinet of all your achievement badges!")
 });
 
 // Messages with no command
 
 bot.on('message', msg => {
+  // console.log(msg.photo[2].file_id);
   const userId = msg.from.id;
 
   // TODO: automatically open a conversation for a smoother journalling experience?
