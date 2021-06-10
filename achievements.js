@@ -1,7 +1,7 @@
 const BADGE_LEVEL_LABELS = ["", "Bronze", "Silver", "Gold"];
 const BADGE_LEVEL_EMOJIS = ["", "🥉", "🥈", "🥇"];
 
-const BLANK_BADGE = 'AgACAgUAAxkBAAIFqWDAM5P6HN4T0HC5fjJK_cOiheGiAAKIrTEbEjMAAVbc3UHRD6HmW3NcknJ0AAMBAAMCAAN4AANrSwACHwQ';
+const BLANK_BADGE = 'AgACAgUAAxkBAAIGB2DA0i_hf0S1ngYqmqp-f-pW7as5AALsrjEbEjMAAVYAAWO6j_uMthMYaJVydAADAQADAgADeAADilAAAh8E';
 
 const BADGES = {
   reflections: {
@@ -14,7 +14,7 @@ const BADGES = {
       'AgACAgUAAxkBAAIETmC-NGjS8O_qnRh2wA5SGNLcffNaAALMrzEbfrvxVSMbniIEU6_bx3S3b3QAAwEAAwIAA3gAA01PBQABHwQ',
     ],
   },
-  convo_length: {
+  convoLength: {
     values: [0, 30, 100, 500],
     name: "🕳 Going Deep",
     images: [

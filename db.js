@@ -21,7 +21,6 @@ const INITIAL_USER = {
   "achievements": {
     "reflections": 0,
     "convoLength": 0,
-    "emojis": 0,
     "hashtags": 0,
     "idat": 0
   }

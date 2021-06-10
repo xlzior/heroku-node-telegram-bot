@@ -84,6 +84,10 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(msg.chat.id, match[1]);
 });
 
+bot.onText(/\/echo\s*$/, (msg) => {
+  bot.sendMessage(msg.chat.id, "Send /echo [text], and I'll repeat the [text] back at you. This can be useful for prompting yourself with a question you already have in mind, or telling yourself something you need/want to hear.")
+})
+
 bot.onText(/\/start/, msg => {
   const userId = msg.from.id;
   const chatId = msg.chat.id;
@@ -149,7 +153,7 @@ continueConversation["close"] = async (msg) => {
     const closureStats = await closeReflection(userId, msg.message_id, msg.text);
     const { convoLength, newAchievements } = closureStats;
     const xpData = await addXP(msg.from.id, convoLength);
-    notifyXP(chatId, "this conversation", xpData);
+    await notifyXP(chatId, "this conversation", xpData);
 
     // achievements
     for (const type in newAchievements) {
@@ -201,7 +205,7 @@ bot.onText(/\/lifexp/, msg => {
   const userId = msg.from.id;
   getProgress(userId)
   .then(({ level, xp, pinnedMessageId }) => {
-    bot.unpinChatMessage(chatId, pinnedMessageId);
+    bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
     sendAndPin(chatId, formatLevel(level, xp))
     .then(messageId => setPinnedMessageId(userId, messageId));
   });
@@ -257,7 +261,7 @@ continueConversation["idat - difficulty"] = async (msg) => {
     const { hasNewBadge, previousLevel, currentLevel } = await incrementIDAT(userId);
     if (hasNewBadge) {
       for (let i = previousLevel + 1; i <= currentLevel; i++) {
-        notifyBadge(chatId, 'idat', i);
+        await notifyBadge(chatId, 'idat', i);
       }
     }
     
@@ -290,9 +294,11 @@ bot.onText(/\/stats/, msg => {
   })
 })
 
-bot.onText(/\/reorganise/, async msg => {
+bot.onText(/\/achievements/, async msg => {
   const achievements = await getAchievements(msg.from.id);
   const achievementsCount = sum(Object.values(achievements));
+
+  // TODO: delete all previous badges sent? so that it's not so repetitive
 
   if (achievementsCount === 0) {
     return bot.sendMessage(msg.chat.id, "Oh no! You haven't earned any achievements yet. Keep journalling to earn some!")
