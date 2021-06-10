@@ -1,4 +1,4 @@
-const prompts = require('./prompts/prompts.json');
+const prompts = require('./prompts.json');
 const emojiTree = require('emoji-tree');
 
 const getRandomPrompt = () => {
