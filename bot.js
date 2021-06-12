@@ -12,7 +12,7 @@ const {
   getAchievements,
 } = require('./db');
 
-const { getRandomPrompt, countEmojis, emojiChart, sum } = require('./utils');
+const { getRandomPrompt, countEmojis, emojiChart, sum, cleanMarkdownReserved } = require('./utils');
 const { formatLevel } = require('./levels');
 const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require('./achievements');
 
@@ -176,14 +176,14 @@ bot.onText(/\/hashtags/, msg => {
   .then(hashtags => {
     const message = hashtags
       .map(({ hashtag, messages }) => {
-        const firstLine = `*\\#${hashtag}: ${messages.length}*`
+        const firstLine = `*#${hashtag}: ${messages.length}*`
         const nextLines = messages
-          .map(({ messageId, name }) => `\\- /goto${messageId} ${name}`)
+          .map(({ messageId, name }) => `- /goto${messageId} ${name}`)
           .join('\n')
         return `${firstLine}\n${nextLines}`;
       })
       .join('\n\n');
-    bot.sendMessage(msg.chat.id, message, MARKDOWN);
+    bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), MARKDOWN);
   })
   .catch(error => {
     bot.sendMessage(msg.chat.id, error);

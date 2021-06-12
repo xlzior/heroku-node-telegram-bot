@@ -37,9 +37,20 @@ const sum = (arr) => arr.reduce((x, y) => x + y, 0)
 
 const average = (arr) => sum(arr) / arr.length;
 
+const RESERVED_CHARACTERS = ["-", "#", "+", "_"];
+
+const cleanMarkdownReserved = rawText => {
+  let result = rawText;
+  RESERVED_CHARACTERS.forEach(char => {
+    result = result.replace(new RegExp(`\\${char}`, 'g'), `\\${char}`);
+  })
+  return result;
+}
+
 module.exports = {
   getRandomPrompt,
   countEmojis, emojiChart,
   countTotalHashtags,
   sum, average,
+  cleanMarkdownReserved
 }
