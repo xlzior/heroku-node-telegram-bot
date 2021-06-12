@@ -320,6 +320,11 @@ bot.onText(/\/achievements/, async msg => {
   await bot.sendMessage(msg.chat.id, "Tip: View the chat's 'shared media' to see a display cabinet of all your achievement badges!")
 });
 
+bot.onText(/\/cancel/, async (msg) => {
+  await resetPrevCommand(msg.from.id)
+  bot.sendMessage(msg.chat.id, "The previous command has been cancelled.");
+})
+
 // Messages with no command
 
 bot.on('message', msg => {
@@ -337,15 +342,17 @@ bot.on('message', msg => {
 
   addEmojis(userId, countEmojis(msg.text));
 
-  getPrevCommand(userId)
-  .then(({ command }) => {
-    if (continueConversation[command]) {
-      continueConversation[command](msg);
-    } else {
-      console.error('Encountered unfamiliar command: ', command)
-    }
-  })
-  .catch(() => {});
+  if (msg.text !== '/cancel') {
+    getPrevCommand(userId)
+    .then(({ command }) => {
+      if (continueConversation[command]) {
+        continueConversation[command](msg);
+      } else {
+        console.error('Encountered unfamiliar command: ', command)
+      }
+    })
+    .catch(() => {});
+  }
 });
 
 bot.on("polling_error", (err) => console.error(err));
