@@ -1,14 +1,14 @@
 {
-  "name": "heroku-node-telegram-bot",
-  "version": "1.0.3",
-  "description": "Starter pack for running telegram bot on the Heroku using Node.js",
+  "name": "lifexp-bot",
+  "version": "1.0.0",
+  "description": "Gamified Journalling Chatbot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
+    "lint": "eslint",
     "switch_to_dev": "export $(cat .env | xargs) && wget --spider https://api.telegram.org/bot$TOKEN/setWebhook?url= --delete-after && node index.js"
   },
-  "author": "Volodymyr Lut",
+  "author": "xlzior",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.15.0",
@@ -17,5 +17,8 @@
     "express": "^4.13.4",
     "firebase": "^8.6.3",
     "node-telegram-bot-api": "^0.30.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.28.0"
   }
 }
