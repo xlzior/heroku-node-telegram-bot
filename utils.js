@@ -1,5 +1,6 @@
-const prompts = require('./prompts.json');
 const emojiTree = require('emoji-tree');
+
+const prompts = require('./prompts.json');
 
 const getRandomPrompt = () => {
   const index = Math.floor(Math.random() * prompts.random.length);
@@ -37,13 +38,14 @@ const sum = (arr) => arr.reduce((x, y) => x + y, 0)
 
 const average = (arr) => sum(arr) / arr.length;
 
-const RESERVED_CHARACTERS = ["-", "#", "+", "_"];
+const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")"];
 
 const cleanMarkdownReserved = rawText => {
   let result = rawText;
   RESERVED_CHARACTERS.forEach(char => {
     result = result.replace(new RegExp(`\\${char}`, 'g'), `\\${char}`);
   })
+  result = result.replace(/<\/?i>/g, '_');
   return result;
 }
 

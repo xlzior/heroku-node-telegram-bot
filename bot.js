@@ -282,15 +282,15 @@ bot.onText(/\/stats/, msg => {
       `*Level*: ${level}\n*Total XP*: ${xp}`,
       `*Journal entries*: ${reflections}
       ${totalLength} message(s) total
-      ${Math.round(averageLength)} message(s) per reflection \\(average\\)
+      ${Math.round(averageLength)} message(s) per reflection (average)
       Longest entry: ${maximumLength} message(s)`,
       `*Hashtags used*: ${hashtags}
       ${uniqueHashtags} unique hashtags
-      _\\(use /hashtags to browse\\)_`,
+      <i>(use /hashtags to browse)</i>`,
       `*Great things done*: ${idat}`,
     ]
     const message = statsDisplay.join('\n\n');
-    bot.sendMessage(msg.chat.id, message, MARKDOWN)
+    bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), MARKDOWN)
   })
 })
 
