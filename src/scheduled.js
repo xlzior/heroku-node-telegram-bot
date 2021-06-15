@@ -1,7 +1,7 @@
 require("dotenv").config();
 const Bot = require('node-telegram-bot-api');
 
-const { fn, server } = require('./web');
+const { fn, server } = require('../web');
 
 const token = process.env.TOKEN;
 
