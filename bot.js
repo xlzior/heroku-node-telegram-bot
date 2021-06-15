@@ -1,15 +1,14 @@
 const Bot = require('node-telegram-bot-api');
 
 const {
-  createUser,
-  setPinnedMessageId, addXP, getProgress,
-  updatePrevCommand, resetPrevCommand, getPrevCommand,
-  openReflection, closeReflection, isReflectionOpen,
-  addHashtags, getHashtags,
-  addEmojis, getEmojis,
-  getStats,
-  incrementIDAT,
-  getAchievements,
+  user,
+  progress,
+  reflections,
+  prevCommand,
+  hashtags: hashtagsDb,
+  emojis: emojisDb,
+  idat,
+  stats,
 } = require('./db');
 
 const { getRandomPrompt, countEmojis, emojiChart, sum, cleanMarkdownReserved } = require('./utils');
@@ -93,9 +92,9 @@ bot.onText(/\/start/, msg => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journalling chatbot.`);
 
-  createUser(userId)
+  user.create(userId)
   .then(() => sendAndPin(chatId, formatLevel(1, 0)))
-  .then(messageId => setPinnedMessageId(userId, messageId));
+  .then(messageId => progress.setPinnedMessageId(userId, messageId));
 })
 
 bot.onText(/\/help/, msg => {
@@ -112,7 +111,7 @@ bot.onText(/\/help/, msg => {
 })
 
 bot.onText(/\/open/, msg => {
-  openReflection(msg.from.id, msg.message_id)
+  reflections.open(msg.from.id, msg.message_id)
   .then(() => {
     bot.sendMessage(msg.chat.id, "Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
   })
@@ -122,11 +121,11 @@ bot.onText(/\/open/, msg => {
 })
 
 bot.onText(/\/close/, msg => {
-  isReflectionOpen(msg.from.id)
+  reflections.isOpen(msg.from.id)
   .then(isOpen => {
     if (isOpen) {
       bot.sendMessage(msg.chat.id, "Whew! Nice journalling session. How would you like to name this conversation for future browsing?", FORCE_REPLY)
-      updatePrevCommand(msg.from.id, { command: "close" })
+      prevCommand.update(msg.from.id, { command: "close" })
     } else {
       bot.sendMessage(msg.chat.id, "You have not started a reflection. Use /open to start a new reflection");
     }
@@ -143,16 +142,16 @@ continueConversation["close"] = async (msg) => {
     await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
 
     // emojis
-    const emojis = await getEmojis(userId);
+    const emojis = await emojisDb.get(userId);
     const emojiCounts = Object.values(emojis);
     if (emojiCounts.length >= 2 && sum(emojiCounts) >= 5) {
       await bot.sendMessage(chatId, `You used these emojis in this entry:\n${emojiChart(emojis)}`)
     }
     
     // XP
-    const closureStats = await closeReflection(userId, msg.message_id, msg.text);
+    const closureStats = await reflections.close(userId, msg.message_id, msg.text);
     const { convoLength, newAchievements } = closureStats;
-    const xpData = await addXP(msg.from.id, convoLength);
+    const xpData = await progress.addXP(msg.from.id, convoLength);
     await notifyXP(chatId, "this conversation", xpData);
 
     // achievements
@@ -165,14 +164,14 @@ continueConversation["close"] = async (msg) => {
     // TODO: emojis achievement
 
     // close the loop
-    resetPrevCommand(userId);
+    prevCommand.reset(userId);
   } catch (error) {
     console.error(error);
   }
 }
 
 bot.onText(/\/hashtags/, msg => {
-  getHashtags(msg.from.id)
+  hashtagsDb.get(msg.from.id)
   .then(hashtags => {
     const message = hashtags
       .map(({ hashtag, messages }) => {
@@ -196,18 +195,14 @@ bot.onText(/\/goto(\d+)/, (msg, match) => {
   })
 })
 
-bot.onText(/\/emojis/, msg => {
-
-})
-
 bot.onText(/\/lifexp/, msg => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  getProgress(userId)
+  progress.getProgress(userId)
   .then(({ level, xp, pinnedMessageId }) => {
     bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
     sendAndPin(chatId, formatLevel(level, xp))
-    .then(messageId => setPinnedMessageId(userId, messageId));
+    .then(messageId => progress.setPinnedMessageId(userId, messageId));
   });
 })
 
@@ -216,17 +211,17 @@ bot.onText(/\/ididathing/, msg => {
   .then(() => {
     bot.sendMessage(msg.chat.id, "So tell me, what did you do?", FORCE_REPLY);
   })
-  updatePrevCommand(msg.from.id, { command: "idat - what" });
+  prevCommand.update(msg.from.id, { command: "idat - what" });
 })
 
 continueConversation["idat - what"] = msg => {
   bot.sendMessage(msg.chat.id, "Amazing! How do you feel about it now?", FORCE_REPLY);
-  updatePrevCommand(msg.from.id, { command: "idat - feeling" });
+  prevCommand.update(msg.from.id, { command: "idat - feeling" });
 }
 
 continueConversation["idat - feeling"] = msg => {
   bot.sendMessage(msg.chat.id, "Nice~ On a scale of 1 to 10, how difficult would you rate it?", FORCE_REPLY);
-  updatePrevCommand(msg.from.id, { command: "idat - difficulty" });
+  prevCommand.update(msg.from.id, { command: "idat - difficulty" });
 }
 
 const DIFFICULTY_XP_MULTIPLIER = 100;
@@ -254,23 +249,23 @@ continueConversation["idat - difficulty"] = async (msg) => {
     }
 
     // give XP
-    const xpData = await addXP(userId, difficulty * DIFFICULTY_XP_MULTIPLIER);
+    const xpData = await progress.addXP(userId, difficulty * DIFFICULTY_XP_MULTIPLIER);
     await notifyXP(chatId, "your achievement", xpData);
     
     // give badge
-    const { hasNewBadge, previousLevel, currentLevel } = await incrementIDAT(userId);
+    const { hasNewBadge, previousLevel, currentLevel } = await idat.increment(userId);
     if (hasNewBadge) {
       for (let i = previousLevel + 1; i <= currentLevel; i++) {
         await notifyBadge(chatId, 'idat', i);
       }
     }
     
-    return resetPrevCommand(userId);
+    return prevCommand.reset(userId);
   }
 }
 
 bot.onText(/\/stats/, msg => {
-  getStats(msg.from.id)
+  stats.getStats(msg.from.id)
   .then((stats) => {
     const {
       level, xp,
@@ -295,7 +290,7 @@ bot.onText(/\/stats/, msg => {
 })
 
 bot.onText(/\/achievements/, async msg => {
-  const achievements = await getAchievements(msg.from.id);
+  const achievements = await stats.getAchievements(msg.from.id);
   const achievementsCount = sum(Object.values(achievements));
 
   // TODO: delete all previous badges sent? so that it's not so repetitive
@@ -321,7 +316,7 @@ bot.onText(/\/achievements/, async msg => {
 });
 
 bot.onText(/\/cancel/, async (msg) => {
-  await resetPrevCommand(msg.from.id)
+  await prevCommand.reset(msg.from.id)
   bot.sendMessage(msg.chat.id, "The previous command has been cancelled.");
 })
 
@@ -337,13 +332,13 @@ bot.on('message', msg => {
     const hashtags = msg.entities
       .filter(({ type }) => type === 'hashtag')
       .map(({ offset, length }) => msg.text.substr(offset, length));
-    addHashtags(userId, hashtags);
+    hashtagsDb.add(userId, hashtags);
   }
 
-  addEmojis(userId, countEmojis(msg.text));
+  emojisDb.add(userId, countEmojis(msg.text));
 
   if (msg.text !== '/cancel') {
-    getPrevCommand(userId)
+    prevCommand.get(userId)
     .then(({ command }) => {
       if (continueConversation[command]) {
         continueConversation[command](msg);
