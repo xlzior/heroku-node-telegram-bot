@@ -26,7 +26,7 @@ if(process.env.NODE_ENV === 'production') {
   bot = new Bot(token, { polling: true });
 }
 
-console.info('Bot server started in ' + process.env.NODE_ENV + ' mode');
+console.info(`Bot server started in ${process.env.NODE_ENV} mode`);
 
 /* BOT UTILITIES */
 
