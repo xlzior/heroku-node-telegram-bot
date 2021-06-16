@@ -58,10 +58,18 @@ const cleanMarkdownReserved = rawText => {
   return result;
 }
 
+const groupPairs = array => {
+  const result = [];
+  for (let i = 0; i < array.length; i += 2) {
+    result.push(array.slice(i, i + 2));
+  }
+  return result;
+}
+
 module.exports = {
   getRandomPrompt,
   countEmojis, emojiChart,
   countTotalHashtags, formatHashtag,
   sum, average,
-  cleanMarkdownReserved
+  cleanMarkdownReserved, groupPairs,
 }

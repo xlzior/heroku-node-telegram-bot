@@ -11,7 +11,7 @@ const {
   stats,
 } = require('./db');
 
-const { getRandomPrompt, countEmojis, emojiChart, sum, cleanMarkdownReserved, formatHashtag } = require('./utils');
+const { getRandomPrompt, countEmojis, emojiChart, sum, cleanMarkdownReserved, formatHashtag, groupPairs } = require('./utils');
 const { formatLevel } = require('./levels');
 const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require('./achievements');
 
@@ -69,6 +69,7 @@ const sendPhotos = async (chatId, photos) => {
 }
 
 const FORCE_REPLY = { reply_markup: { force_reply: true } };
+const REMOVE_KEYBOARD = { reply_markup: { remove_keyboard: true } };
 const MARKDOWN = { parse_mode: "MarkdownV2" };
 
 /* BOT RESPONSES */
@@ -184,9 +185,10 @@ bot.onText(/\/hashtags/, msg => {
 bot.onText(/\/hashtag$/, async (msg) => {
   prevCommand.update(msg.from.id, { command: "hashtag" });
   const hashtags = await hashtagsDb.get(msg.from.id)
+  const keyboard = groupPairs(hashtags.map(({ hashtag }) => hashtag));
   bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?", {
     reply_markup: {
-      keyboard: hashtags.map(({ hashtag }) => [hashtag]),
+      keyboard,
       resize_keyboard: true,
       one_time_keyboard: true,
     }
@@ -197,7 +199,7 @@ continueConversation['hashtag'] = async (msg) => {
   const hashtags = await hashtagsDb.get(msg.from.id);
   const hashtag = hashtags.find(({ hashtag }) => hashtag === msg.text);
   const message = formatHashtag(20)(hashtag);
-  bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), MARKDOWN);
+  bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), { ...MARKDOWN, ...REMOVE_KEYBOARD });
   prevCommand.reset(msg.from.id);
 }
 
