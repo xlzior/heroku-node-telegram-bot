@@ -8,7 +8,7 @@ const {
   hashtags: hashtagsDb,
   emojis: emojisDb,
   idat,
-  stats,
+  stats: statsDb,
 } = require('./db');
 
 const { getRandomPrompt, countEmojis, emojiChart, sum, cleanMarkdownReserved, formatHashtag, groupPairs } = require('./utils');
@@ -47,12 +47,10 @@ const notifyBadge = (chatId, type, badgeLevel) => {
     { caption: `New Achievement! ${getBadgeLabel(type, badgeLevel)}` });
 }
 
-const sendAndPin = (chatId, message) => {
-  return bot.sendMessage(chatId, message)
-  .then(botMsg => {
-    bot.pinChatMessage(chatId, botMsg.message_id);
-    return botMsg.message_id;
-  })
+const sendAndPin = async (chatId, message) => {
+  const botMsg = await bot.sendMessage(chatId, message)
+  bot.pinChatMessage(chatId, botMsg.message_id);
+  return botMsg.message_id;
 }
 
 // depending on the number of photos, send the appropriate number of media groups
@@ -88,14 +86,14 @@ bot.onText(/\/echo\s*$/, (msg) => {
   bot.sendMessage(msg.chat.id, "Send /echo [text], and I'll repeat the [text] back at you. This can be useful for prompting yourself with a question you already have in mind, or telling yourself something you need/want to hear.")
 })
 
-bot.onText(/\/start/, msg => {
+bot.onText(/\/start/, async (msg) => {
   const userId = msg.from.id;
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journalling chatbot.`);
 
-  user.create(userId)
-  .then(() => sendAndPin(chatId, formatLevel(1, 0)))
-  .then(messageId => progress.setPinnedMessageId(userId, messageId));
+  await user.create(userId)
+  const messageId = await sendAndPin(chatId, formatLevel(1, 0));
+  progress.setPinnedMessageId(userId, messageId);
 })
 
 bot.onText(/\/help/, msg => {
@@ -209,22 +207,18 @@ bot.onText(/\/goto(\d+)/, (msg, match) => {
   })
 })
 
-bot.onText(/\/lifexp/, msg => {
+bot.onText(/\/lifexp/, async (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  progress.getProgress(userId)
-  .then(({ level, xp, pinnedMessageId }) => {
-    bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
-    sendAndPin(chatId, formatLevel(level, xp))
-    .then(messageId => progress.setPinnedMessageId(userId, messageId));
-  });
+  const { level, xp, pinnedMessageId } = await progress.getProgress(userId);
+  bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
+  const messageId = await sendAndPin(chatId, formatLevel(level, xp))
+  progress.setPinnedMessageId(userId, messageId);
 })
 
-bot.onText(/\/ididathing/, msg => {
-  bot.sendMessage(msg.chat.id, "Congrats! Whether it's a small win or a big win, let's celebrate it!")
-  .then(() => {
-    bot.sendMessage(msg.chat.id, "So tell me, what did you do?", FORCE_REPLY);
-  })
+bot.onText(/\/ididathing/, async (msg) => {
+  await bot.sendMessage(msg.chat.id, "Congrats! Whether it's a small win or a big win, let's celebrate it!")
+  bot.sendMessage(msg.chat.id, "So tell me, what did you do?", FORCE_REPLY);
   prevCommand.update(msg.from.id, { command: "idat - what" });
 })
 
@@ -278,33 +272,31 @@ continueConversation["idat - difficulty"] = async (msg) => {
   }
 }
 
-bot.onText(/\/stats/, msg => {
-  stats.getStats(msg.from.id)
-  .then((stats) => {
-    const {
-      level, xp,
-      reflections, totalLength, averageLength, maximumLength,
-      hashtags, uniqueHashtags,
-      idat
-    } = stats;
-    const statsDisplay = [
-      `*Level*: ${level}\n*Total XP*: ${xp}`,
-      `*Journal entries*: ${reflections}
-      ${totalLength} message(s) total
-      ${Math.round(averageLength)} message(s) per reflection (average)
-      Longest entry: ${maximumLength} message(s)`,
-      `*Hashtags used*: ${hashtags}
-      ${uniqueHashtags} unique hashtags
-      <i>(use /hashtags to browse)</i>`,
-      `*Great things done*: ${idat}`,
-    ]
-    const message = statsDisplay.join('\n\n');
-    bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), MARKDOWN)
-  })
-})
+bot.onText(/\/stats/, async (msg) => {
+  const {
+    level, xp,
+    reflections, totalLength, averageLength, maximumLength,
+    hashtags, uniqueHashtags,
+    idat
+  } = await statsDb.getStats(msg.from.id);
+
+  const statsDisplay = [
+    `*Level*: ${level}\n*Total XP*: ${xp}`,
+    `*Journal entries*: ${reflections}
+    ${totalLength} message(s) total
+    ${Math.round(averageLength)} message(s) per reflection (average)
+    Longest entry: ${maximumLength} message(s)`,
+    `*Hashtags used*: ${hashtags}
+    ${uniqueHashtags} unique hashtags
+    <i>(use /hashtags to browse)</i>`,
+    `*Great things done*: ${idat}`,
+  ];
+  const message = statsDisplay.join('\n\n');
+  bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), MARKDOWN)
+});
 
 bot.onText(/\/achievements/, async msg => {
-  const achievements = await stats.getAchievements(msg.from.id);
+  const achievements = await statsDb.getAchievements(msg.from.id);
   const achievementsCount = sum(Object.values(achievements));
 
   // TODO: delete all previous badges sent? so that it's not so repetitive
