@@ -1,6 +1,6 @@
 const emojiTree = require('emoji-tree');
 
-const prompts = require('../private/prompts.json');
+const prompts = require('./prompts.json');
 
 const getRandomPrompt = () => {
   const index = Math.floor(Math.random() * prompts.random.length);
