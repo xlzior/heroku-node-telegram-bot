@@ -11,7 +11,7 @@ const {
   stats,
 } = require('./db');
 
-const { getRandomPrompt, countEmojis, emojiChart, sum, cleanMarkdownReserved } = require('./utils');
+const { getRandomPrompt, countEmojis, emojiChart, sum, cleanMarkdownReserved, formatHashtag } = require('./utils');
 const { formatLevel } = require('./levels');
 const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require('./achievements');
 
@@ -173,21 +173,33 @@ continueConversation["close"] = async (msg) => {
 bot.onText(/\/hashtags/, msg => {
   hashtagsDb.get(msg.from.id)
   .then(hashtags => {
-    const message = hashtags
-      .map(({ hashtag, messages }) => {
-        const firstLine = `*#${hashtag}: ${messages.length}*`
-        const nextLines = messages
-          .map(({ messageId, name }) => `- /goto${messageId} ${name}`)
-          .join('\n')
-        return `${firstLine}\n${nextLines}`;
-      })
-      .join('\n\n');
+    const message = hashtags.map(formatHashtag(3)).join('\n\n');
     bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), MARKDOWN);
   })
   .catch(error => {
     bot.sendMessage(msg.chat.id, error);
   })
 });
+
+bot.onText(/\/hashtag$/, async (msg) => {
+  prevCommand.update(msg.from.id, { command: "hashtag" });
+  const hashtags = await hashtagsDb.get(msg.from.id)
+  bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?", {
+    reply_markup: {
+      keyboard: hashtags.map(({ hashtag }) => [hashtag]),
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    }
+  });
+})
+
+continueConversation['hashtag'] = async (msg) => {
+  const hashtags = await hashtagsDb.get(msg.from.id);
+  const hashtag = hashtags.find(({ hashtag }) => hashtag === msg.text);
+  const message = formatHashtag(20)(hashtag);
+  bot.sendMessage(msg.chat.id, cleanMarkdownReserved(message), MARKDOWN);
+  prevCommand.reset(msg.from.id);
+}
 
 bot.onText(/\/goto(\d+)/, (msg, match) => {
   bot.sendMessage(msg.chat.id, "The conversation started here!", {

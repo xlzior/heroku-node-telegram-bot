@@ -34,6 +34,15 @@ const countTotalHashtags = hashtags => {
     .reduce((acc, item) => acc + item, 0); // sum
 }
 
+const formatHashtag = (limit) => ({ hashtag, messages }) => {
+  const firstLine = `*#${hashtag}: ${messages.length}*`
+  const nextLines = messages
+    .map(({ messageId, name }) => `- /goto${messageId} ${name}`)
+    .slice(0, limit - 1)
+    .join('\n')
+  return `${firstLine}\n${nextLines}`;
+}
+
 const sum = (arr) => arr.reduce((x, y) => x + y, 0)
 
 const average = (arr) => sum(arr) / arr.length;
@@ -52,7 +61,7 @@ const cleanMarkdownReserved = rawText => {
 module.exports = {
   getRandomPrompt,
   countEmojis, emojiChart,
-  countTotalHashtags,
+  countTotalHashtags, formatHashtag,
   sum, average,
   cleanMarkdownReserved
 }
