@@ -4,7 +4,9 @@ const getId = async (userId) => {
   const res = await pool.query(`SELECT current_reflection_id FROM users WHERE user_id=${userId}`);
   const reflectionId = getFirst(res).current_reflection_id;
   if (reflectionId) return reflectionId;
-  return Promise.reject("No current reflection");
+  return Promise.reject("NO_CURRENT_REFLECTION");
+
+  // TODO: reject with an error code, shift the message into bot's catch
 };
 
 const setId = (userId, start) => {

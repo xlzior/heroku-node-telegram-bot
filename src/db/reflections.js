@@ -34,7 +34,7 @@ const isOpen = (userId) => {
 const open = async (userId, start) => {
   try {
     await current.getId(userId);
-    return Promise.reject("A reflection is already in progress, please /close the reflection before opening a new one.");
+    return Promise.reject("REFLECTION_ALREADY_OPEN");
   } catch (e) {
     insert(userId, start);
     current.setId(userId, start);
@@ -43,7 +43,7 @@ const open = async (userId, start) => {
 
 const close = async (userId, end, name) => {
   const start = await current.getId(userId).catch(() => {
-    return Promise.reject("You have not started a reflection. Use /open to start a new reflection");
+    return Promise.reject("NO_REFLECTION_OPEN");
   })
 
   current.resetId(userId);
