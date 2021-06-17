@@ -69,8 +69,8 @@ const incrementXP = (level, originalXP, additionalXP) => {
   const levelledUp = newXP >= xpThreshold;
   if (level < MAX_LEVEL) {
     return {
-      newXP,
-      newLevel: levelledUp ? level + 1 : level,
+      xp: newXP,
+      level: levelledUp ? level + 1 : level,
       levelledUp,
     }
   }
