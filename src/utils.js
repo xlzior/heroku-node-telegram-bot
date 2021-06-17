@@ -12,8 +12,7 @@ const countEmojis = (rawText) => {
   
   emojiTree(rawText)
     .filter(char => char.type === 'emoji')
-    .map(emojiData => emojiData.text)
-    .map(emoji => {
+    .map(({ text: emoji }) => {
       if (!result[emoji]) result[emoji] = 0;
       result[emoji]++;
     })
@@ -22,16 +21,8 @@ const countEmojis = (rawText) => {
 
 const emojiChart = (emojiCounts) => {
   return Object.keys(emojiCounts)
-    .map(emoji => {
-      return emoji.repeat(emojiCounts[emoji])
-    })
+    .map(emoji => emoji.repeat(emojiCounts[emoji]))
     .join('\n');
-}
-
-const countTotalHashtags = hashtags => {
-  return Object.values(hashtags)
-    .map(tagObj => Object.values(tagObj).length)
-    .reduce((acc, item) => acc + item, 0); // sum
 }
 
 const formatHashtag = (limit) => ({ hashtag, messages }) => {
@@ -69,7 +60,7 @@ const groupPairs = array => {
 module.exports = {
   getRandomPrompt,
   countEmojis, emojiChart,
-  countTotalHashtags, formatHashtag,
+  formatHashtag,
   sum, average,
   cleanMarkdownReserved, groupPairs,
 }
