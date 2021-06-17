@@ -1,4 +1,4 @@
-const db = require('./index.js');
+const current = require('./current');
 const { pool, getFirst, getRows } = require("./postgresql");
 
 const getCount = async (userId) => {
@@ -6,20 +6,23 @@ const getCount = async (userId) => {
 }
 
 const get = async (userId) => {
-  const rawHashtags = pool.query(`SELECT * FROM hashtags WHERE user_id=${userId}`).then(getRows);
-  console.log('rawHashtags :', rawHashtags);
-  return rawHashtags;
-  // TODO: post-process the rows a bit? convert to an array of objects with hashtag and messages
-  // TODO: reject if there are no hashtags
-  // TODO: might need to join table with reflections to get reflection name...
+  const hashtags = await pool.query(
+    `SELECT hashtag, json_agg(json_build_array(hashtags.start_id, name) ORDER BY hashtags.start_id) AS messages
+    FROM hashtags
+    INNER JOIN reflections
+    ON (hashtags.start_id = reflections.start_id)
+    WHERE hashtags.user_id=${userId}
+    GROUP BY hashtag;`).then(getRows);
+  if (hashtags.length === 0) return Promise.reject("You have no hashtags saved. /open a conversation and use hashtags to categorise your entries.")
+
+  return hashtags;
 }
 
 const add = async (userId, hashtags = []) => {
   if (hashtags.length === 0) return;
-
-  const startId = await db.reflections.current.getId(userId);
+  const startId = await current.getId(userId);
   const promises = hashtags.map(hashtag => {
-    return pool.query(`INSERT INTO hashtags(user_id, start_id, hashtag) VALUES(${userId}, ${startId}, ${hashtag});`);
+    return pool.query(`INSERT INTO hashtags(user_id, start_id, hashtag) VALUES(${userId}, ${startId}, '${hashtag}');`);
   });
   try {
     await Promise.all(promises);

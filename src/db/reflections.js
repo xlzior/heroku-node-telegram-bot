@@ -1,26 +1,9 @@
-const hashtagsDb = require('./hashtags');
-const achievementsDb = require('./achievements');
 const { checkForNewBadge } = require('../achievements');
 const { pool, getFirst, getRows } = require("./postgresql");
 
-const current = {
-  getId: async (userId) => {
-    const res = await pool.query(`SELECT current_reflection_id FROM users WHERE user_id=${userId}`);
-    const reflectionId = getFirst(res).current_reflection_id;
-    if (reflectionId) return reflectionId;
-    return Promise.reject("No current reflection");
-  },
-  setId: (userId, start) => {
-    return pool.query(`UPDATE users SET current_reflection_id=${start} WHERE user_id=${userId}`);
-  },
-  resetId: (userId) => {
-    return current.setId(userId, 'NULL');
-  },
-  get: async (userId) => {
-    const startId = await current.getId(userId);
-    return pool.query(`SELECT * FROM reflections WHERE user_id=${userId} AND start_id=${startId}`).then(getFirst);
-  },
-}
+const hashtagsDb = require('./hashtags');
+const achievementsDb = require('./achievements');
+const current = require('./current');
 
 const getCount = (userId) => {
   return pool.query(`SELECT COUNT(*) FROM reflections WHERE user_id=${userId}`).then(getFirst);

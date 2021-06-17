@@ -107,7 +107,6 @@ bot.onText(/\/open/, msg => {
     bot.sendMessage(msg.chat.id, "Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
   })
   .catch(error => {
-    console.log('error :', error);
     bot.sendMessage(msg.chat.id, error);
   });
 })
@@ -166,7 +165,7 @@ continueConversation["close"] = async (msg) => {
 bot.onText(/\/hashtags/, msg => {
   db.hashtags.get(msg.from.id)
   .then(hashtags => {
-    const message = hashtags.map(utils.formatHashtag(3)).join('\n\n');
+    const message = hashtags.map(utils.formatHashtag(5)).join('\n\n');
     bot.sendMessage(msg.chat.id, utils.cleanMarkdownReserved(message), MARKDOWN);
   })
   .catch(error => {
@@ -175,16 +174,20 @@ bot.onText(/\/hashtags/, msg => {
 });
 
 bot.onText(/\/hashtag(@lifexp_bot)?$/, async (msg) => {
-  db.users.prevCommand.set(msg.from.id, "hashtag");
-  const hashtags = await db.hashtags.get(msg.from.id)
-  const keyboard = utils.groupPairs(hashtags.map(({ hashtag }) => hashtag));
-  bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?", {
-    reply_markup: {
-      keyboard,
-      resize_keyboard: true,
-      one_time_keyboard: true,
-    }
-  });
+  try {
+    const hashtags = await db.hashtags.get(msg.from.id)
+    db.users.prevCommand.set(msg.from.id, "hashtag");
+    const keyboard = utils.groupPairs(hashtags.map(({ hashtag }) => hashtag));
+    bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?", {
+      reply_markup: {
+        keyboard,
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      }
+    });
+  } catch (error) {
+    bot.sendMessage(msg.chat.id, error);
+  }
 })
 
 continueConversation['hashtag'] = async (msg) => {
