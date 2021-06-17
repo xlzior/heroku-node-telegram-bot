@@ -1,4 +1,4 @@
-const BADGE_LEVEL_LABELS = ["", "Bronze", "Silver", "Gold"];
+// const BADGE_LEVEL_LABELS = ["", "Bronze", "Silver", "Gold"];
 const BADGE_LEVEL_EMOJIS = ["", "🥉", "🥈", "🥇"];
 
 const BLANK_BADGE = 'AgACAgUAAxkBAAIGB2DA0i_hf0S1ngYqmqp-f-pW7as5AALsrjEbEjMAAVYAAWO6j_uMthMYaJVydAADAQADAgADeAADilAAAh8E';
@@ -63,12 +63,12 @@ const getBadgeLevel = (badgeValues, value) => {
   }
 }
 
-const checkForNewBadge = (type, currentBadge = 0, value) => {
-  const newBadgeLevel = getBadgeLevel(BADGES[type].values, value);
+const checkForNewBadge = (type, previousLevel = 0, value) => {
+  const currentLevel = getBadgeLevel(BADGES[type].values, value);
   return {
-    hasNewBadge: newBadgeLevel > currentBadge,
-    previousLevel: currentBadge,
-    currentLevel: newBadgeLevel
+    hasNewBadge: currentLevel > previousLevel,
+    previousLevel,
+    currentLevel,
   };
 }
 
