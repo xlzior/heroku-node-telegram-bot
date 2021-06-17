@@ -13,7 +13,6 @@ const get = async (userId) => {
     ON (hashtags.start_id = reflections.start_id)
     WHERE hashtags.user_id=${userId}
     GROUP BY hashtag;`).then(getRows);
-  if (hashtags.length === 0) return Promise.reject("You have no hashtags saved. /open a conversation and use hashtags to categorise your entries.")
 
   return hashtags;
 }

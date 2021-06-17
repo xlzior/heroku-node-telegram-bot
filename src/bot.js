@@ -24,9 +24,7 @@ console.info(`Bot server started in ${process.env.NODE_ENV} mode`);
 const notifyXP = async (chatId, type, xpData) => {
   const { level, levelledUp, additionalXP, xp, pinnedMessageId } = xpData;
   await bot.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
-  if (levelledUp) {
-    await bot.sendMessage(chatId, `You levelled up! You are now Level ${level}.`);
-  }
+  levelledUp && await bot.sendMessage(chatId, `You levelled up! You are now Level ${level}.`);
   await bot.editMessageText(formatLevel(level, xp), {
     chat_id: chatId,
     message_id: pinnedMessageId,
@@ -101,37 +99,35 @@ bot.onText(/\/help/, msg => {
   bot.sendMessage(msg.chat.id, helpMessage)
 })
 
-bot.onText(/\/open/, msg => {
-  db.reflections.open(msg.from.id, msg.message_id)
-  .then(() => {
+bot.onText(/\/open/, async (msg) => {
+  try {
+    await db.reflections.open(msg.from.id, msg.message_id)
     bot.sendMessage(msg.chat.id, "Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
-  })
-  .catch(error => {
-    bot.sendMessage(msg.chat.id, error);
-  });
+  } catch (error) {
+    if (error === "REFLECTION_ALREADY_OPEN") {
+      bot.sendMessage(msg.chat.id, "A reflection is already in progress, please /close the reflection before opening a new one.");
+    } else {
+      console.error("error:", error);
+    }
+  }
 })
 
-bot.onText(/\/close/, msg => {
-  db.reflections.isOpen(msg.from.id)
-  .then(isOpen => {
-    if (isOpen) {
-      bot.sendMessage(msg.chat.id, "Whew! Nice journalling session. How would you like to name this conversation for future browsing?", FORCE_REPLY)
-      db.users.prevCommand.set(msg.from.id, "close")
-    } else {
-      bot.sendMessage(msg.chat.id, "You have not started a reflection. Use /open to start a new reflection");
-      db.users.prevCommand.reset(msg.from.id);
-    }
-  })
-  .catch(error => {
-    console.error(error)
-  })
+bot.onText(/\/close/, async (msg) => {
+  const isOpen = await db.reflections.isOpen(msg.from.id)
+  if (isOpen) {
+    bot.sendMessage(msg.chat.id, "Whew! Nice journalling session. How would you like to name this reflection for future browsing?", FORCE_REPLY)
+    db.users.prevCommand.set(msg.from.id, "close")
+  } else {
+    bot.sendMessage(msg.chat.id, "You have not started a reflection. Use /open to start a new reflection");
+    db.users.prevCommand.reset(msg.from.id);
+  }
 })
 
 continueConversation["close"] = async (msg) => {
   try {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
-    await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' conversation. I'm proud of you!`)
+    await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`)
 
     // emojis
     // const emojis = await emojisDb.get(userId);
@@ -142,9 +138,10 @@ continueConversation["close"] = async (msg) => {
     
     // XP
     const closureStats = await db.reflections.close(userId, msg.message_id, msg.text);
+    // TODO: catch this?
     const { convoLength, newAchievements } = closureStats;
-    const xpData = await db.users.progress.addXP(msg.from.id, convoLength);
-    await notifyXP(chatId, "this conversation", xpData);
+    const xpData = await db.users.progress.addXP(userId, convoLength);
+    await notifyXP(chatId, "this reflection", xpData);
 
     // achievements
     for (const type in newAchievements) {
@@ -159,35 +156,33 @@ continueConversation["close"] = async (msg) => {
     db.users.prevCommand.reset(userId);
   } catch (error) {
     console.error(error);
+    // TODO: what error is this supposed to catch?
   }
 }
 
-bot.onText(/\/hashtags/, msg => {
-  db.hashtags.get(msg.from.id)
-  .then(hashtags => {
-    const message = hashtags.map(utils.formatHashtag(5)).join('\n\n');
-    bot.sendMessage(msg.chat.id, utils.cleanMarkdownReserved(message), MARKDOWN);
-  })
-  .catch(error => {
-    bot.sendMessage(msg.chat.id, error);
-  })
+bot.onText(/\/hashtags/, async (msg) => {
+  const hashtags = await db.hashtags.get(msg.from.id);
+  if (hashtags.length === 0) {
+    return bot.sendMessage(msg.chat.id, "You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
+  }
+  const message = hashtags.map(utils.formatHashtag(5)).join('\n\n');
+  bot.sendMessage(msg.chat.id, utils.cleanMarkdownReserved(message), MARKDOWN);
 });
 
 bot.onText(/\/hashtag(@lifexp_bot)?$/, async (msg) => {
-  try {
-    const hashtags = await db.hashtags.get(msg.from.id)
-    db.users.prevCommand.set(msg.from.id, "hashtag");
-    const keyboard = utils.groupPairs(hashtags.map(({ hashtag }) => hashtag));
-    bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?", {
-      reply_markup: {
-        keyboard,
-        resize_keyboard: true,
-        one_time_keyboard: true,
-      }
-    });
-  } catch (error) {
-    bot.sendMessage(msg.chat.id, error);
+  const hashtags = await db.hashtags.get(msg.from.id)
+  if (hashtags.length === 0) {
+    return bot.sendMessage(msg.chat.id, "You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
   }
+  db.users.prevCommand.set(msg.from.id, "hashtag");
+  const keyboard = utils.groupPairs(hashtags.map(({ hashtag }) => hashtag));
+  bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?", {
+    reply_markup: {
+      keyboard,
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    }
+  });
 })
 
 continueConversation['hashtag'] = async (msg) => {
@@ -199,7 +194,7 @@ continueConversation['hashtag'] = async (msg) => {
 }
 
 bot.onText(/\/goto(\d+)/, (msg, match) => {
-  bot.sendMessage(msg.chat.id, "The conversation started here!", {
+  bot.sendMessage(msg.chat.id, "The reflection started here!", {
     reply_to_message_id: match[1]
   })
 })
@@ -331,7 +326,7 @@ bot.on('message', msg => {
   // console.log(msg.photo[2].file_id);
   const userId = msg.from.id;
 
-  // KIV: automatically open a conversation for a smoother journalling experience?
+  // KIV: automatically open a reflection for a smoother journalling experience?
 
   if (msg.entities) {
     const hashtags = msg.entities
