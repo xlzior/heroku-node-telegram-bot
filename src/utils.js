@@ -35,10 +35,10 @@ const countTotalHashtags = hashtags => {
 }
 
 const formatHashtag = (limit) => ({ hashtag, messages }) => {
-  const firstLine = `*#${hashtag}: ${messages.length}*`
+  const firstLine = `*${hashtag}: ${messages.length}*`
   const nextLines = messages
-    .map(({ messageId, name }) => `- /goto${messageId} ${name}`)
-    .slice(0, limit - 1)
+    .map(([ messageId, name ]) => `- /goto${messageId} ${name}`)
+    .slice(0, limit)
     .join('\n')
   return `${firstLine}\n${nextLines}`;
 }
