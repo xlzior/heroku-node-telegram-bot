@@ -1,4 +1,4 @@
-const Bot = require('node-telegram-bot-api');
+const Bot = require('./TelegramBot');
 
 const db = require('./db');
 const utils = require('./utils');
@@ -19,46 +19,15 @@ if (process.env.NODE_ENV === 'production') {
 
 console.info(`Bot server started in ${process.env.NODE_ENV} mode`);
 
-/* BOT UTILITIES */
-
-const notifyXP = async (chatId, type, xpData) => {
-  const { level, levelledUp, additionalXP, xp, pinnedMessageId } = xpData;
-  await bot.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
-  levelledUp && await bot.sendMessage(chatId, `You levelled up! You are now Level ${level}.`);
-  await bot.editMessageText(formatLevel(level, xp), {
-    chat_id: chatId,
-    message_id: pinnedMessageId,
-  })
-}
-
-const notifyBadge = (chatId, type, badgeLevel) => {
-  const badgeImage = getBadgeImage(type, badgeLevel);
-  return bot.sendPhoto(chatId, badgeImage,
-    { caption: `New Achievement! ${getBadgeLabel(type, badgeLevel)}` });
-}
-
-const sendAndPin = async (chatId, message) => {
-  const botMsg = await bot.sendMessage(chatId, message)
-  bot.pinChatMessage(chatId, botMsg.message_id);
-  return botMsg.message_id;
-}
-
-// depending on the number of photos, send the appropriate number of media groups
-const sendPhotos = async (chatId, photos) => {
-  if (photos.length === 1) { // send an individual photo
-    const { media, caption } = photos[0]
-    await bot.sendPhoto(chatId, media, { caption })
-  } else if (photos.length <= 10) { // send a media group
-    await bot.sendMediaGroup(chatId, photos);
-  } else { // send multiple media groups
-    await bot.sendMediaGroup(chatId, photos.slice(0, 10)); // send the first 10
-    await sendPhotos(chatId, photos.slice(10));            // recurse for the rest
-  }
-}
+/* MESSAGE MODIFIERS */
 
 const FORCE_REPLY = { reply_markup: { force_reply: true } };
 const REMOVE_KEYBOARD = { reply_markup: { remove_keyboard: true } };
 const MARKDOWN = { parse_mode: "MarkdownV2" };
+
+const withKeyboard = (keyboard, resize_keyboard = true, one_time_keyboard = true) => {
+  return { reply_markup: { keyboard, resize_keyboard, one_time_keyboard } }
+}
 
 /* BOT RESPONSES */
 
@@ -82,7 +51,7 @@ bot.onText(/\/start/, async (msg) => {
   bot.sendMessage(chatId, `Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journalling chatbot.`);
 
   await db.users.create(userId)
-  const messageId = await sendAndPin(chatId, formatLevel(1, 0));
+  const messageId = await bot.sendAndPin(chatId, formatLevel(1, 0));
   db.users.pinnedMessageId.set(userId, messageId);
 })
 
@@ -141,13 +110,13 @@ continueConversation["close"] = async (msg) => {
     // TODO: catch this?
     const { convoLength, newAchievements } = closureStats;
     const xpData = await db.users.progress.addXP(userId, convoLength);
-    await notifyXP(chatId, "this reflection", xpData);
+    await bot.notifyXP(chatId, "this reflection", xpData);
 
     // achievements
     for (const type in newAchievements) {
       const { previousLevel, currentLevel } = newAchievements[type];
       for (let i = previousLevel + 1; i <= currentLevel; i++) {
-        await notifyBadge(chatId, type, i);
+        await bot.notifyBadge(chatId, type, i);
       }
     }
     // KIV: emojis achievement
@@ -176,13 +145,8 @@ bot.onText(/\/hashtag(@lifexp_bot)?$/, async (msg) => {
   }
   db.users.prevCommand.set(msg.from.id, "hashtag");
   const keyboard = utils.groupPairs(hashtags.map(({ hashtag }) => hashtag));
-  bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?", {
-    reply_markup: {
-      keyboard,
-      resize_keyboard: true,
-      one_time_keyboard: true,
-    }
-  });
+  bot.sendMessage(msg.chat.id, "Alright, which hashtag would you like to browse?",
+    withKeyboard(keyboard));
 })
 
 continueConversation['hashtag'] = async (msg) => {
@@ -204,7 +168,7 @@ bot.onText(/\/lifexp/, async (msg) => {
   const userId = msg.from.id;
   const { level, xp, pinnedMessageId } = await db.users.progress.get(userId);
   bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
-  const messageId = await sendAndPin(chatId, formatLevel(level, xp))
+  const messageId = await bot.sendAndPin(chatId, formatLevel(level, xp))
   db.users.pinnedMessageId.set(userId, messageId);
 })
 
@@ -250,13 +214,13 @@ continueConversation["idat - difficulty"] = async (msg) => {
 
     // give XP
     const xpData = await db.users.progress.addXP(userId, difficulty * DIFFICULTY_XP_MULTIPLIER);
-    await notifyXP(chatId, "your achievement", xpData);
+    await bot.notifyXP(chatId, "your achievement", xpData);
     
     // give badge
     const { hasNewBadge, previousLevel, currentLevel } = await db.users.idat.increment(userId);
     if (hasNewBadge) {
       for (let i = previousLevel + 1; i <= currentLevel; i++) {
-        await notifyBadge(chatId, 'idat', i);
+        await bot.notifyBadge(chatId, 'idat', i);
       }
     }
     
@@ -311,7 +275,7 @@ bot.onText(/\/achievements/, async msg => {
     }
   }
   await bot.sendMessage(msg.chat.id, "Resending your achievements...");
-  await sendPhotos(msg.chat.id, photos);
+  await bot.sendPhotos(msg.chat.id, photos);
   await bot.sendMessage(msg.chat.id, "Tip: View the chat's 'shared media' to see a display cabinet of all your achievement badges!")
 });
 
