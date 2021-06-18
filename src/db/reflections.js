@@ -4,17 +4,16 @@ const { pool, getFirst, getRows } = require("./postgresql");
 const hashtagsDb = require('./hashtags');
 const achievementsDb = require('./achievements');
 const current = require('./current');
+const errors = require('./errors');
 
-const getCount = (userId) => {
-  return pool.query(`SELECT COUNT(*) FROM reflections WHERE user_id=${userId}`).then(getFirst);
+const getCount = async (userId) => {
+  const res = await pool.query(`SELECT COUNT(*) FROM reflections WHERE user_id=${userId}`);
+  return getFirst(res);
 }
 
-const getLengths = (userId) => {
-  return pool.query(`SELECT start, end FROM reflections WHERE user_id=${userId}`)
-  .then(getRows)
-  .then(rows => rows.map(({ start_id, end_id }) => {
-    return end_id - start_id + 1;
-  }));
+const getLengths = async (userId) => {
+  const res = await pool.query(`SELECT start, end FROM reflections WHERE user_id=${userId}`);
+  return getRows(res).map(({ start_id, end_id }) => end_id - start_id + 1);
 }
 
 const insert = (userId, start) => {
@@ -26,25 +25,23 @@ const update = (userId, start, end, name) => {
 }
 
 const isOpen = (userId) => {
-  return current.getId(userId)
-    .then(() => true)
-    .catch(() => false);
+  return current.getId(userId).then(Boolean);
 }
 
 const open = async (userId, start) => {
-  try {
-    await current.getId(userId);
-    return Promise.reject("REFLECTION_ALREADY_OPEN");
-  } catch (e) {
+  const reflectionId = await current.getId(userId);
+  if (reflectionId) {
+    return Promise.reject(errors.REFLECTION_ALREADY_OPEN);
+  } else {
     insert(userId, start);
     current.setId(userId, start);
   }
 }
 
 const close = async (userId, end, name) => {
-  const start = await current.getId(userId).catch(() => {
-    return Promise.reject("NO_REFLECTION_OPEN");
-  })
+  const start = await current.getId(userId)
+  
+  if (!start) return Promise.reject(errors.NO_REFLECTION_OPEN);
 
   current.resetId(userId);
   update(userId, start, end, name);

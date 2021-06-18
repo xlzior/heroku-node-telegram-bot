@@ -6,6 +6,7 @@ const utils = require('./utils');
 // TODO: refactor into gameUtils?
 const { formatLevel } = require('./levels');
 const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require('./achievements');
+const errors = require('./db/errors');
 
 const token = process.env.TOKEN;
 
@@ -73,7 +74,7 @@ bot.onText(/\/open/, async (msg) => {
     await db.reflections.open(msg.from.id, msg.message_id)
     bot.sendMessage(msg.chat.id, "Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.")
   } catch (error) {
-    if (error === "REFLECTION_ALREADY_OPEN") {
+    if (error === errors.REFLECTION_ALREADY_OPEN) {
       bot.sendMessage(msg.chat.id, "A reflection is already in progress, please /close the reflection before opening a new one.");
     } else {
       console.error("error:", error);
@@ -286,7 +287,7 @@ bot.onText(/\/cancel/, async (msg) => {
 
 // Messages with no command
 
-bot.on('message', msg => {
+bot.on('message', async (msg) => {
   // console.log(msg.photo[2].file_id);
   const userId = msg.from.id;
 
@@ -302,15 +303,12 @@ bot.on('message', msg => {
   // emojisDb.add(userId, utils.countEmojis(msg.text));
 
   if (msg.text !== '/cancel') {
-    db.users.prevCommand.get(userId)
-    .then(command => {
-      if (continueConversation[command]) {
-        continueConversation[command](msg);
-      } else if (command) {
-        console.error('Encountered unfamiliar command: ', command)
-      }
-    })
-    .catch(() => {});
+    const command = await db.users.prevCommand.get(userId);
+    if (continueConversation[command]) {
+      continueConversation[command](msg);
+    } else if (command) {
+      console.error('Encountered unfamiliar command: ', command)
+    }
   }
 });
 
