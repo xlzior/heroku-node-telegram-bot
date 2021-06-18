@@ -2,11 +2,10 @@ const { incrementXP } = require("../levels");
 const { pool, getFirst } = require("./postgresql");
 
 const create = async (userId) => {
-  try {
-    return pool.query(`INSERT INTO users(user_id, level, xp, idat) VALUES(${userId}, 1, 0, 0);`);
-  } catch (e) {
-    console.info('User already exists');
-  }
+  return pool.query(
+    `INSERT INTO users(user_id, level, xp, idat)
+    VALUES(${userId}, 1, 0, 0)
+    ON CONFLICT DO NOTHING;`);
 }
 
 const progress = {
@@ -40,6 +39,7 @@ const pinnedMessageId = {
 const idat = {
   increment: (userId) => {
     return pool.query(`UPDATE users SET idat = idat + 1 WHERE user_id=${userId}`);
+    // TODO: what does this return? can I make it return the current idat count?
     // TODO: check for IDAT achievement?
   }
 }
