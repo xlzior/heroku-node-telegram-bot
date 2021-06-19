@@ -38,6 +38,8 @@ const sum = (arr) => arr.reduce((x, y) => x + y, 0)
 
 const average = (arr) => sum(arr) / arr.length;
 
+const max = (arr) => Math.max(...arr);
+
 const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")"];
 
 const cleanMarkdownReserved = rawText => {
@@ -61,6 +63,6 @@ module.exports = {
   getRandomPrompt,
   countEmojis, emojiChart,
   formatHashtag,
-  sum, average,
+  sum, average, max,
   cleanMarkdownReserved, groupPairs,
 }

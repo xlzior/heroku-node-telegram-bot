@@ -12,7 +12,7 @@ const getCount = async (userId) => {
 }
 
 const getLengths = async (userId) => {
-  const res = await pool.query(`SELECT start, end FROM reflections WHERE user_id=${userId}`);
+  const res = await pool.query(`SELECT start_id, end_id FROM reflections WHERE user_id=${userId}`);
   return getRows(res).map(({ start_id, end_id }) => end_id - start_id + 1);
 }
 
@@ -45,17 +45,17 @@ const close = async (userId, end, name) => {
 
   current.resetId(userId);
   update(userId, start, end, name);
-  const reflectionsCount = getCount(userId)
-  const hashtagsCount = hashtagsDb.getCount(userId)
-  const achievements = await achievementsDb.getAll(userId)
 
-  const newAchievements = {};
   const convoLength = end - start + 1;
   const stats = [
     { type: "convoLength", value: convoLength },
-    { type: "hashtags", value: await hashtagsCount },
-    { type: "reflections", value: await reflectionsCount },
+    { type: "reflections", value: await getCount(userId) },
+    { type: "hashtags", value: await hashtagsDb.getTotalCount(userId) },
   ]
+
+  const achievements = await achievementsDb.getAll(userId)
+  const newAchievements = {};
+
   stats.forEach(({ type, value }) => {
     const previousAchievement = achievements.find(elem => elem.type === type);
     const previousLevel = previousAchievement ? previousAchievement.level : 0;

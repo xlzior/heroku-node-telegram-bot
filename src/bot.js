@@ -227,30 +227,23 @@ continueConversation["idat - difficulty"] = async (msg) => {
   }
 }
 
-/*
 bot.onText(/\/stats/, async (msg) => {
-  const {
-    level, xp,
-    reflections, totalLength, averageLength, maximumLength,
-    hashtags, uniqueHashtags,
-    idat
-  } = await statsDb.getStats(msg.from.id);
+  const { progress, idat, reflections, hashtags } = await db.stats.get(msg.from.id);
 
   const statsDisplay = [
-    `*Level*: ${level}\n*Total XP*: ${xp}`,
-    `*Journal entries*: ${reflections}
-    ${totalLength} message(s) total
-    ${Math.round(averageLength)} message(s) per reflection (average)
-    Longest entry: ${maximumLength} message(s)`,
-    `*Hashtags used*: ${hashtags}
-    ${uniqueHashtags} unique hashtags
+    `*Level*: ${progress.level}\n*Total XP*: ${progress.xp}`,
+    `*Journal entries*: ${reflections.count}
+    ${reflections.length.total} message(s) total
+    ${Math.round(reflections.length.average)} message(s) per reflection (average)
+    Longest entry: ${reflections.length.maximum} message(s)`,
+    `*Hashtags used*: ${hashtags.total}
+    ${hashtags.unique} unique hashtags
     <i>(use /hashtags to browse)</i>`,
     `*Great things done*: ${idat}`,
   ];
   const message = statsDisplay.join('\n\n');
   bot.sendMessage(msg.chat.id, utils.cleanMarkdownReserved(message), MARKDOWN)
 });
-*/
 
 bot.onText(/\/achievements/, async msg => {
   const achievements = await db.achievements.getAll(msg.from.id);
