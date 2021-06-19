@@ -253,7 +253,7 @@ bot.onText(/\/stats/, async (msg) => {
 */
 
 bot.onText(/\/achievements/, async msg => {
-  const achievements = await db.achievements.get(msg.from.id);
+  const achievements = await db.achievements.getAll(msg.from.id);
   const achievementsCount = utils.sum(Object.values(achievements));
 
   // KIV: delete all previous badges sent? so that it's not so repetitive
@@ -299,7 +299,7 @@ bot.on('message', async (msg) => {
 
   // emojisDb.add(userId, utils.countEmojis(msg.text));
 
-  if (msg.text !== '/cancel') {
+  if (!msg.text.startsWith('/cancel')) {
     const command = await db.users.prevCommand.get(userId);
     if (continueConversation[command]) {
       continueConversation[command](msg);

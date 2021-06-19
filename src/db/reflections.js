@@ -47,7 +47,7 @@ const close = async (userId, end, name) => {
   update(userId, start, end, name);
   const reflectionsCount = getCount(userId)
   const hashtagsCount = hashtagsDb.getCount(userId)
-  const achievements = await achievementsDb.get(userId)
+  const achievements = await achievementsDb.getAll(userId)
 
   const newAchievements = {};
   const convoLength = end - start + 1;
