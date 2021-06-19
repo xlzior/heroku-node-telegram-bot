@@ -94,40 +94,42 @@ bot.onText(/\/close/, async (msg) => {
 })
 
 continueConversation["close"] = async (msg) => {
-  try {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`)
+  const userId = msg.from.id;
+  const chatId = msg.chat.id;
+  await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`)
 
-    // emojis
-    // const emojis = await emojisDb.get(userId);
-    // const emojiCounts = Object.values(emojis);
-    // if (emojiCounts.length >= 2 && utils.sum(emojiCounts) >= 5) {
-    //   await bot.sendMessage(chatId, `You used these emojis in this entry:\n${utils.emojiChart(emojis)}`)
-    // }
-    
-    // XP
-    const closureStats = await db.reflections.close(userId, msg.message_id, msg.text);
-    // TODO: catch this?
-    const { convoLength, newAchievements } = closureStats;
-    const xpData = await db.users.progress.addXP(userId, convoLength);
-    await bot.notifyXP(chatId, "this reflection", xpData);
+  // emojis
+  // const emojis = await emojisDb.get(userId);
+  // const emojiCounts = Object.values(emojis);
+  // if (emojiCounts.length >= 2 && utils.sum(emojiCounts) >= 5) {
+  //   await bot.sendMessage(chatId, `You used these emojis in this entry:\n${utils.emojiChart(emojis)}`)
+  // }
 
-    // achievements
-    for (const type in newAchievements) {
-      const { previousLevel, currentLevel } = newAchievements[type];
-      for (let i = previousLevel + 1; i <= currentLevel; i++) {
-        await bot.notifyBadge(chatId, type, i);
+  // XP
+  const closureStats = await db.reflections.close(userId, msg.message_id, msg.text)
+    .catch(error => {
+      if (error === errors.NO_REFLECTION_OPEN) {
+        bot.sendMessage(msg.chat.id, "You have not started a reflection. Use /open to start a new reflection");
+      } else {
+        console.error("error:", error);
       }
-    }
-    // KIV: emojis achievement
+    });
 
-    // close the loop
-    db.users.prevCommand.reset(userId);
-  } catch (error) {
-    console.error(error);
-    // TODO: what error is this supposed to catch?
+  const { convoLength, newAchievements } = closureStats;
+  const xpData = await db.users.progress.addXP(userId, convoLength);
+  await bot.notifyXP(chatId, "this reflection", xpData);
+
+  // achievements
+  for (const type in newAchievements) {
+    const { previousLevel, currentLevel } = newAchievements[type];
+    for (let i = previousLevel + 1; i <= currentLevel; i++) {
+      await bot.notifyBadge(chatId, type, i);
+    }
   }
+  // KIV: emojis achievement
+
+  // close the loop
+  db.users.prevCommand.reset(userId);
 }
 
 bot.onText(/\/hashtags/, async (msg) => {
@@ -265,16 +267,15 @@ bot.onText(/\/achievements/, async msg => {
   }
   
   const photos = [];
-  for (const type in achievements) {
-    const badgeLevel = achievements[type];
+  achievements.forEach(({ type, level }) => {
     for (let i = 3; i >= 1; i--) {
       photos.push({
         type: "photo",
-        media: i <= badgeLevel ? getBadgeImage(type, i) : BLANK_BADGE,
-        caption: i <= badgeLevel ? getBadgeLabel(type, i) : ""
+        media: i <= level ? getBadgeImage(type, i) : BLANK_BADGE,
+        caption: i <= level ? getBadgeLabel(type, i) : ""
       });
     }
-  }
+  })
   await bot.sendMessage(msg.chat.id, "Resending your achievements...");
   await bot.sendPhotos(msg.chat.id, photos);
   await bot.sendMessage(msg.chat.id, "Tip: View the chat's 'shared media' to see a display cabinet of all your achievement badges!")

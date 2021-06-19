@@ -8,7 +8,7 @@ const errors = require('./errors');
 
 const getCount = async (userId) => {
   const res = await pool.query(`SELECT COUNT(*) FROM reflections WHERE user_id=${userId}`);
-  return getFirst(res);
+  return parseInt(getFirst(res).count);
 }
 
 const getLengths = async (userId) => {
@@ -48,7 +48,6 @@ const close = async (userId, end, name) => {
   const reflectionsCount = getCount(userId)
   const hashtagsCount = hashtagsDb.getCount(userId)
   const achievements = await achievementsDb.get(userId)
-  console.log('achievements :', achievements);
 
   const newAchievements = {};
   const convoLength = end - start + 1;
@@ -58,9 +57,9 @@ const close = async (userId, end, name) => {
     { type: "reflections", value: await reflectionsCount },
   ]
   stats.forEach(({ type, value }) => {
-    // TODO: what format is achievements? how do I access the current achievement level?
-    const newBadge = checkForNewBadge(type, achievements[type], value);
-    const { hasNewBadge, previousLevel, currentLevel } = newBadge;
+    const previousAchievement = achievements.find(elem => elem.type === type);
+    const previousLevel = previousAchievement ? previousAchievement.level : 0;
+    const { hasNewBadge, currentLevel } = checkForNewBadge(type, previousLevel, value);
     if (hasNewBadge) {
       newAchievements[type] = { previousLevel, currentLevel };
       achievementsDb.update(userId, type, currentLevel);

@@ -67,7 +67,6 @@ const checkForNewBadge = (type, previousLevel = 0, value) => {
   const currentLevel = getBadgeLevel(BADGES[type].values, value);
   return {
     hasNewBadge: currentLevel > previousLevel,
-    previousLevel,
     currentLevel,
   };
 }
