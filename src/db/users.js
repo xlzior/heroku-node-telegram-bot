@@ -39,6 +39,10 @@ const pinnedMessageId = {
 }
 
 const idat = {
+  get: async (userId) => {
+    const res = await pool.query(`SELECT idat FROM users WHERE user_id=${userId}`);
+    return getFirst(res).idat;
+  },
   increment: async (userId) => {
     const res = await pool.query(
       `UPDATE users SET idat = idat + 1 WHERE user_id=${userId}
