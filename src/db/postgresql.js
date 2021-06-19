@@ -1,10 +1,10 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const pool = new Pool({
   connectionString: process.env.DB_URI,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 const getRows = res => res.rows;
@@ -14,4 +14,4 @@ module.exports = {
   pool,
   getRows,
   getFirst,
-}
+};

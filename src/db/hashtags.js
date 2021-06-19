@@ -1,17 +1,17 @@
-const current = require('./current');
+const current = require("./current");
 const { pool, getFirst, getRows } = require("./postgresql");
 
-const getTotalCount = async (userId) => {
+const getTotalCount = async userId => {
   const res = await pool.query(`SELECT COUNT(hashtag) FROM hashtags WHERE user_id=${userId}`);
   return parseInt(getFirst(res).count);
-}
+};
 
-const getUniqueCount = async (userId) => {
+const getUniqueCount = async userId => {
   const res = await pool.query(`SELECT COUNT(DISTINCT hashtag) FROM hashtags WHERE user_id=${userId}`);
   return parseInt(getFirst(res).count);
-}
+};
 
-const get = async (userId) => {
+const get = async userId => {
   const hashtags = await pool.query(
     `SELECT hashtag, json_agg(json_build_array(hashtags.start_id, name) ORDER BY hashtags.start_id) AS messages
     FROM hashtags
@@ -21,7 +21,7 @@ const get = async (userId) => {
     GROUP BY hashtag;`).then(getRows);
 
   return hashtags;
-}
+};
 
 const add = async (userId, hashtags = []) => {
   if (hashtags.length === 0) return;
@@ -34,11 +34,11 @@ const add = async (userId, hashtags = []) => {
   } catch (e) {
     console.info(e);
   }
-}
+};
 
 module.exports = {
   getTotalCount,
   getUniqueCount,
   get,
   add,
-}
+};
