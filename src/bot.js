@@ -122,9 +122,7 @@ continueConversation["close"] = async (msg) => {
   // achievements
   for (const type in newAchievements) {
     const { previousLevel, currentLevel } = newAchievements[type];
-    for (let i = previousLevel + 1; i <= currentLevel; i++) {
-      await bot.notifyBadge(chatId, type, i);
-    }
+    await bot.notifyBadges(chatId, type, previousLevel, currentLevel);
   }
   // KIV: emojis achievement
 
@@ -222,9 +220,7 @@ continueConversation["idat - difficulty"] = async (msg) => {
     // give badge
     const { hasNewBadge, previousLevel, currentLevel } = await db.users.idat.increment(userId);
     if (hasNewBadge) {
-      for (let i = previousLevel + 1; i <= currentLevel; i++) {
-        await bot.notifyBadge(chatId, 'idat', i);
-      }
+      await bot.notifyBadges(chatId, 'idat', previousLevel, currentLevel);
     }
     
     return db.users.prevCommand.reset(userId);
