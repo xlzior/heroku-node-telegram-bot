@@ -1,12 +1,12 @@
 const Bot = require('./TelegramBot');
 
 const db = require('./db');
+const errors = require('./db/errors');
 const utils = require('./utils');
 
 // TODO: refactor into gameUtils?
 const { formatLevel } = require('./levels');
-const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require('./achievements');
-const errors = require('./db/errors');
+const { getBadgeImage, getBadgeLabel, checkForNewBadge, BLANK_BADGE } = require('./achievements');
 
 const token = process.env.TOKEN;
 
@@ -106,7 +106,7 @@ continueConversation["close"] = async (msg) => {
   // }
 
   // XP
-  const closureStats = await db.reflections.close(userId, msg.message_id, msg.text)
+  const convoLength = await db.reflections.close(userId, msg.message_id, msg.text)
     .catch(error => {
       if (error === errors.NO_REFLECTION_OPEN) {
         bot.sendMessage(msg.chat.id, "You have not started a reflection. Use /open to start a new reflection");
@@ -115,16 +115,28 @@ continueConversation["close"] = async (msg) => {
       }
     });
 
-  const { convoLength, newAchievements } = closureStats;
   const xpData = await db.users.progress.addXP(userId, convoLength);
   await bot.notifyXP(chatId, "this reflection", xpData);
 
   // achievements
-  for (const type in newAchievements) {
-    const { previousLevel, currentLevel } = newAchievements[type];
-    await bot.notifyBadges(chatId, type, previousLevel, currentLevel);
-  }
-  // KIV: emojis achievement
+  const stats = [
+    { type: "convoLength", value: convoLength },
+    { type: "reflections", value: await db.reflections.getCount(userId) },
+    { type: "hashtags", value: await db.hashtags.getTotalCount(userId) },
+  ]
+  // KIV: emojis achievement?
+
+  const achievements = await db.achievements.getAll(userId)
+
+  stats.forEach(async ({ type, value }) => {
+    const previousAchievement = achievements.find(elem => elem.type === type);
+    const previousLevel = previousAchievement ? previousAchievement.level : 0;
+    const { hasNewBadge, currentLevel } = checkForNewBadge(type, previousLevel, value);
+    if (hasNewBadge) {
+      await bot.notifyBadges(chatId, type, previousLevel, currentLevel);
+      db.achievements.update(userId, type, currentLevel);
+    }
+  })
 
   // close the loop
   db.users.prevCommand.reset(userId);
@@ -292,7 +304,7 @@ bot.on('message', async (msg) => {
 
   // emojisDb.add(userId, utils.countEmojis(msg.text));
 
-  if (!msg.text.startsWith('/cancel')) {
+  if (msg.text && !msg.text.startsWith('/cancel')) {
     const command = await db.users.prevCommand.get(userId);
     if (continueConversation[command]) {
       continueConversation[command](msg);

@@ -1,8 +1,5 @@
-const { checkForNewBadge } = require('../achievements');
 const { pool, getFirst, getRows } = require("./postgresql");
 
-const hashtagsDb = require('./hashtags');
-const achievementsDb = require('./achievements');
 const current = require('./current');
 const errors = require('./errors');
 
@@ -46,27 +43,7 @@ const close = async (userId, end, name) => {
   current.resetId(userId);
   update(userId, start, end, name);
 
-  const convoLength = end - start + 1;
-  const stats = [
-    { type: "convoLength", value: convoLength },
-    { type: "reflections", value: await getCount(userId) },
-    { type: "hashtags", value: await hashtagsDb.getTotalCount(userId) },
-  ]
-
-  const achievements = await achievementsDb.getAll(userId)
-  const newAchievements = {};
-
-  stats.forEach(({ type, value }) => {
-    const previousAchievement = achievements.find(elem => elem.type === type);
-    const previousLevel = previousAchievement ? previousAchievement.level : 0;
-    const { hasNewBadge, currentLevel } = checkForNewBadge(type, previousLevel, value);
-    if (hasNewBadge) {
-      newAchievements[type] = { previousLevel, currentLevel };
-      achievementsDb.update(userId, type, currentLevel);
-    }
-  })
-
-  return { convoLength, newAchievements };
+  return end - start + 1;
 }
 module.exports = {
   current,
