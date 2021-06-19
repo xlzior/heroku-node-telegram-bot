@@ -19,6 +19,12 @@ Bot.prototype.notifyBadge = function(chatId, type, badgeLevel) {
     { caption: `New Achievement! ${getBadgeLabel(type, badgeLevel)}` });
 }
 
+Bot.prototype.notifyBadges = async function(chatId, type, previousLevel, currentLevel) {
+  for (let i = previousLevel + 1; i <= currentLevel; i++) {
+    await this.notifyBadge(chatId, type, i);
+  }
+}
+
 Bot.prototype.sendAndPin = async function(chatId, message) {
   const botMsg = await this.sendMessage(chatId, message)
   this.pinChatMessage(chatId, botMsg.message_id);
