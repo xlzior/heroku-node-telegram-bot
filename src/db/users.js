@@ -1,5 +1,7 @@
+const { checkForNewBadge } = require("../achievements");
 const { incrementXP } = require("../levels");
 const { pool, getFirst } = require("./postgresql");
+const achievementsDb = require("./achievements");
 
 const create = async (userId) => {
   return pool.query(
@@ -37,10 +39,19 @@ const pinnedMessageId = {
 }
 
 const idat = {
-  increment: (userId) => {
-    return pool.query(`UPDATE users SET idat = idat + 1 WHERE user_id=${userId}`);
-    // TODO: what does this return? can I make it return the current idat count?
-    // TODO: check for IDAT achievement?
+  increment: async (userId) => {
+    const res = await pool.query(
+      `UPDATE users SET idat = idat + 1 WHERE user_id=${userId}
+      RETURNING idat`);
+    const idatCount = getFirst(res).idat;
+
+    const currentIDATAchievement = await achievementsDb.get(userId, 'idat');
+    const newBadge = checkForNewBadge('idat', currentIDATAchievement.level, idatCount);
+    const { hasNewBadge, currentLevel } = newBadge;
+    if (hasNewBadge) {
+      achievementsDb.update(userId, 'idat', currentLevel);
+    }
+    return newBadge;
   }
 }
 
