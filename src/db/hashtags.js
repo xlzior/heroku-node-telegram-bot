@@ -2,7 +2,8 @@ const current = require('./current');
 const { pool, getFirst, getRows } = require("./postgresql");
 
 const getCount = async (userId) => {
-  return pool.query(`SELECT COUNT(*) FROM hashtags WHERE user_id=${userId}`).then(getFirst);
+  const res = await pool.query(`SELECT COUNT(*) FROM hashtags WHERE user_id=${userId}`);
+  return parseInt(getFirst(res).count);
 }
 
 const get = async (userId) => {
