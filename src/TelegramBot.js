@@ -31,6 +31,8 @@ Bot.prototype.sendAndPin = async function(chatId, message) {
   return botMsg.message_id;
 };
 
+const MAX_PER_MEDIA_GROUP = 9;
+
 // depending on the number of photos, send the appropriate number of media groups
 Bot.prototype.sendPhotos = async function(chatId, photos) {
   if (photos.length === 1) { // send an individual photo
@@ -39,8 +41,8 @@ Bot.prototype.sendPhotos = async function(chatId, photos) {
   } else if (photos.length <= 10) { // send a media group
     await this.sendMediaGroup(chatId, photos);
   } else { // send multiple media groups
-    await this.sendMediaGroup(chatId, photos.slice(0, 10)); // send the first 10
-    await this.sendPhotos(chatId, photos.slice(10));            // recurse for the rest
+    await this.sendMediaGroup(chatId, photos.slice(0, MAX_PER_MEDIA_GROUP)); // send the first batch
+    await this.sendPhotos(chatId, photos.slice(MAX_PER_MEDIA_GROUP));        // recurse for the rest
   }
 };
 
