@@ -98,13 +98,12 @@ continueConversation["close"] = async msg => {
   const chatId = msg.chat.id;
   await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`);
 
-  // TODO: fix emojis
   // emojis
-  // const emojis = await emojisDb.get(userId);
-  // const emojiCounts = Object.values(emojis);
-  // if (emojiCounts.length >= 2 && utils.sum(emojiCounts) >= 5) {
-  //   await bot.sendMessage(chatId, `You used these emojis in this entry:\n${utils.emojiChart(emojis)}`)
-  // }
+  const emojis = await db.emojis.getCurrent(userId);
+  const emojiCounts = emojis.map(({ count }) => count);
+  if (emojis.length >= 2 && utils.sum(emojiCounts) >= 5) {
+    await bot.sendMessage(chatId, `You used these emojis in this entry:\n\n${utils.emojiChart(emojis)}`);
+  }
 
   // XP
   const convoLength = await db.reflections.close(userId, msg.message_id, msg.text)
@@ -310,8 +309,7 @@ bot.on("message", async msg => {
     db.hashtags.add(userId, hashtags);
   }
 
-  // TODO: fix emojis
-  // emojisDb.add(userId, utils.countEmojis(msg.text));
+  db.emojis.add(userId, utils.countEmojis(msg.text));
 
   if (msg.text && !msg.text.startsWith("/cancel")) {
     const command = await db.users.prevCommand.get(userId);
