@@ -98,6 +98,7 @@ continueConversation["close"] = async msg => {
   const chatId = msg.chat.id;
   await bot.sendMessage(chatId, `Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`);
 
+  // TODO: fix emojis
   // emojis
   // const emojis = await emojisDb.get(userId);
   // const emojiCounts = Object.values(emojis);
@@ -147,8 +148,9 @@ bot.onText(/\/hashtags/, async msg => {
   if (hashtags.length === 0) {
     return bot.sendMessage(msg.chat.id, "You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
   }
-  const message = hashtags.map(utils.formatHashtag(5)).join("\n\n");
-  bot.sendMessage(msg.chat.id, utils.cleanMarkdownReserved(message), MARKDOWN);
+  const message = "Showing the 5 most recent reflections for all hashtags\n\n" + hashtags.map(utils.formatHashtag(5)).join("\n\n");
+  await bot.sendMessage(msg.chat.id, utils.cleanMarkdownReserved(message), MARKDOWN);
+  await bot.sendMessage(msg.chat.id, "Tip: Use /hashtag to view all reflections with a particular hashtag");
 });
 
 bot.onText(/\/hashtag(@lifexp_bot)?$/, async msg => {
@@ -165,7 +167,12 @@ bot.onText(/\/hashtag(@lifexp_bot)?$/, async msg => {
 continueConversation["hashtag"] = async msg => {
   const hashtags = await db.hashtags.get(msg.from.id);
   const hashtag = hashtags.find(({ hashtag }) => hashtag === msg.text);
-  const message = utils.formatHashtag(20)(hashtag);
+
+  if (!hashtag) {
+    return bot.sendMessage(msg.chat.id, `Sorry, I don't recognise the hashtag '${msg.text}'. Please select a hashtag from the list.`);
+  }
+
+  const message = `Showing all reflections with the hashtag ${msg.text}\n\n` + utils.formatHashtag()(hashtag);
   bot.sendMessage(msg.chat.id, utils.cleanMarkdownReserved(message),
     { ...MARKDOWN, ...REMOVE_KEYBOARD });
   db.users.prevCommand.reset(msg.from.id);
@@ -303,6 +310,7 @@ bot.on("message", async msg => {
     db.hashtags.add(userId, hashtags);
   }
 
+  // TODO: fix emojis
   // emojisDb.add(userId, utils.countEmojis(msg.text));
 
   if (msg.text && !msg.text.startsWith("/cancel")) {
