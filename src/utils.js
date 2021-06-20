@@ -13,16 +13,14 @@ const countEmojis = rawText => {
   emojiTree(rawText)
     .filter(char => char.type === "emoji")
     .map(({ text: emoji }) => {
-      if (!result[emoji]) result[emoji] = 0;
-      result[emoji]++;
+      if (!result[emoji]) result[emoji] = { emoji, count: 0 };
+      result[emoji].count++;
     });
-  return result;
+  return Object.values(result);
 };
 
-const emojiChart = emojiCounts => {
-  return Object.keys(emojiCounts)
-    .map(emoji => emoji.repeat(emojiCounts[emoji]))
-    .join("\n");
+const emojiChart = emojis => {
+  return emojis.map(({ emoji, count }) => emoji.repeat(count)).join("\n");
 };
 
 const formatHashtag = limit => ({ hashtag, messages }) => {

@@ -38,3 +38,14 @@ CREATE TABLE hashtags(
     FOREIGN KEY(user_id)
       REFERENCES users(user_id)
 );
+
+CREATE TABLE emojis(
+  user_id INTEGER,
+  start_id INTEGER,
+  emoji VARCHAR,
+  count INTEGER,
+  PRIMARY KEY(user_id, start_id, emoji),
+  CONSTRAINT foreign_key_user
+    FOREIGN KEY(user_id)
+      REFERENCES users(user_id)
+);
