@@ -31,6 +31,7 @@ module.exports = {
     "no-unused-expressions": ["error"],
     "no-useless-escape": ["error"],
     "no-var": "error",
+    "object-shorthand": "error",
     "prefer-const": "error",
     "quotes": ["error"],
     "semi": ["error", "always"],

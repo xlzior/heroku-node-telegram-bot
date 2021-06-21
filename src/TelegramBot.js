@@ -8,7 +8,7 @@ const { formatLevel } = require("./levels");
 const generateShortcuts = (thisBot, msg) => ({
   userId: msg.from.id,
   chatId: msg.chat.id,
-  send: function (...args) { return thisBot.sendMessage(msg.chat.id, ...args); },
+  send (...args) { return thisBot.sendMessage(msg.chat.id, ...args); },
 });
 
 Bot.prototype.originalOnText = Bot.prototype.onText;
