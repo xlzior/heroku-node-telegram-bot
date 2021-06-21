@@ -24,7 +24,8 @@ const emojiChart = emojis => {
 };
 
 const formatHashtag = limit => ({ hashtag, messages }) => {
-  const firstLine = `*${hashtag}: ${messages.length}*`;
+  const firstLineText = `${hashtag}: ${messages.length}`;
+  const firstLine = limit === 0 ? firstLineText : `*${firstLineText}*`;
   const nextLines = messages
     .map(([ messageId, name ]) => `- /goto${messageId} ${name}`)
     .slice(0, limit)
