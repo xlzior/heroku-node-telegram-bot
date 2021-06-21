@@ -1,7 +1,7 @@
 const Bot = require("node-telegram-bot-api");
 
-const { getBadgeImage, getBadgeLabel } = require("./achievements");
-const { formatLevel } = require("./levels");
+const { getBadgeImage, getBadgeLabel } = require("../achievements");
+const { formatLevel } = require("../levels");
 
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)
