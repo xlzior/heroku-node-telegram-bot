@@ -139,6 +139,12 @@ continueConversation["close"] = async ({ send, userId, chatId }, msg) => {
   db.users.prevCommand.reset(userId);
 };
 
+bot.onText(/\/reflections/, async ({ send, userId }) => {
+  const reflections = await db.reflections.getAll(userId);
+  const message = reflections.map(utils.formatReflection).join("\n\n");
+  send(utils.cleanMarkdownReserved(message), MARKDOWN);
+});
+
 bot.onText(/\/hashtags/, async ({ send, userId }) => {
   const hashtags = await db.hashtags.get(userId);
   if (hashtags.length === 0) {

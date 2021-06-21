@@ -13,6 +13,20 @@ const getLengths = async userId => {
   return getRows(res).map(({ start_id, end_id }) => end_id - start_id + 1);
 };
 
+const getAll = async userId => {
+  const res = await pool.query(
+    `SELECT
+      reflections.start_id,
+      name,
+      json_agg(hashtags.hashtag) AS hashtags
+    FROM reflections
+    INNER JOIN hashtags ON (reflections.user_id = hashtags.user_id AND reflections.start_id = hashtags.start_id)
+    WHERE reflections.user_id=${userId}
+    GROUP BY reflections.start_id, reflections.name
+    ORDER BY reflections.start_id DESC;`);
+  return getRows(res);
+};
+
 const insert = (userId, start) => {
   return pool.query(`INSERT INTO reflections(user_id, start_id) VALUES(${userId}, ${start})`);
 };
@@ -45,6 +59,6 @@ const close = async (userId, end, name) => {
 };
 module.exports = {
   current,
-  getCount, getLengths,
+  getCount, getLengths, getAll,
   isOpen, open, close,
 };

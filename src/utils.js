@@ -32,6 +32,14 @@ const formatHashtag = limit => ({ hashtag, messages }) => {
   return `${firstLine}\n${nextLines}`;
 };
 
+const formatReflection = ({ start_id, name, hashtags }) => {
+  return [
+    `*${name}*`,
+    `/goto${start_id}`,
+    `Hashtags: ${hashtags.join(", ")}`,
+  ].join("\n");
+};
+
 const sum = arr => arr.reduce((x, y) => x + y, 0);
 
 const average = arr => sum(arr) / arr.length;
@@ -60,7 +68,7 @@ const groupPairs = array => {
 module.exports = {
   getRandomPrompt,
   countEmojis, emojiChart,
-  formatHashtag,
+  formatHashtag, formatReflection,
   sum, average, max,
   cleanMarkdownReserved, groupPairs,
 };

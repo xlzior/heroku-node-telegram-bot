@@ -17,7 +17,7 @@ const get = userId => {
       hashtag,
       json_agg(json_build_array(hashtags.start_id, name) ORDER BY hashtags.start_id DESC) AS messages
     FROM hashtags
-    INNER JOIN reflections ON (hashtags.start_id = reflections.start_id)
+    INNER JOIN reflections ON (hashtags.user_id = reflections.user_id AND hashtags.start_id = reflections.start_id)
     WHERE hashtags.user_id=${userId}
     GROUP BY hashtag;`).then(getRows);
 };
