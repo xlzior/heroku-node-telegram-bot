@@ -120,8 +120,8 @@ continueConversation["close"] = async ({ send, userId, chatId }, msg) => {
     { type: "convoLength", value: convoLength },
     { type: "reflections", value: await db.reflections.getCount(userId) },
     { type: "hashtags", value: await db.hashtags.getTotalCount(userId) },
+    { type: "emojis", value: await db.emojis.getCount(userId) },
   ];
-  // KIV: emojis achievement?
 
   const achievements = await db.achievements.getAll(userId);
 

@@ -1,5 +1,10 @@
 const current = require("./current");
-const { pool, getRows } = require("./postgresql");
+const { pool, getRows, getFirst } = require("./postgresql");
+
+const getCount = async userId => {
+  const res = await pool.query(`SELECT COUNT(*) FROM emojis WHERE user_id=${userId}`);
+  return getFirst(res).count;
+};
 
 const getCurrent = async userId => {
   const startId = await current.getId(userId);
@@ -24,6 +29,6 @@ const add = async (userId, emojis = []) => {
 };
 
 module.exports = {
-  getCurrent,
+  getCurrent, getCount,
   add,
 };
