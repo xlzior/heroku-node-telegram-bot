@@ -1,17 +1,15 @@
 const db = require("../db");
+const utils = require("../utils");
 const { formatLevel } = require("../levels");
+const errors = require("../db/errors");
+
+const { clean, MARKDOWN } = utils.telegram;
 
 function handleBasic({ bot }) {
   bot.onText(/\/start/, async ({ send, userId, chatId }, msg) => {
-    send(`Hello, ${msg.from.first_name}! Welcome to LifeXP, a gamified journalling chatbot.`);
+    await send(`Hello, ${msg.from.first_name}!`);
 
-    await db.users.create(userId);
-    const messageId = await bot.sendAndPin(chatId, formatLevel(1, 0));
-    db.users.pinnedMessageId.set(userId, messageId);
-  });
-
-  bot.onText(/\/help/, ({ send }) => {
-    const helpMessage = [
+    const message = [
       "Welcome to LifeXP, a gamified journalling chatbot.\n",
       "I'm here to help you pen down your thoughts in a safe and convenient environment.\n",
       "Use /open to start a new journal entry.",
@@ -20,7 +18,53 @@ function handleBasic({ bot }) {
       "Finally, /close the journal entry and let your mind rest.\n",
       "I hope you have a meaningful journalling session.",
     ].join("\n");
-    send(helpMessage);
+    await send(message);
+
+    try {
+      await db.users.create(userId);
+      const messageId = await bot.sendAndPin(chatId, formatLevel(1, 0));
+      db.users.pinnedMessageId.set(userId, messageId);
+    } catch (error) {
+      if (error !== errors.USER_ALREADY_EXISTS) {
+        console.error("error:", error);
+      }
+    }
+  });
+
+  bot.onText(/\/help/, ({ send }) => {
+    const intro = [
+      "Welcome to LifeXP, a gamified journalling chatbot.",
+      "I'm here to help you pen down your thoughts in a safe and convenient environment.",
+    ].join("\n");
+    const journal = [
+      "*Journal*",
+      "/open - start a new journal entry",
+      "/prompt - get a randomised journalling prompt",
+      "/echo - echo your message e.g. for prompting yourself with a question",
+      "/ididathing - celebrate something you're proud of",
+      "/close - end off the journal entry",
+    ].join("\n");
+    const browse = [
+      "*Browse*",
+      "/reflections - list all reflections",
+      "/hashtags - list all hashtags",
+      "/hashtag - browse conversations with a particular hashtag",
+    ].join("\n");
+    const game = [
+      "*Game Features*",
+      "/lifexp - check your level and XP",
+      "/achievements - show display cabinet of achievement badges",
+      "/stats - show statistics",
+    ].join("\n");
+    const misc = [
+      "/cancel - cancel your previous command",
+    ].join("\n");
+    const outro = [
+      "I hope you have a meaningful journalling session. 😊",
+    ].join("\n");
+
+    const message = [intro, journal, browse, game, misc, outro].join("\n\n");
+    send(clean(message), MARKDOWN);
   });
 
   bot.onText(/\/cancel/, async ({ send, userId }) => {

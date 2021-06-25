@@ -66,7 +66,7 @@ const withInlineKeyboard = keyboard => {
 };
 const replyTo = messageId => ({ reply_to_message_id: messageId });
 
-const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")"];
+const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")", "."];
 const clean = rawText => {
   let result = rawText;
   RESERVED_CHARACTERS.forEach(char => {

@@ -2,12 +2,13 @@ const { checkForNewBadge } = require("../achievements");
 const { incrementXP } = require("../levels");
 const { pool, getFirst } = require("./postgresql");
 const achievementsDb = require("./achievements");
+const errors = require("./errors");
 
 const create = async userId => {
   return pool.query(
     `INSERT INTO users(user_id, level, xp, idat)
-    VALUES(${userId}, 1, 0, 0)
-    ON CONFLICT DO NOTHING;`);
+    VALUES(${userId}, 1, 0, 0);`)
+    .catch(() => Promise.reject(errors.USER_ALREADY_EXISTS));
 };
 
 const progress = {
