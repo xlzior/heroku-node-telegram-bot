@@ -13,6 +13,21 @@ const getLengths = async userId => {
   return getRows(res).map(({ start_id, end_id }) => end_id - start_id + 1);
 };
 
+const get = async (userId, limit, offset) => {
+  const res = await pool.query(
+    `SELECT
+      reflections.start_id,
+      name,
+      json_agg(hashtags.hashtag) AS hashtags
+    FROM reflections
+    INNER JOIN hashtags ON (reflections.user_id = hashtags.user_id AND reflections.start_id = hashtags.start_id)
+    WHERE reflections.user_id=${userId}
+    GROUP BY reflections.start_id, reflections.name
+    ORDER BY reflections.start_id DESC
+    LIMIT ${limit} OFFSET ${offset};`);
+  return getRows(res);
+};
+
 const getAll = async userId => {
   const res = await pool.query(
     `SELECT
@@ -59,6 +74,7 @@ const close = async (userId, end, name) => {
 };
 module.exports = {
   current,
-  getCount, getLengths, getAll,
+  getCount, getLengths,
+  get, getAll,
   isOpen, open, close,
 };

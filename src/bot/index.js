@@ -30,13 +30,13 @@ handleIDAT({ bot, continueConversation });
 handleBrowse({ bot, continueConversation });
 handleStats({ bot, continueConversation });
 
-bot.onMessage(async (shortcuts, msg, match) => {
+bot.onMessage(async (shortcuts, msg) => {
   // console.log(msg.photo[2].file_id);
 
   if (msg.text && !msg.text.startsWith("/cancel")) {
     const command = await db.users.prevCommand.get(shortcuts.userId);
     if (continueConversation[command]) {
-      continueConversation[command](shortcuts, msg, match);
+      continueConversation[command](shortcuts, msg);
     } else if (command) {
       console.error("Encountered unfamiliar command:", command);
     }
