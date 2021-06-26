@@ -5,7 +5,8 @@ CREATE TABLE users(
   pinned_message_id INTEGER,
   idat INTEGER,
   current_reflection_id INTEGER,
-  prev_command VARCHAR
+  prev_command VARCHAR,
+  partial JSONB
 );
 
 CREATE TABLE reflections(

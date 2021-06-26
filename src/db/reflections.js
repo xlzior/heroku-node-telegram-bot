@@ -72,6 +72,7 @@ const close = async (userId, end, name) => {
 
   return end - start + 1;
 };
+
 module.exports = {
   current,
   getCount, getLengths,
