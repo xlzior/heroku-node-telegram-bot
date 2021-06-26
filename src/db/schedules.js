@@ -4,9 +4,8 @@ const getUser = userId => {
   return pool.query(`SELECT time, questions FROM schedules WHERE user_id=${userId};`).then(getRows);
 };
 
-const getNow = () => {
-  const now = (new Date()).getHours() * 100;
-  return pool.query(`SELECT user_id, questions FROM schedules WHERE time=${now};`).then(getRows);
+const getTime = time => {
+  return pool.query(`SELECT user_id, questions FROM schedules WHERE time=${time};`).then(getRows);
 };
 
 const getQuestions = async (userId, time) => {
@@ -27,7 +26,7 @@ const deleteSchedule = (userId, time) => {
 
 module.exports = {
   getUser,
-  getNow,
+  getTime,
   getQuestions,
   add,
   delete: deleteSchedule,

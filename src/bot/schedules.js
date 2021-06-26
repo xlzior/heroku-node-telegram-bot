@@ -21,6 +21,18 @@ const formatScheduleInfo = (time, questions) => {
 };
 
 function handleSchedules({ bot, continueConversation }) {
+  continueConversation["scheduled"] = async ({ userId, send }, msg, { time, index }) => {
+    const questions = await db.schedules.getQuestions(userId, time);
+
+    if (index < questions.length) {
+      send(questions[index]);
+      db.users.prevCommand.set(userId, "scheduled", { time, index: index + 1 });
+    } else {
+      send("You've completed your scheduled journalling session. Good job!");
+      db.users.prevCommand.reset(userId);
+    }
+  };
+
   bot.onText(/\/manage_schedules/, async ({ send, userId }) => {
     const userSchedules = await db.schedules.getUser(userId);
     if (userSchedules.length === 0) {
