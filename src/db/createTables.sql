@@ -50,3 +50,13 @@ CREATE TABLE emojis(
     FOREIGN KEY(user_id)
       REFERENCES users(user_id)
 );
+
+CREATE TABLE schedules(
+  user_id INTEGER,
+  time INTEGER,
+  questions VARCHAR[],
+  PRIMARY KEY(user_id, time),
+  CONSTRAINT foreign_key_user
+    FOREIGN KEY(user_id)
+      REFERENCES users(user_id)
+);

@@ -7,6 +7,7 @@ const handleBrowse = require("./browse");
 const handleReflections = require("./reflections");
 const handleIDAT = require("./idat");
 const handleStats = require("./stats");
+const handleSchedules = require("./schedules");
 
 const token = process.env.TOKEN;
 
@@ -29,6 +30,7 @@ handleReflections({ bot, continueConversation });
 handleIDAT({ bot, continueConversation });
 handleBrowse({ bot, continueConversation });
 handleStats({ bot, continueConversation });
+handleSchedules({ bot, continueConversation });
 
 bot.onMessage(async (shortcuts, msg) => {
   // console.log(msg.photo[2].file_id);

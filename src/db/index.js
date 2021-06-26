@@ -4,6 +4,7 @@ const hashtags = require("./hashtags");
 const emojis = require("./emojis");
 const achievements = require("./achievements");
 const stats = require("./stats");
+const schedules = require("./schedules");
 
 module.exports = {
   users,
@@ -12,4 +13,5 @@ module.exports = {
   emojis,
   achievements,
   stats,
+  schedules,
 };
