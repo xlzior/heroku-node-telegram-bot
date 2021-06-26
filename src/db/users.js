@@ -62,11 +62,17 @@ const idat = {
 
 const prevCommand = {
   get: async userId => {
-    const res = await pool.query(`SELECT prev_command FROM users WHERE user_id=${userId}`);
-    return getFirst(res).prev_command;
+    const res = await pool.query(`SELECT prev_command, partial FROM users WHERE user_id=${userId};`);
+    return {
+      command: getFirst(res).prev_command,
+      partial: getFirst(res).partial,
+    };
   },
-  set: (userId, command) => {
-    return pool.query(`UPDATE users SET prev_command='${command}' WHERE user_id=${userId}`);
+  set: (userId, command, partial={}) => {
+    return pool.query(
+      `UPDATE users
+      SET prev_command='${command}', partial='${JSON.stringify(partial)}'
+      WHERE user_id=${userId};`);
   },
   reset: userId => {
     return prevCommand.set(userId, "");
