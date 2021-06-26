@@ -39,8 +39,8 @@ function handleBasic({ bot }) {
     const journal = [
       "*Journal*",
       "/open - start a new journal entry",
-      "/prompt - get a randomised journalling prompt",
-      "/echo - echo your message e.g. for prompting yourself with a question",
+      "/prompt - get a randomised prompt",
+      "/echo - give yourself a prompt",
       "/ididathing - celebrate something you're proud of",
       "/close - end off the journal entry",
     ].join("\n");
@@ -52,7 +52,7 @@ function handleBasic({ bot }) {
     ].join("\n");
     const game = [
       "*Game Features*",
-      "/lifexp - check your level and XP",
+      "/lifexp - show level and XP",
       "/achievements - show display cabinet of achievement badges",
       "/stats - show statistics",
     ].join("\n");

@@ -18,9 +18,9 @@ function handleStats({ bot }) {
     const statsDisplay = [
       `*Level*: ${progress.level}\n*Total XP*: ${progress.xp}`,
       `*Journal entries*: ${reflections.count}
-      ${reflections.length.total} message(s) total
-      ${Math.round(reflections.length.average)} message(s) per reflection (average)
-      Longest entry: ${reflections.length.maximum} message(s)`,
+      Total: ${reflections.length.total} messages
+      Average: ${Math.round(reflections.length.average)} messages per reflection
+      Longest: ${reflections.length.maximum} messages`,
       `*Hashtags used*: ${hashtags.total}
       ${hashtags.unique} unique hashtags
       <i>(use /hashtags to browse)</i>`,

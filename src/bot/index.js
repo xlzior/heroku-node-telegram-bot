@@ -33,7 +33,7 @@ handleStats({ bot, continueConversation });
 bot.onMessage(async (shortcuts, msg) => {
   // console.log(msg.photo[2].file_id);
 
-  if (msg.text && !msg.text.startsWith("/cancel")) {
+  if (msg.text && !msg.text.startsWith("/")) {
     const command = await db.users.prevCommand.get(shortcuts.userId);
     if (continueConversation[command]) {
       continueConversation[command](shortcuts, msg);
