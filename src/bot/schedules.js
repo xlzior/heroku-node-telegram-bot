@@ -1,7 +1,7 @@
 const db = require("../db");
 const utils = require("../utils");
 
-const { groupPairs, withKeyboard } = utils.telegram;
+const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = utils.telegram;
 
 const parseTime = rawText => {
   const time = parseInt(rawText);
@@ -84,6 +84,45 @@ function handleSchedules({ bot, continueConversation }) {
     const questions = msg.text.split("\n").filter(Boolean);
     send(`Okay, I'm creating a new session at ${formatScheduleInfo(partial.time, questions)}`);
     db.schedules.add(userId, partial.time, questions);
+    db.users.prevCommand.reset(userId);
+  };
+
+  bot.onText(/\/delete_schedule/, async ({ send, userId }) => {
+    const userSchedules = await db.schedules.getUser(userId);
+
+    if (userSchedules.length === 0) {
+      send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
+    } else if (userSchedules.length === 1) {
+      const { time, questions } = userSchedules[0];
+      await send(`Alright, you only have one schedule at ${formatScheduleInfo(time, questions)}`);
+      await send("Are you sure you would like to delete this scheduled journalling session? Please send 'Yes' to confirm.");
+      db.users.prevCommand.set(userId, "schedule - delete - confirm", { time });
+    } else {
+      const keyboard = groupPairs(userSchedules.map(({ time }) => time + ""));
+      send("Which schedule would you like to delete?", withKeyboard(keyboard));
+      db.users.prevCommand.set(userId, "schedule - delete - select");
+    }
+  });
+
+  continueConversation["schedule - delete - select"] = async ({ send, userId }, msg) => {
+    const time = msg.text;
+    const questions = await db.schedules.getQuestions(userId, time);
+    if (questions) {
+      await send(`You have chosen to delete the schedule at ${formatScheduleInfo(time, questions)}`, REMOVE_KEYBOARD);
+      await send("Are you sure you would like to delete this session? Please send 'Yes' to confirm.");
+      db.users.prevCommand.set(userId, "schedule - delete - confirm", { time });
+    } else {
+      send(`You do not have a session at ${formatTime(time)}. Please send a valid time using the keyboard provided.`);
+    }
+  };
+
+  continueConversation["schedule - delete - confirm"] = async ({ send, userId }, msg, { time }) => {
+    if (msg.text === "Yes") {
+      send("You have deleted your session.");
+      db.schedules.delete(userId, time);
+    } else {
+      send("Deleting cancelled.");
+    }
     db.users.prevCommand.reset(userId);
   };
 }
