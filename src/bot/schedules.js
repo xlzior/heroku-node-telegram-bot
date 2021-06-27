@@ -21,17 +21,21 @@ const formatScheduleInfo = (time, questions) => {
 };
 
 function handleSchedules({ bot, continueConversation }) {
-  continueConversation["scheduled"] = async ({ userId, send }, msg, { time, index }) => {
+  bot.onText(/\/done/, async ({ userId, send }) => {
+    const { command, partial } = await db.users.prevCommand.get(userId);
+    if (command !== "scheduled") return;
+
+    const { time, index } = partial;
     const questions = await db.schedules.getQuestions(userId, time);
 
     if (index < questions.length) {
-      send(questions[index]);
+      send(`${questions[index]}\n\n(when finished, send /done)`);
       db.users.prevCommand.set(userId, "scheduled", { time, index: index + 1 });
     } else {
       send("You've completed your scheduled journalling session. Good job!");
       db.users.prevCommand.reset(userId);
     }
-  };
+  });
 
   bot.onText(/\/manage_schedules/, async ({ send, userId }) => {
     const userSchedules = await db.schedules.getUser(userId);
@@ -67,8 +71,8 @@ function handleSchedules({ bot, continueConversation }) {
 
     const questions = await db.schedules.getQuestions(userId, time);
     if (questions.length > 0) {
-      send(`You already have a session set for ${formatScheduleInfo(time, questions)}.`);
-      send("Please use /edit_schedule to edit the schedule instead.");
+      await send(`You already have a session set for ${formatScheduleInfo(time, questions)}`);
+      await send("Please use /edit_schedule to edit the schedule instead.");
       db.users.prevCommand.reset(userId);
     } else {
       await send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
@@ -78,7 +82,7 @@ function handleSchedules({ bot, continueConversation }) {
 
   continueConversation["schedule - add - questions"] = async ({ send, userId }, msg, partial) => {
     const questions = msg.text.split("\n").filter(Boolean);
-    send(`Okay, I'm creating a new session at ${formatScheduleInfo(partial.time, questions)}.`);
+    send(`Okay, I'm creating a new session at ${formatScheduleInfo(partial.time, questions)}`);
     db.schedules.add(userId, partial.time, questions);
     db.users.prevCommand.reset(userId);
   };

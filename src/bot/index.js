@@ -39,8 +39,6 @@ bot.onMessage(async (shortcuts, msg) => {
     const { command, partial } = await db.users.prevCommand.get(shortcuts.userId);
     if (continueConversation[command]) {
       continueConversation[command](shortcuts, msg, partial);
-    } else if (command) {
-      console.error("Encountered unfamiliar command:", command);
     }
   }
 });
