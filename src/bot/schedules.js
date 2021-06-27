@@ -39,13 +39,14 @@ function handleSchedules({ bot, continueConversation }) {
 
   bot.onText(/\/manage_schedules/, async ({ send, userId }) => {
     const userSchedules = await db.schedules.getUser(userId);
+
     if (userSchedules.length === 0) {
       send("Welcome to the scheduled journalling prompts feature. I can send you a fixed set of prompts every day at a time of your choosing. Use /add_schedule to get started.");
     } else {
       const schedulesDisplay = userSchedules
         .map(({ time, questions }) => `${formatTime(time)}: ${questions.length} questions`)
         .join("\n");
-      send(`You currently have the following schedules set:\n${schedulesDisplay}`);
+      await send(`You currently have the following schedules set:\n${schedulesDisplay}`);
 
       const commands = [
         "Use the following commands to add, edit or delete schedules:",
@@ -53,7 +54,7 @@ function handleSchedules({ bot, continueConversation }) {
         "/edit_schedule",
         "/delete_schedule",
       ];
-      send(commands.join("\n"));
+      await send(commands.join("\n"));
     }
   });
 
@@ -87,6 +88,56 @@ function handleSchedules({ bot, continueConversation }) {
     db.users.prevCommand.reset(userId);
   };
 
+  bot.onText(/\/edit_schedule/, async ({ send, userId }) => {
+    const userSchedules = await db.schedules.getUser(userId);
+
+    if (userSchedules.length === 0) {
+      send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
+    } else if (userSchedules.length === 1) {
+      const { time, questions } = userSchedules[0];
+      await send(`Alright, you only have one schedule at ${formatScheduleInfo(time, questions)}`);
+      await send("Please send a new time for this scheduled session.");
+      db.users.prevCommand.set(userId, "schedule - edit - time", { time });
+    } else {
+      const keyboard = groupPairs(userSchedules.map(({ time }) => time + ""));
+      send("Which schedule would you like to edit?", withKeyboard(keyboard));
+      db.users.prevCommand.set(userId, "schedule - edit - select");
+    }
+  });
+
+  continueConversation["schedule - edit - select"] = async ({ send, userId }, msg) => {
+    const time = parseTime(msg.text);
+    const questions = await db.schedules.getQuestions(userId, time);
+    if (questions.length > 0) {
+      await send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}`, REMOVE_KEYBOARD);
+      await send("Please send a new time for this scheduled session.");
+      // TODO: implement "no change" option?
+      db.users.prevCommand.set(userId, "schedule - edit - time", { time });
+    } else {
+      send(`You do not have a session at ${formatTime(time)}. Please send a valid time using the keyboard provided.`);
+    }
+  };
+
+  continueConversation["schedule - edit - time"] = async({ send, userId }, msg, { time }) => {
+    const newTime = parseTime(msg.text);
+    const questions = await db.schedules.getQuestions(userId, newTime);
+    if (time !== newTime && questions.length > 0) {
+      await send(`You already have a session set for ${formatScheduleInfo(newTime, questions)}`);
+      await send("You cannot have two journalling sessions scheduled for the same time.");
+      db.users.prevCommand.reset(userId);
+    } else {
+      await send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
+      db.users.prevCommand.set(userId, "schedule - edit - questions", { time, newTime });
+    }
+  };
+
+  continueConversation["schedule - edit - questions"] = async({ send, userId }, msg, { time, newTime }) => {
+    const newQuestions = msg.text.split("\n").filter(Boolean);
+    send(`Okay, your new session will be at ${formatScheduleInfo(newTime, newQuestions)}`);
+    db.schedules.edit(userId, time, newTime, newQuestions);
+    db.users.prevCommand.reset(userId);
+  };
+
   bot.onText(/\/delete_schedule/, async ({ send, userId }) => {
     const userSchedules = await db.schedules.getUser(userId);
 
@@ -107,7 +158,7 @@ function handleSchedules({ bot, continueConversation }) {
   continueConversation["schedule - delete - select"] = async ({ send, userId }, msg) => {
     const time = msg.text;
     const questions = await db.schedules.getQuestions(userId, time);
-    if (questions) {
+    if (questions.length > 0) {
       await send(`You have chosen to delete the schedule at ${formatScheduleInfo(time, questions)}`, REMOVE_KEYBOARD);
       await send("Are you sure you would like to delete this session? Please send 'Yes' to confirm.");
       db.users.prevCommand.set(userId, "schedule - delete - confirm", { time });
