@@ -47,15 +47,7 @@ function handleSchedules({ bot, continueConversation }) {
       const schedulesDisplay = userSchedules
         .map(({ time, questions }) => `${formatTime(time)}: ${questions.length} questions`)
         .join("\n");
-      await send(`You currently have the following schedules set:\n${schedulesDisplay}`);
-
-      const commands = [
-        "Use the following commands to add, edit or delete schedules:",
-        "/add_schedule",
-        "/edit_schedule",
-        "/delete_schedule",
-      ];
-      await send(commands.join("\n"));
+      send(`You currently have the following schedules set:\n${schedulesDisplay}\n\nYou can manage them using /add_schedule, /edit_schedule and /delete_schedule.`);
     }
   });
 
@@ -73,11 +65,10 @@ function handleSchedules({ bot, continueConversation }) {
 
     const questions = await schedules.getQuestions(userId, time);
     if (questions.length > 0) {
-      await send(`You already have a session set for ${formatScheduleInfo(time, questions)}`);
-      await send("Please use /edit_schedule to edit the schedule instead.");
+      send(`You already have a session set for ${formatScheduleInfo(time, questions)}\n\nPlease use /edit_schedule to edit the schedule instead.`);
       prevCommand.reset(userId);
     } else {
-      await send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
+      send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
       prevCommand.set(userId, "schedule - add - questions", { time });
     }
   };
@@ -96,8 +87,7 @@ function handleSchedules({ bot, continueConversation }) {
       send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
     } else if (userSchedules.length === 1) {
       const { time, questions } = userSchedules[0];
-      await send(`Alright, you only have one schedule at ${formatScheduleInfo(time, questions)}`);
-      await send("Please send a new time for this scheduled session.");
+      send(`Alright, you only have one schedule at ${formatScheduleInfo(time, questions)}\n\nPlease send a new time for this scheduled session.`);
       prevCommand.set(userId, "schedule - edit - time", { time });
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => time + ""));
@@ -110,8 +100,7 @@ function handleSchedules({ bot, continueConversation }) {
     const time = parseTime(msg.text);
     const questions = await schedules.getQuestions(userId, time);
     if (questions.length > 0) {
-      await send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}`, REMOVE_KEYBOARD);
-      await send("Please send a new time for this scheduled session.");
+      send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}\n\nPlease send a new time for this scheduled session.`, REMOVE_KEYBOARD);
       // TODO: implement "no change" option?
       prevCommand.set(userId, "schedule - edit - time", { time });
     } else {
@@ -123,11 +112,10 @@ function handleSchedules({ bot, continueConversation }) {
     const newTime = parseTime(msg.text);
     const questions = await schedules.getQuestions(userId, newTime);
     if (time !== newTime && questions.length > 0) {
-      await send(`You already have a session set for ${formatScheduleInfo(newTime, questions)}`);
-      await send("You cannot have two journalling sessions scheduled for the same time.");
+      send(`You already have a session set for ${formatScheduleInfo(newTime, questions)}\n\nYou cannot have two journalling sessions scheduled for the same time.`);
       prevCommand.reset(userId);
     } else {
-      await send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
+      send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
       prevCommand.set(userId, "schedule - edit - questions", { time, newTime });
     }
   };
@@ -146,8 +134,7 @@ function handleSchedules({ bot, continueConversation }) {
       send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
     } else if (userSchedules.length === 1) {
       const { time, questions } = userSchedules[0];
-      await send(`Alright, you only have one schedule at ${formatScheduleInfo(time, questions)}`);
-      await send("Are you sure you would like to delete this scheduled journalling session? Please send 'Yes' to confirm.");
+      send(`Alright, you only have one schedule at ${formatScheduleInfo(time, questions)}\n\nAre you sure you would like to delete this scheduled journalling session? Please send 'Yes' to confirm.`);
       prevCommand.set(userId, "schedule - delete - confirm", { time });
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => time + ""));
@@ -160,8 +147,7 @@ function handleSchedules({ bot, continueConversation }) {
     const time = msg.text;
     const questions = await schedules.getQuestions(userId, time);
     if (questions.length > 0) {
-      await send(`You have chosen to delete the schedule at ${formatScheduleInfo(time, questions)}`, REMOVE_KEYBOARD);
-      await send("Are you sure you would like to delete this session? Please send 'Yes' to confirm.");
+      send(`You have chosen to delete the schedule at ${formatScheduleInfo(time, questions)}\n\nAre you sure you would like to delete this session? Please send 'Yes' to confirm.`, REMOVE_KEYBOARD);
       prevCommand.set(userId, "schedule - delete - confirm", { time });
     } else {
       send(`You do not have a session at ${formatTime(time)}. Please send a valid time using the keyboard provided.`);
