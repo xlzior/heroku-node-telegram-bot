@@ -8,16 +8,24 @@ const getTime = time => {
   return pool.query(`SELECT user_id, questions FROM schedules WHERE time=${time};`).then(getRows);
 };
 
+const formatStringArray = array => `{${array.map(qn => `"${qn}"`).join(",")}}`;
+
 const getQuestions = async (userId, time) => {
   const res = await pool.query(`SELECT questions FROM schedules WHERE user_id=${userId} AND time=${time};`);
   return getFirst(res) ? getFirst(res).questions : [];
 };
 
 const add = (userId, time, questions) => {
-  const questionsArray = `{${questions.map(qn => `"${qn}"`).join(",")}}`;
   return pool.query(
     `INSERT INTO schedules(user_id, time, questions)
-    VALUES(${userId}, ${time}, '${questionsArray}');`);
+    VALUES(${userId}, ${time}, '${formatStringArray(questions)}');`);
+};
+
+const edit = (userId, time, newTime, newQuestions) => {
+  return pool.query(
+    `UPDATE schedules
+    SET time=${newTime}, questions='${formatStringArray(newQuestions)}'
+    WHERE user_id=${userId} AND time=${time};`);
 };
 
 const deleteSchedule = (userId, time) => {
@@ -29,5 +37,6 @@ module.exports = {
   getTime,
   getQuestions,
   add,
+  edit,
   delete: deleteSchedule,
 };
