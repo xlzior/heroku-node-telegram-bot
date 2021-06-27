@@ -17,6 +17,12 @@ const formatTime = time => {
   return hour < 12 ? `${hour}am` : `${hour - 12}pm`;
 };
 
+const generateName = time => {
+  const today = (new Date()).toLocaleDateString();
+  // TODO: who's locale is this?
+  return `${today} ${formatTime(time)}`;
+};
+
 const formatScheduleInfo = (time, questions) => {
   return `${formatTime(time)} with the following ${questions.length} question(s):\n${questions.join("\n")}`;
 };
@@ -33,7 +39,8 @@ function handleSchedules({ bot, continueConversation }) {
       send(`${questions[index]}\n\n(when finished, send /done)`);
       prevCommand.set(userId, "scheduled", { time, index: index + 1 });
     } else {
-      send("You've completed your scheduled journalling session. Good job!");
+      const botMsg = await send("You've completed your scheduled journalling session. Good job!");
+      db.reflections.close(userId, botMsg.message_id, generateName(time));
       prevCommand.reset(userId);
     }
   });

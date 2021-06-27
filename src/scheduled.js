@@ -23,7 +23,8 @@ const main = async () => {
   const schedules = await db.schedules.getTime(now);
 
   await Promise.all(schedules.map(async ({ user_id: userId, questions }) => {
-    await bot.sendMessage(userId, `${questions[0]}\n\n(when finished, send /done)`);
+    const botMsg = await bot.sendMessage(userId, `${questions[0]}\n\n(when finished, send /done)`);
+    await db.reflections.open(userId, botMsg.message_id);
     await db.users.prevCommand.set(userId, "scheduled", { index: 1, time: now });
   }));
 
