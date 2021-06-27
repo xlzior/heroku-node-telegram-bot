@@ -34,11 +34,9 @@ const formatHashtag = limit => ({ hashtag, messages }) => {
 };
 
 const formatReflection = ({ start_id, name, hashtags }) => {
-  return [
-    `*${name}*`,
-    `/goto${start_id}`,
-    `Hashtags: ${hashtags.join(", ")}`,
-  ].join("\n");
+  const reflectionInfo = [`*${name}*`, `/goto${start_id}`];
+  if (hashtags[0] !== null) reflectionInfo.push(`Hashtags: ${hashtags.join(", ")}`);
+  return reflectionInfo.join("\n");
 };
 
 const sum = arr => arr.reduce((x, y) => x + y, 0);

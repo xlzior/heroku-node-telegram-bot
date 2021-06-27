@@ -20,7 +20,7 @@ const get = async (userId, limit, offset) => {
       name,
       json_agg(hashtags.hashtag) AS hashtags
     FROM reflections
-    INNER JOIN hashtags ON (reflections.user_id = hashtags.user_id AND reflections.start_id = hashtags.start_id)
+    LEFT JOIN hashtags ON (reflections.user_id = hashtags.user_id AND reflections.start_id = hashtags.start_id)
     WHERE reflections.user_id=${userId}
     GROUP BY reflections.start_id, reflections.name
     ORDER BY reflections.start_id DESC
