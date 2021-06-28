@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { fn } = require("./web");
+const { handleRequests } = require("./web");
 
 const bot = require("./src/bot");
-fn(bot);
+handleRequests(bot);

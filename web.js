@@ -17,7 +17,7 @@ const server = app.listen(process.env.PORT, "0.0.0.0", () => {
 });
 
 module.exports = {
-  fn: bot => {
+  handleRequests: bot => {
     app.post("/" + bot.token, (req, res) => {
       bot.processUpdate(req.body);
       res.sendStatus(200);
