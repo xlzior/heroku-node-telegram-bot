@@ -28,6 +28,14 @@ const formatScheduleInfo = (time, questions) => {
 };
 
 function handleSchedules({ bot, continueConversation }) {
+  bot.onText(/\/skip/, async ({ userId, send }) => {
+    const { command } = await prevCommand.get(userId);
+    if (command !== "scheduled") return;
+
+    db.reflections.cancel(userId);
+    send("Alright, skipping this session.");
+  });
+
   bot.onText(/\/done/, async ({ userId, send }) => {
     const { command, partial } = await prevCommand.get(userId);
     if (command !== "scheduled") return;
