@@ -50,6 +50,10 @@ const update = (userId, start, end, name) => {
   return pool.query(`UPDATE reflections SET end_id='${end}', name='${name}' WHERE user_id=${userId} AND start_id=${start}`);
 };
 
+const deleteReflection = (userId, start) => {
+  return pool.query(`DELETE FROM reflections WHERE user_id=${userId} AND start_id=${start};`);
+};
+
 const isOpen = userId => {
   return current.getId(userId).then(Boolean);
 };
@@ -73,9 +77,18 @@ const close = async (userId, end, name) => {
   return end - start + 1;
 };
 
+const cancel = async userId => {
+  const start = await current.getId(userId);
+
+  if (!start) return Promise.reject(errors.NO_REFLECTION_OPEN);
+
+  deleteReflection(userId, start);
+  current.resetId(userId);
+};
+
 module.exports = {
   current,
   getCount, getLengths,
   get, getAll,
-  isOpen, open, close,
+  isOpen, open, close, cancel,
 };
