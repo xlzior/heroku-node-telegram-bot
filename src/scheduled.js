@@ -15,7 +15,8 @@ const main = async () => {
   const schedules = await db.schedules.getTime(now);
 
   await Promise.all(schedules.map(async ({ user_id: userId, questions }) => {
-    if (!db.reflections.isOpen(userId)) { // don't interupt an ongoing session
+    const isOpen = await db.reflections.isOpen(userId);
+    if (!isOpen) { // don't interupt an ongoing session
       const message = [
         "It's time for your scheduled journalling session!",
         `Here's your first prompt: ${questions[0]}`,

@@ -14,7 +14,7 @@ const parseTime = rawText => {
 
 const formatTime = time => {
   const hour = Math.floor(time / 100);
-  return hour < 12 ? `${hour}am` : `${hour - 12}pm`;
+  return hour < 12 ? `${hour}am` : `${(hour - 1) % 12 + 1}pm`;
 };
 
 const generateName = time => {

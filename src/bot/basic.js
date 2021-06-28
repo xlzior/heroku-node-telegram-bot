@@ -75,6 +75,8 @@ function handleBasic({ bot }) {
   });
 
   bot.onText(/\/cancel/, async ({ send, userId }) => {
+    const isOpen = await db.reflections.isOpen(userId);
+    if (isOpen) db.reflections.cancel(userId);
     await db.users.prevCommand.reset(userId);
     send("The previous command has been cancelled.");
   });
