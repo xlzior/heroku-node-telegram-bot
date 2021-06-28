@@ -56,6 +56,13 @@ function handleBasic({ bot }) {
       "/achievements - show display cabinet of achievement badges",
       "/stats - show statistics",
     ].join("\n");
+    const scheduled = [
+      "*Scheduled Journalling Sessions*",
+      "/manage_schedules",
+      "/add_schedule",
+      "/edit_schedule",
+      "/delete_schedule",
+    ].join("\n");
     const misc = [
       "/cancel - cancel your previous command",
     ].join("\n");
@@ -63,7 +70,7 @@ function handleBasic({ bot }) {
       "I hope you have a meaningful journalling session. 😊",
     ].join("\n");
 
-    const message = [intro, journal, browse, game, misc, outro].join("\n\n");
+    const message = [intro, journal, browse, game, scheduled, misc, outro].join("\n\n");
     send(clean(message), MARKDOWN);
   });
 
