@@ -23,19 +23,13 @@ const emojiChart = emojis => {
   return emojis.map(({ emoji, count }) => emoji.repeat(count)).join("\n");
 };
 
-const formatHashtag = limit => ({ hashtag, messages }) => {
-  const firstLineText = `${hashtag}: ${messages.length}`;
-  const firstLine = limit === 0 ? firstLineText : `*${firstLineText}*`;
-  const nextLines = messages
-    .map(([ messageId, name ]) => `- /goto${messageId} ${name}`)
-    .slice(0, limit)
-    .join("\n");
-  return `${firstLine}\n${nextLines}`;
+const formatHashtag = ({ hashtag, count }) => {
+  return `${hashtag}: ${count}`;
 };
 
-const formatReflection = ({ start_id, name, hashtags }) => {
+const formatReflection = ({ start_id, name, hashtags = [] }) => {
   const reflectionInfo = [`*${name}*`, `/goto${start_id}`];
-  if (hashtags[0] !== null) reflectionInfo.push(`Hashtags: ${hashtags.join(", ")}`);
+  if (hashtags.length > 0 && hashtags[0] !== null) reflectionInfo.push(`Hashtags: ${hashtags.join(", ")}`);
   return reflectionInfo.join("\n");
 };
 
@@ -60,7 +54,7 @@ const withKeyboard = (keyboard, resize_keyboard = true, one_time_keyboard = true
   return { reply_markup: { keyboard, resize_keyboard, one_time_keyboard } };
 };
 const withInlineKeyboard = keyboard => {
-  return keyboard ? { reply_markup: {inline_keyboard: keyboard } } : {};
+  return keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {};
 };
 const replyTo = messageId => ({ reply_to_message_id: messageId });
 
