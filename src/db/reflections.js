@@ -4,12 +4,12 @@ const current = require("./current");
 const errors = require("./errors");
 
 const getCount = async userId => {
-  const res = await pool.query(`SELECT COUNT(*) FROM reflections WHERE user_id=${userId}`);
+  const res = await pool.query("SELECT COUNT(*) FROM reflections WHERE user_id=$1", [userId]);
   return parseInt(getFirst(res).count);
 };
 
 const getLengths = async userId => {
-  const res = await pool.query(`SELECT start_id, end_id FROM reflections WHERE user_id=${userId}`);
+  const res = await pool.query("SELECT start_id, end_id FROM reflections WHERE user_id=$1", [userId]);
   return getRows(res).map(({ start_id, end_id }) => end_id - start_id + 1);
 };
 
@@ -21,10 +21,11 @@ const get = async (userId, limit, offset) => {
       json_agg(hashtags.hashtag) AS hashtags
     FROM reflections
     LEFT JOIN hashtags ON (reflections.user_id = hashtags.user_id AND reflections.start_id = hashtags.start_id)
-    WHERE reflections.user_id=${userId}
+    WHERE reflections.user_id=$1
     GROUP BY reflections.start_id, reflections.name
     ORDER BY reflections.start_id DESC
-    LIMIT ${limit} OFFSET ${offset};`);
+    LIMIT $2 OFFSET $3;`,
+    [userId, limit, offset]);
   return getRows(res);
 };
 
@@ -36,22 +37,24 @@ const getAll = async userId => {
       json_agg(hashtags.hashtag) AS hashtags
     FROM reflections
     INNER JOIN hashtags ON (reflections.user_id = hashtags.user_id AND reflections.start_id = hashtags.start_id)
-    WHERE reflections.user_id=${userId}
+    WHERE reflections.user_id=$1
     GROUP BY reflections.start_id, reflections.name
-    ORDER BY reflections.start_id DESC;`);
+    ORDER BY reflections.start_id DESC;`,
+    [userId]);
   return getRows(res);
 };
 
 const insert = (userId, start) => {
-  return pool.query(`INSERT INTO reflections(user_id, start_id) VALUES(${userId}, ${start})`);
+  return pool.query("INSERT INTO reflections(user_id, start_id) VALUES($1, $2)", [userId, start]);
 };
 
 const update = (userId, start, end, name) => {
-  return pool.query(`UPDATE reflections SET end_id='${end}', name='${name}' WHERE user_id=${userId} AND start_id=${start}`);
+  return pool.query("UPDATE reflections SET end_id=$1, name=$2 WHERE user_id=$3 AND start_id=$4",
+    [end, name, userId, start]);
 };
 
 const deleteReflection = (userId, start) => {
-  return pool.query(`DELETE FROM reflections WHERE user_id=${userId} AND start_id=${start};`);
+  return pool.query("DELETE FROM reflections WHERE user_id=$1 AND start_id=$2;", [userId, start]);
 };
 
 const isOpen = userId => {

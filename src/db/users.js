@@ -6,17 +6,18 @@ const errors = require("./errors");
 
 const create = async userId => {
   return pool.query(
-    `INSERT INTO users(user_id, level, xp, idat)
-    VALUES(${userId}, 1, 0, 0);`)
+    "INSERT INTO users(user_id, level, xp, idat) VALUES($1, 1, 0, 0);",
+    [userId])
     .catch(() => Promise.reject(errors.USER_ALREADY_EXISTS));
 };
 
 const progress = {
-  get: userId => {
-    return pool.query(`SELECT level, xp, pinned_message_id FROM users WHERE user_id=${userId}`).then(getFirst);
+  get: async userId => {
+    const res = await pool.query("SELECT level, xp, pinned_message_id FROM users WHERE user_id=$1", [userId]);
+    return getFirst(res);
   },
   set: (userId, level, xp) => {
-    return pool.query(`UPDATE users SET level=${level}, xp=${xp} WHERE user_id=${userId}`);
+    return pool.query("UPDATE users SET level=$1, xp=$2 WHERE user_id=$3", [level, xp, userId]);
   },
   addXP: async (userId, additionalXP) => {
     const currentProgress = await progress.get(userId);
@@ -31,23 +32,24 @@ const progress = {
 };
 
 const pinnedMessageId = {
-  get: userId => {
-    return pool.query(`SELECT pinned_message_id FROM users WHERE user_id=${userId}`).then(getFirst);
+  get: async userId => {
+    const res = await pool.query("SELECT pinned_message_id FROM users WHERE user_id=$1", [userId]);
+    return getFirst(res);
   },
   set: (userId, pinnedMessageId) => {
-    return pool.query(`UPDATE users SET pinned_message_id=${pinnedMessageId} WHERE user_id=${userId}`);
+    return pool.query("UPDATE users SET pinned_message_id=$1 WHERE user_id=$2", [pinnedMessageId, userId]);
   },
 };
 
 const idat = {
   get: async userId => {
-    const res = await pool.query(`SELECT idat FROM users WHERE user_id=${userId}`);
+    const res = await pool.query("SELECT idat FROM users WHERE user_id=$1", [userId]);
     return getFirst(res).idat;
   },
   increment: async userId => {
     const res = await pool.query(
-      `UPDATE users SET idat = idat + 1 WHERE user_id=${userId}
-      RETURNING idat`);
+      "UPDATE users SET idat = idat + 1 WHERE user_id=$1 RETURNING idat",
+      [userId]);
     const idatCount = getFirst(res).idat;
 
     const currentIDATAchievement = await achievementsDb.get(userId, "idat");
@@ -62,7 +64,7 @@ const idat = {
 
 const prevCommand = {
   get: async userId => {
-    const res = await pool.query(`SELECT prev_command, partial FROM users WHERE user_id=${userId};`);
+    const res = await pool.query("SELECT prev_command, partial FROM users WHERE user_id=$1;", [userId]);
     return {
       command: getFirst(res).prev_command,
       partial: getFirst(res).partial,
@@ -70,9 +72,8 @@ const prevCommand = {
   },
   set: (userId, command, partial={}) => {
     return pool.query(
-      `UPDATE users
-      SET prev_command='${command}', partial='${JSON.stringify(partial)}'
-      WHERE user_id=${userId};`);
+      "UPDATE users SET prev_command=$1, partial=$2 WHERE user_id=$3;",
+      [command, partial, userId]);
   },
   reset: userId => {
     return prevCommand.set(userId, "");

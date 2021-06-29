@@ -1,35 +1,35 @@
 const { pool, getRows, getFirst } = require("./postgresql");
 
 const getUser = userId => {
-  return pool.query(`SELECT time, questions FROM schedules WHERE user_id=${userId} ORDER BY time;`).then(getRows);
+  return pool.query("SELECT time, questions FROM schedules WHERE user_id=$1 ORDER BY time;", [userId])
+  .then(getRows);
 };
 
 const getTime = time => {
-  return pool.query(`SELECT user_id, questions FROM schedules WHERE time=${time};`).then(getRows);
+  return pool.query("SELECT user_id, questions FROM schedules WHERE time=$1;", [time]).then(getRows);
 };
 
-const formatStringArray = array => `{${array.map(qn => `"${qn}"`).join(",")}}`;
-
 const getQuestions = async (userId, time) => {
-  const res = await pool.query(`SELECT questions FROM schedules WHERE user_id=${userId} AND time=${time};`);
+  const res = await pool.query("SELECT questions FROM schedules WHERE user_id=$1 AND time=$2;", [userId, time]);
   return getFirst(res) ? getFirst(res).questions : [];
 };
 
 const add = (userId, time, questions) => {
   return pool.query(
-    `INSERT INTO schedules(user_id, time, questions)
-    VALUES(${userId}, ${time}, '${formatStringArray(questions)}');`);
+    "INSERT INTO schedules(user_id, time, questions) VALUES($1, $2, $3);",
+    [userId, time, questions]);
 };
 
 const edit = (userId, time, newTime, newQuestions) => {
   return pool.query(
     `UPDATE schedules
-    SET time=${newTime}, questions='${formatStringArray(newQuestions)}'
-    WHERE user_id=${userId} AND time=${time};`);
+    SET time=$1, questions=$2
+    WHERE user_id=$3 AND time=$4;`,
+    [newTime, newQuestions, userId, time]);
 };
 
 const deleteSchedule = (userId, time) => {
-  return pool.query(`DELETE FROM schedules WHERE user_id=${userId} AND time=${time};`);
+  return pool.query("DELETE FROM schedules WHERE user_id=$1 AND time=$2;", [userId, time]);
 };
 
 module.exports = {
