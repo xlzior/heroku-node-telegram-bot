@@ -13,7 +13,7 @@ const defaultAchievement = (userId, type) => ({
 const get = async (userId, type) => {
   const res = await pool.query(`SELECT * FROM achievements WHERE user_id=${userId} AND type='${type}'`);
   const rows = getRows(res);
-  return rows.length > 0 ? rows : defaultAchievement(userId, type);
+  return rows.length > 0 ? rows[0] : defaultAchievement(userId, type);
 };
 
 const update = (userId, type, level) => {
