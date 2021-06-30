@@ -20,7 +20,8 @@ function handleStats({ bot }) {
       `*Journal entries*: ${reflections.count}
       Total: ${reflections.length.total} messages
       Average: ${Math.round(reflections.length.average)} messages per reflection
-      Longest: ${reflections.length.maximum} messages`,
+      Longest: ${reflections.length.maximum} messages
+      <i>(use /reflections to browse)</i>`,
       `*Hashtags used*: ${hashtags.total}
       ${hashtags.unique} unique hashtags
       <i>(use /hashtags to browse)</i>`,
