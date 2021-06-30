@@ -34,8 +34,8 @@ const formatReflection = ({ start_id, name, hashtags = [] }) => {
 };
 
 const sum = arr => arr.reduce((x, y) => x + y, 0);
-const average = arr => sum(arr) / arr.length;
-const max = arr => Math.max(...arr);
+const average = arr => arr.length === 0 ? 0 : sum(arr) / arr.length;
+const max = arr => Math.max(0, ...arr);
 
 /* Telegram-specific */
 
