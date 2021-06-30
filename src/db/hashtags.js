@@ -1,33 +1,33 @@
 const current = require("./current");
 const { pool, getFirst, getRows } = require("./postgresql");
 
-const getCount = async (userId, hashtag) => {
-  const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1 AND hashtag=$2;", [userId, hashtag]);
+const getCount = async (chatId, hashtag) => {
+  const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1 AND hashtag=$2;", [chatId, hashtag]);
   return parseInt(getFirst(res).count);
 };
 
-const getTotalCount = async userId => {
-  const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1;", [userId]);
+const getTotalCount = async chatId => {
+  const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1;", [chatId]);
   return parseInt(getFirst(res).count);
 };
 
-const getUniqueCount = async userId => {
-  const res = await pool.query("SELECT COUNT(DISTINCT hashtag) FROM hashtags WHERE user_id=$1;", [userId]);
+const getUniqueCount = async chatId => {
+  const res = await pool.query("SELECT COUNT(DISTINCT hashtag) FROM hashtags WHERE user_id=$1;", [chatId]);
   return parseInt(getFirst(res).count);
 };
 
-const getAll = async userId => {
+const getAll = async chatId => {
   const res = await pool.query(
     `SELECT hashtag, COUNT(hashtag) AS count
     FROM hashtags
     WHERE user_id=$1
     GROUP BY hashtag
     ORDER BY count DESC;`,
-    [userId]);
+    [chatId]);
   return getRows(res);
 };
 
-const get = async (userId, hashtag, limit, offset) => {
+const get = async (chatId, hashtag, limit, offset) => {
   const res = await pool.query(
     `SELECT name, reflections.start_id
     FROM hashtags
@@ -36,18 +36,18 @@ const get = async (userId, hashtag, limit, offset) => {
     GROUP BY hashtag, name, reflections.start_id
     ORDER BY COUNT(hashtags.start_id) DESC
     LIMIT $3 OFFSET $4;`,
-    [userId, hashtag, limit, offset]);
+    [chatId, hashtag, limit, offset]);
   return getRows(res);
 };
 
-const add = async (userId, hashtags = []) => {
+const add = async (chatId, hashtags = []) => {
   if (hashtags.length === 0) return;
-  const startId = await current.getId(userId);
+  const startId = await current.getId(chatId);
   const promises = hashtags.map(hashtag => {
     return pool.query(
       `INSERT INTO hashtags(user_id, start_id, hashtag) VALUES($1, $2, $3)
       ON CONFLICT DO NOTHING;`,
-      [userId, startId, hashtag]);
+      [chatId, startId, hashtag]);
   });
   return Promise.all(promises);
 };

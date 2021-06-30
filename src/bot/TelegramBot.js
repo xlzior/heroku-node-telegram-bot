@@ -23,9 +23,9 @@ Bot.prototype.onText = function(regex, callback) {
 
 Bot.prototype.onMessage = function(callback) {
   const botReference = this;
-  return this.on("message", function(msg, match) {
+  return this.on("message", function(msg) {
     const shortcuts = generateShortcuts(botReference, msg);
-    callback(shortcuts, msg, match);
+    callback(shortcuts, msg);
   });
 };
 

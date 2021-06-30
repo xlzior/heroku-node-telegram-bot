@@ -33,10 +33,8 @@ handleStats({ bot, continueConversation });
 handleSchedules({ bot, continueConversation });
 
 bot.onMessage(async (shortcuts, msg) => {
-  // console.log(msg.photo[2].file_id);
-
   if (msg.text && !msg.text.startsWith("/")) {
-    const { command, partial } = await db.users.prevCommand.get(shortcuts.userId);
+    const { command, partial } = await db.users.prevCommand.get(shortcuts.chatId);
     if (continueConversation[command]) {
       continueConversation[command](shortcuts, msg, partial);
     }

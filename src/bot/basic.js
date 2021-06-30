@@ -6,7 +6,7 @@ const errors = require("../db/errors");
 const { clean, MARKDOWN } = utils.telegram;
 
 function handleBasic({ bot }) {
-  bot.onText(/\/start/, async ({ send, userId, chatId }, msg) => {
+  bot.onText(/\/start/, async ({ send, chatId }, msg) => {
     await send(`Hello, ${msg.from.first_name}!`);
 
     const message = [
@@ -21,9 +21,9 @@ function handleBasic({ bot }) {
     await send(message);
 
     try {
-      await db.users.create(userId);
+      await db.users.create(chatId);
       const messageId = await bot.sendAndPin(chatId, formatLevel(1, 0));
-      db.users.pinnedMessageId.set(userId, messageId);
+      db.users.pinnedMessageId.set(chatId, messageId);
     } catch (error) {
       if (error !== errors.USER_ALREADY_EXISTS) {
         console.error("error:", error);
@@ -74,10 +74,10 @@ function handleBasic({ bot }) {
     send(clean(message), MARKDOWN);
   });
 
-  bot.onText(/\/cancel/, async ({ send, userId }) => {
-    const isOpen = await db.reflections.isOpen(userId);
-    if (isOpen) db.reflections.cancel(userId);
-    await db.users.prevCommand.reset(userId);
+  bot.onText(/\/cancel/, async ({ send, chatId }) => {
+    const isOpen = await db.reflections.isOpen(chatId);
+    if (isOpen) db.reflections.cancel(chatId);
+    await db.users.prevCommand.reset(chatId);
     send("The previous command has been cancelled.");
   });
 }

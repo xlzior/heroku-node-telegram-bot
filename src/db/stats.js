@@ -4,13 +4,13 @@ const users = require("./users");
 const reflections = require("./reflections");
 const hashtagsDb = require("./hashtags");
 
-const get = async userId => {
-  const progress = users.progress.get(userId);
-  const idat = users.idat.get(userId);
-  const reflectionsCount = reflections.getCount(userId);
-  const reflectionLengths = reflections.getLengths(userId);
-  const hashtagsTotalCount = hashtagsDb.getTotalCount(userId);
-  const hashtagsUniqueCount = hashtagsDb.getUniqueCount(userId);
+const get = async chatId => {
+  const progress = users.progress.get(chatId);
+  const idat = users.idat.get(chatId);
+  const reflectionsCount = reflections.getCount(chatId);
+  const reflectionLengths = reflections.getLengths(chatId);
+  const hashtagsTotalCount = hashtagsDb.getTotalCount(chatId);
+  const hashtagsUniqueCount = hashtagsDb.getUniqueCount(chatId);
 
   return {
     progress: await progress,

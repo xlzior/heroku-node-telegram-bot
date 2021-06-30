@@ -5,15 +5,15 @@ const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require("../achievements")
 const utils = require("../utils");
 
 function handleStats({ bot }) {
-  bot.onText(/\/lifexp/, async ({ chatId, userId }) => {
-    const { level, xp, pinnedMessageId } = await db.users.progress.get(userId);
+  bot.onText(/\/lifexp/, async ({ chatId }) => {
+    const { level, xp, pinnedMessageId } = await db.users.progress.get(chatId);
     bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
     const messageId = await bot.sendAndPin(chatId, formatLevel(level, xp));
-    db.users.pinnedMessageId.set(userId, messageId);
+    db.users.pinnedMessageId.set(chatId, messageId);
   });
 
-  bot.onText(/\/stats/, async ({ send, userId }) => {
-    const { progress, idat, reflections, hashtags } = await db.stats.get(userId);
+  bot.onText(/\/stats/, async ({ send, chatId }) => {
+    const { progress, idat, reflections, hashtags } = await db.stats.get(chatId);
 
     const statsDisplay = [
       `*Level*: ${progress.level}\n*Total XP*: ${progress.xp}`,
@@ -30,8 +30,8 @@ function handleStats({ bot }) {
     send(utils.telegram.clean(message), utils.telegram.MARKDOWN);
   });
 
-  bot.onText(/\/achievements/, async ({ send, userId, chatId }) => {
-    const achievements = await db.achievements.getAll(userId);
+  bot.onText(/\/achievements/, async ({ send, chatId }) => {
+    const achievements = await db.achievements.getAll(chatId);
     const achievementsCount = utils.sum(Object.values(achievements));
 
     // KIV: delete all previous badges sent? so that it's not so repetitive

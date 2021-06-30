@@ -30,10 +30,10 @@ const generatePagination = type => (currentPage, lastPage) => {
   return [result.filter(Boolean)];
 };
 
-const generateReflectionsList = async (userId, currentPage) => {
+const generateReflectionsList = async (chatId, currentPage) => {
   // reflections
   const reflections = await db.reflections.get(
-    userId, REFLECTIONS_PER_PAGE, pageToOffset(currentPage));
+    chatId, REFLECTIONS_PER_PAGE, pageToOffset(currentPage));
   if (reflections.length === 0) {
     return {
       error: true,
@@ -44,7 +44,7 @@ const generateReflectionsList = async (userId, currentPage) => {
   const reflectionsList = reflections.map(utils.formatReflection).join("\n\n");
 
   // pagination
-  const reflectionsCount = await db.reflections.getCount(userId);
+  const reflectionsCount = await db.reflections.getCount(chatId);
   const lastPage = countToNumPages(reflectionsCount);
   const keyboard = generatePagination("reflections")(currentPage, lastPage);
 
@@ -56,9 +56,9 @@ const generateReflectionsList = async (userId, currentPage) => {
   return { message, options };
 };
 
-const generateHashtagList = async (userId, hashtag, currentPage) => {
+const generateHashtagList = async (chatId, hashtag, currentPage) => {
   // reflections
-  const reflections = await db.hashtags.get(userId, hashtag,
+  const reflections = await db.hashtags.get(chatId, hashtag,
     REFLECTIONS_PER_PAGE, pageToOffset(currentPage));
   if (reflections.length === 0) {
     return {
@@ -70,7 +70,7 @@ const generateHashtagList = async (userId, hashtag, currentPage) => {
   const reflectionsList = reflections.map(utils.formatReflection).join("\n\n");
 
   // pagination
-  const reflectionsCount = await db.hashtags.getCount(userId, hashtag);
+  const reflectionsCount = await db.hashtags.getCount(chatId, hashtag);
   const lastPage = countToNumPages(reflectionsCount);
   const keyboard = generatePagination(`hashtag - ${hashtag}`)(currentPage, lastPage);
 
@@ -83,8 +83,8 @@ const generateHashtagList = async (userId, hashtag, currentPage) => {
 };
 
 function handleBrowse({ bot, continueConversation }) {
-  bot.onText(/\/reflections/, async ({ send, userId }) => {
-    const { error = false, message, options } = await generateReflectionsList(userId, 1);
+  bot.onText(/\/reflections/, async ({ send, chatId }) => {
+    const { error = false, message, options } = await generateReflectionsList(chatId, 1);
     if (!error) send("All reflections");
     send(message, options);
   });
@@ -103,8 +103,8 @@ function handleBrowse({ bot, continueConversation }) {
     }
   });
 
-  bot.onText(/\/hashtags/, async ({ send, userId }) => {
-    const hashtags = await db.hashtags.getAll(userId);
+  bot.onText(/\/hashtags/, async ({ send, chatId }) => {
+    const hashtags = await db.hashtags.getAll(chatId);
     if (hashtags.length === 0) {
       return send("You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
     }
@@ -114,21 +114,21 @@ function handleBrowse({ bot, continueConversation }) {
     await send("Use /hashtag to view all reflections with a particular hashtag");
   });
 
-  bot.onText(/\/hashtag(@lifexp_bot)?$/, async ({ send, userId }) => {
-    const hashtags = await db.hashtags.getAll(userId);
+  bot.onText(/\/hashtag(@lifexp_bot)?$/, async ({ send, chatId }) => {
+    const hashtags = await db.hashtags.getAll(chatId);
     if (hashtags.length === 0) {
       return send("You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
     }
-    db.users.prevCommand.set(userId, "hashtag");
+    db.users.prevCommand.set(chatId, "hashtag");
     const keyboard = groupPairs(hashtags.map(({ hashtag }) => hashtag));
     send("Alright, which hashtag would you like to browse?", withKeyboard(keyboard));
   });
 
-  continueConversation["hashtag"] = async ({ send, userId }, msg) => {
-    const { error = false, message, options } = await generateHashtagList(userId, msg.text, 1);
+  continueConversation["hashtag"] = async ({ send, chatId }, msg) => {
+    const { error = false, message, options } = await generateHashtagList(chatId, msg.text, 1);
     if (!error) send(`Reflections with the hashtag ${msg.text}`, REMOVE_KEYBOARD);
     send(message, options);
-    db.users.prevCommand.reset(userId);
+    db.users.prevCommand.reset(chatId);
   };
 
   bot.on("callback_query", async ({ id, from, message: msg, data }) => {

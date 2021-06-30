@@ -4,25 +4,25 @@ const { pool, getFirst } = require("./postgresql");
 const achievementsDb = require("./achievements");
 const errors = require("./errors");
 
-const create = async userId => {
+const create = async chatId => {
   return pool.query(
     "INSERT INTO users(user_id, level, xp, idat) VALUES($1, 1, 0, 0);",
-    [userId])
+    [chatId])
     .catch(() => Promise.reject(errors.USER_ALREADY_EXISTS));
 };
 
 const progress = {
-  get: async userId => {
-    const res = await pool.query("SELECT level, xp, pinned_message_id FROM users WHERE user_id=$1", [userId]);
+  get: async chatId => {
+    const res = await pool.query("SELECT level, xp, pinned_message_id FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res);
   },
-  set: (userId, level, xp) => {
-    return pool.query("UPDATE users SET level=$1, xp=$2 WHERE user_id=$3", [level, xp, userId]);
+  set: (chatId, level, xp) => {
+    return pool.query("UPDATE users SET level=$1, xp=$2 WHERE user_id=$3", [level, xp, chatId]);
   },
-  addXP: async (userId, additionalXP) => {
-    const currentProgress = await progress.get(userId);
+  addXP: async (chatId, additionalXP) => {
+    const currentProgress = await progress.get(chatId);
     const newProgress = incrementXP(currentProgress.level, currentProgress.xp, additionalXP);
-    await progress.set(userId, newProgress.level, newProgress.xp);
+    await progress.set(chatId, newProgress.level, newProgress.xp);
     return {
       ...newProgress,
       pinnedMessageId: currentProgress.pinned_message_id,
@@ -32,51 +32,51 @@ const progress = {
 };
 
 const pinnedMessageId = {
-  get: async userId => {
-    const res = await pool.query("SELECT pinned_message_id FROM users WHERE user_id=$1", [userId]);
+  get: async chatId => {
+    const res = await pool.query("SELECT pinned_message_id FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res);
   },
-  set: (userId, pinnedMessageId) => {
-    return pool.query("UPDATE users SET pinned_message_id=$1 WHERE user_id=$2", [pinnedMessageId, userId]);
+  set: (chatId, pinnedMessageId) => {
+    return pool.query("UPDATE users SET pinned_message_id=$1 WHERE user_id=$2", [pinnedMessageId, chatId]);
   },
 };
 
 const idat = {
-  get: async userId => {
-    const res = await pool.query("SELECT idat FROM users WHERE user_id=$1", [userId]);
+  get: async chatId => {
+    const res = await pool.query("SELECT idat FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res).idat;
   },
-  increment: async userId => {
+  increment: async chatId => {
     const res = await pool.query(
       "UPDATE users SET idat = idat + 1 WHERE user_id=$1 RETURNING idat",
-      [userId]);
+      [chatId]);
     const idatCount = getFirst(res).idat;
 
-    const currentIDATAchievement = await achievementsDb.get(userId, "idat");
+    const currentIDATAchievement = await achievementsDb.get(chatId, "idat");
     const newBadge = checkForNewBadge("idat", currentIDATAchievement.level, idatCount);
     const { hasNewBadge, currentLevel } = newBadge;
     if (hasNewBadge) {
-      achievementsDb.update(userId, "idat", currentLevel);
+      achievementsDb.update(chatId, "idat", currentLevel);
     }
     return newBadge;
   },
 };
 
 const prevCommand = {
-  get: async userId => {
-    const res = await pool.query("SELECT prev_command, partial FROM users WHERE user_id=$1;", [userId]);
+  get: async chatId => {
+    const res = await pool.query("SELECT prev_command, partial FROM users WHERE user_id=$1;", [chatId]);
     return {
       command: getFirst(res).prev_command,
       partial: getFirst(res).partial,
     };
   },
-  set: (userId, command, partial={}) => {
+  set: (chatId, command, partial={}) => {
     return pool.query(
       "UPDATE users SET prev_command=$1, partial=$2 WHERE user_id=$3;",
-      [command, partial, userId]);
+      [command, partial, chatId]);
   },
-  reset: userId => {
-    return prevCommand.set(userId, "");
+  reset: chatId => {
+    return prevCommand.set(chatId, "");
   },
 };
 
