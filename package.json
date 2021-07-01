@@ -8,7 +8,7 @@
     "cron": "node src/scheduled.js",
     "deploy": "./private/deploy.sh",
     "lint": "eslint",
-    "switch_to_dev": "export $(cat .env | xargs) && wget --spider https://api.telegram.org/bot$TOKEN/setWebhook?url= --delete-after && node index.js"
+    "set_webhook": "export $(cat .env | xargs) && curl https://api.telegram.org/bot$TOKEN/setWebhook?url=$HEROKU_URL$TOKEN"
   },
   "author": "xlzior",
   "license": "ISC",
