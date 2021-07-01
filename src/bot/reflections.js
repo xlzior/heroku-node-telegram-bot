@@ -1,7 +1,6 @@
 const db = require("../db");
 const errors = require("../db/errors");
 const utils = require("../utils");
-const { checkForNewBadge } = require("../achievements");
 
 function handleReflections({ bot, continueConversation }) {
   bot.onText(/\/prompt/, ({ send }) => {
@@ -41,51 +40,11 @@ function handleReflections({ bot, continueConversation }) {
     }
   });
 
-  continueConversation["close"] = async ({ send, chatId }, msg) => {
+  continueConversation["close"] = async (shortcuts, msg) => {
+    const { send, chatId } = shortcuts;
     await send(`Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`);
-
-    // emojis
-    const emojis = await db.emojis.getCurrent(chatId);
-    const emojiCounts = emojis.map(({ count }) => count);
-    if (emojis.length >= 2 && utils.sum(emojiCounts) >= 5) {
-      await send(`You used these emojis in this entry:\n\n${utils.emojiChart(emojis)}`);
-    }
-
-    // XP
-    const convoLength = await db.reflections.close(chatId, msg.message_id, msg.text)
-      .catch(error => {
-        if (error === errors.NO_REFLECTION_OPEN) {
-          send("You have not started a reflection. Use /open to start a new reflection");
-        } else {
-          console.error("error:", error);
-        }
-      });
-
-    const xpData = await db.users.progress.addXP(chatId, convoLength);
-    await bot.notifyXP(chatId, "this reflection", xpData);
-
-    // achievements
-    const stats = [
-      { type: "convoLength", value: convoLength },
-      { type: "reflections", value: await db.reflections.getCount(chatId) },
-      { type: "hashtags", value: await db.hashtags.getTotalCount(chatId) },
-      { type: "emojis", value: await db.emojis.getCount(chatId) },
-    ];
-
-    const achievements = await db.achievements.getAll(chatId);
-
-    stats.forEach(async ({ type, value }) => {
-      const previousAchievement = achievements.find(elem => elem.type === type);
-      const previousLevel = previousAchievement ? previousAchievement.level : 0;
-      const { hasNewBadge, currentLevel } = checkForNewBadge(type, previousLevel, value);
-      if (hasNewBadge) {
-        await bot.notifyBadges(chatId, type, previousLevel, currentLevel);
-        db.achievements.update(chatId, type, currentLevel);
-      }
-    });
-
-    // close the loop
-    db.users.prevCommand.reset(chatId);
+    await bot.sendClosingStats(shortcuts, msg.message_id, msg.text);
+    await db.users.prevCommand.reset(chatId);
   };
 
   bot.onMessage(async ({ chatId }, msg) => {

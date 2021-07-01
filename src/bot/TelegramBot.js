@@ -1,7 +1,10 @@
 const Bot = require("node-telegram-bot-api");
 
-const { getBadgeImage, getBadgeLabel } = require("../achievements");
+const { getBadgeImage, getBadgeLabel, checkForNewBadge } = require("../achievements");
 const { formatLevel } = require("../levels");
+const db = require("../db");
+const errors = require("../db/errors");
+const utils = require("../utils");
 
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)
@@ -72,6 +75,48 @@ Bot.prototype.sendPhotos = async function(chatId, photos) {
     await this.sendMediaGroup(chatId, photos.slice(0, MAX_PER_MEDIA_GROUP)); // send the first batch
     await this.sendPhotos(chatId, photos.slice(MAX_PER_MEDIA_GROUP));        // recurse for the rest
   }
+};
+
+Bot.prototype.sendClosingStats = async function({ send, chatId }, messageId, name) {
+  // emojis
+  const emojis = await db.emojis.getCurrent(chatId);
+  const emojiCounts = emojis.map(({ count }) => count);
+  if (emojis.length >= 2 && utils.sum(emojiCounts) >= 5) {
+    await send(`You used these emojis in this entry:\n\n${utils.emojiChart(emojis)}`);
+  }
+
+  // XP
+  const convoLength = await db.reflections.close(chatId, messageId, name)
+    .catch(error => {
+      if (error === errors.NO_REFLECTION_OPEN) {
+        send("You have not started a reflection. Use /open to start a new reflection");
+      } else {
+        console.error("error:", error);
+      }
+    });
+
+  const xpData = await db.users.progress.addXP(chatId, convoLength);
+  await this.notifyXP(chatId, "this reflection", xpData);
+
+  // achievements
+  const stats = [
+    { type: "convoLength", value: convoLength },
+    { type: "reflections", value: await db.reflections.getCount(chatId) },
+    { type: "hashtags", value: await db.hashtags.getTotalCount(chatId) },
+    { type: "emojis", value: await db.emojis.getCount(chatId) },
+  ];
+
+  const achievements = await db.achievements.getAll(chatId);
+
+  stats.forEach(async ({ type, value }) => {
+    const previousAchievement = achievements.find(elem => elem.type === type);
+    const previousLevel = previousAchievement ? previousAchievement.level : 0;
+    const { hasNewBadge, currentLevel } = checkForNewBadge(type, previousLevel, value);
+    if (hasNewBadge) {
+      await this.notifyBadges(chatId, type, previousLevel, currentLevel);
+      db.achievements.update(chatId, type, currentLevel);
+    }
+  });
 };
 
 module.exports = Bot;

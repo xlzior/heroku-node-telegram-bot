@@ -36,7 +36,8 @@ function handleSchedules({ bot, continueConversation }) {
     send("Alright, skipping this session.");
   });
 
-  bot.onText(/\/done/, async ({ chatId, send }) => {
+  bot.onText(/\/done/, async shortcuts => {
+    const { chatId, send } = shortcuts;
     const { command, partial } = await prevCommand.get(chatId);
     if (command !== "scheduled") return;
 
@@ -48,8 +49,8 @@ function handleSchedules({ bot, continueConversation }) {
       prevCommand.set(chatId, "scheduled", { time, index: index + 1 });
     } else {
       const botMsg = await send("You've completed your scheduled journalling session. Good job!");
-      db.reflections.close(chatId, botMsg.message_id, generateName(time));
-      prevCommand.reset(chatId);
+      await bot.sendClosingStats(shortcuts, botMsg.message_id, generateName(time));
+      await prevCommand.reset(chatId);
     }
   });
 
