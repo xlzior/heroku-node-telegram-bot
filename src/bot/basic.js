@@ -48,7 +48,7 @@ function handleBasic({ bot }) {
       "*Browse*",
       "/reflections - list all reflections",
       "/hashtags - list all hashtags",
-      "/hashtag - browse conversations with a particular hashtag",
+      "/hashtag - browse reflections with a particular hashtag",
     ].join("\n");
     const game = [
       "*Game Features*",
@@ -75,10 +75,14 @@ function handleBasic({ bot }) {
   });
 
   bot.onText(/\/cancel/, async ({ send, chatId }) => {
-    const isOpen = await db.reflections.isOpen(chatId);
-    if (isOpen) db.reflections.cancel(chatId);
-    await db.users.prevCommand.reset(chatId);
-    send("The previous command has been cancelled.");
+    const { command } = await db.users.prevCommand.get(chatId);
+    if (command) {
+      send(`The command '${command}' has been cancelled.`);
+      if (command === "open") db.reflections.cancel(chatId);
+      await db.users.prevCommand.reset(chatId);
+    } else {
+      send("There was no previous command.");
+    }
   });
 }
 

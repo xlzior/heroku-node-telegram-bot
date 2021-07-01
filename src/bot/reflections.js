@@ -19,6 +19,7 @@ function handleReflections({ bot, continueConversation }) {
     try {
       await db.reflections.open(chatId, msg.message_id);
       send("Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.");
+      await db.users.prevCommand.set(chatId, "open");
     } catch (error) {
       if (error === errors.REFLECTION_ALREADY_OPEN) {
         send("A reflection is already in progress, please /close the reflection before opening a new one.");
