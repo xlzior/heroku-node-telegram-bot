@@ -30,6 +30,11 @@ function handleReflections({ bot, continueConversation }) {
   });
 
   bot.onText(/\/close/, async ({ send, chatId }) => {
+    const { command } = await db.users.prevCommand.get(chatId);
+    if (command === "scheduled") {
+      return send("You're currently doing a scheduled journalling session. When you are done with the given prompt, send /done.");
+    }
+
     const isOpen = await db.reflections.isOpen(chatId);
     if (isOpen) {
       send("Whew! Nice journalling session. How would you like to name this reflection for future browsing?",
