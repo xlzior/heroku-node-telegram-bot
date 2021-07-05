@@ -1,7 +1,9 @@
 require("dotenv").config();
+const { DateTime } = require("luxon");
 const Bot = require("node-telegram-bot-api");
 
 const { handleRequests, server } = require("../web");
+const { formatTime } = require("./bot/schedules/utils");
 const db = require("./db");
 
 const token = process.env.TOKEN;
@@ -11,7 +13,7 @@ handleRequests(bot);
 /* MAIN */
 
 const main = async () => {
-  const now = (new Date()).getHours() * 100;
+  const now = formatTime(DateTime.utc());
   const schedules = await db.schedules.getTime(now);
 
   await Promise.all(schedules.map(async ({ user_id: chatId, questions }) => {
