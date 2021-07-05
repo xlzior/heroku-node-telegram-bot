@@ -46,7 +46,7 @@ function handleEdit({ bot, continueConversation }) {
     const newTime = validateTime(msg.text);
     if (!newTime) return send("Please send a valid time in 12-hour format (e.g. 9pm)");
 
-    const questions = await schedules.getQuestions(chatId, newTime);
+    const questions = await schedules.getQuestions(chatId, localToUTC(newTime, tz));
     if (time.toLowerCase() !== newTime.toLowerCase() && questions.length > 0) {
       send(`You already have a session set for ${formatScheduleInfo(newTime, questions)}\n\nYou cannot have two journalling sessions scheduled for the same time.`);
       prevCommand.reset(chatId);

@@ -12,14 +12,14 @@ function handleAdd({ bot, continueConversation }) {
     if (!tz) return send("Use /set_timezone to get started.");
 
     send("Nice, let's create a new scheduled journalling session! What time would you like to have this session every day? Please send a time in 12-hour format (e.g. 9pm).");
-    prevCommand.set(chatId, TIME);
+    prevCommand.set(chatId, TIME, { tz });
   });
 
   continueConversation[TIME] = async ({ send, chatId }, msg, { tz }) => {
     const time = validateTime(msg.text);
     if (!time) return send("Please send a valid time in 12-hour format (e.g. 9pm)");
 
-    const questions = await schedules.getQuestions(chatId, time);
+    const questions = await schedules.getQuestions(chatId, localToUTC(time, tz));
     if (questions.length > 0) {
       send(`You already have a session set for ${formatScheduleInfo(time, questions)}\n\nPlease use /edit_schedule instead.`);
       prevCommand.reset(chatId);
