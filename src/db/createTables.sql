@@ -6,7 +6,8 @@ CREATE TABLE users(
   idat INTEGER,
   current_reflection_id INTEGER,
   prev_command VARCHAR,
-  partial JSONB
+  partial JSONB,
+  tz VARCHAR
 );
 
 CREATE TABLE reflections(
@@ -53,7 +54,7 @@ CREATE TABLE emojis(
 
 CREATE TABLE schedules(
   user_id INTEGER,
-  time INTEGER,
+  time VARCHAR,
   questions VARCHAR[],
   PRIMARY KEY(user_id, time),
   CONSTRAINT foreign_key_user
