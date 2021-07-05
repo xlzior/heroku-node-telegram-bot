@@ -1,6 +1,6 @@
 const db = require("../../db");
 const { schedules, users: { prevCommand } } = db;
-const { MARKDOWN } = require("../../utils").telegram;
+const { clean, MARKDOWN } = require("../../utils").telegram;
 
 const { formatDateTime } = require("./utils");
 
@@ -23,7 +23,7 @@ function handleSession({ bot }) {
     const questions = await schedules.getQuestions(chatId, time);
 
     if (index < questions.length) {
-      send(`*${questions[index]}*\n\n✅ /done with prompt`, MARKDOWN);
+      send(clean(`*${questions[index]}*\n\n✅ /done with prompt`), MARKDOWN);
       prevCommand.set(chatId, "scheduled", { time, index: index + 1 });
     } else {
       const botMsg = await send("You've completed your scheduled journalling session. Good job!");

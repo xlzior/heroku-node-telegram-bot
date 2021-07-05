@@ -5,7 +5,7 @@ const Bot = require("node-telegram-bot-api");
 const { handleRequests, server } = require("../web");
 const { formatTime } = require("./bot/schedules/utils");
 const db = require("./db");
-const { MARKDOWN } = require("./utils").telegram;
+const { clean, MARKDOWN } = require("./utils").telegram;
 
 const token = process.env.TOKEN;
 const bot = new Bot(token);
@@ -21,7 +21,8 @@ const main = async () => {
     const isOpen = await db.reflections.isOpen(chatId);
     if (!isOpen) { // don't interupt an ongoing session
       await bot.sendMessage(chatId, "It's time for your scheduled journalling session! Here's your first prompt:");
-      const botMsg = await bot.sendMessage(chatId, `*${questions[0]}*\n\n✅ /done with prompt\n⏭ /skip journalling session`, MARKDOWN);
+      const message = `*${questions[0]}*\n\n✅ /done with prompt\n⏭ /skip journalling session`;
+      const botMsg = await bot.sendMessage(chatId, clean(message) , MARKDOWN);
       await db.reflections.open(chatId, botMsg.message_id);
       await db.users.prevCommand.set(chatId, "scheduled", { index: 1, time: now });
     }
