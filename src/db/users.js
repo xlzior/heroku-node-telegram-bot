@@ -80,10 +80,21 @@ const prevCommand = {
   },
 };
 
+const timezone = {
+  get: async chatId => {
+    const res = await pool.query("SELECT tz FROM users WHERE user_id=$1", [chatId]);
+    return getFirst(res).tz;
+  },
+  set: async (chatId, tz) => {
+    return pool.query("UPDATE users SET tz=$1 WHERE user_id=$2", [tz, chatId]);
+  },
+};
+
 module.exports = {
   create,
   progress,
   pinnedMessageId,
   idat,
   prevCommand,
+  timezone,
 };
