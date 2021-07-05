@@ -27,9 +27,9 @@ function handleDelete({ bot, continueConversation }) {
     }
   });
 
-  continueConversation[SELECT] = async ({ send, chatId }, msg, tz) => {
+  continueConversation[SELECT] = async ({ send, chatId }, msg, { tz }) => {
     const time = validateTime(msg.text);
-    if (!time) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
+    if (!time) return send("Please send a valid time using the keyboard provided");
 
     const questions = await schedules.getQuestions(chatId, localToUTC(time, tz));
     if (questions.length > 0) {

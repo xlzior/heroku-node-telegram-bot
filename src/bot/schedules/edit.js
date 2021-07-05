@@ -44,7 +44,7 @@ function handleEdit({ bot, continueConversation }) {
 
   continueConversation[TIME] = async({ send, chatId }, msg, { time, tz }) => {
     const newTime = validateTime(msg.text);
-    if (!newTime) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
+    if (!newTime) return send("Please send a valid time in 12-hour format (e.g. 9pm)");
 
     const questions = await schedules.getQuestions(chatId, newTime);
     if (time.toLowerCase() !== newTime.toLowerCase() && questions.length > 0) {
@@ -59,12 +59,6 @@ function handleEdit({ bot, continueConversation }) {
   continueConversation[QUESTIONS] = async({ send, chatId }, msg, { time, tz, newTime }) => {
     const newQuestions = msg.text.split("\n").filter(Boolean);
     send(`Okay, your new session will be at ${formatScheduleInfo(newTime, newQuestions)}`);
-    console.log({
-      chatId,
-      time: localToUTC(time, tz),
-      newTime: localToUTC(newTime, tz),
-      newQuestions,
-    });
     schedules.edit(chatId, localToUTC(time, tz), localToUTC(newTime, tz), newQuestions);
     prevCommand.reset(chatId);
   };
