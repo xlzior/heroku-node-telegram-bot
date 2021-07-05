@@ -3,9 +3,8 @@ const { DateTime } = require("luxon");
 const Bot = require("node-telegram-bot-api");
 
 const { handleRequests, server } = require("../web");
-const { formatTime } = require("./bot/schedules/utils");
 const db = require("./db");
-const { clean, MARKDOWN } = require("./utils").telegram;
+const { telegram: { clean, MARKDOWN }, time: { formatTime } } = require("./utils");
 
 const token = process.env.TOKEN;
 const bot = new Bot(token);
