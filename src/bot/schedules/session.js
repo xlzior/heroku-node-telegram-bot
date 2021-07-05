@@ -2,7 +2,7 @@ const db = require("../../db");
 const { schedules, users: { prevCommand } } = db;
 const { clean, MARKDOWN } = require("../../utils").telegram;
 
-const { formatDateTime } = require("./utils");
+const { generateDateTime } = require("./utils");
 
 function handleSession({ bot }) {
   bot.onText(/\/skip/, async ({ chatId, send }) => {
@@ -27,7 +27,8 @@ function handleSession({ bot }) {
       prevCommand.set(chatId, "scheduled", { time, index: index + 1 });
     } else {
       const botMsg = await send("You've completed your scheduled journalling session. Good job!");
-      await bot.sendClosingStats(shortcuts, botMsg.message_id, formatDateTime());
+      const tz = await db.users.timezone.get(chatId);
+      await bot.sendClosingStats(shortcuts, botMsg.message_id, generateDateTime(tz));
       await prevCommand.reset(chatId);
     }
   });

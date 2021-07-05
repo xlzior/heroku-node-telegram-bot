@@ -3,7 +3,7 @@ const { DateTime } = require("luxon");
 const parseTime = (timeString, zone) => DateTime.fromFormat(timeString, "ha", { zone });
 const validateTime = rawText => parseTime(rawText).invalid ? false : rawText;
 const formatTime = timeObj => timeObj.toFormat("ha");
-const formatDateTime = zone => DateTime.utc().setZone(zone).toFormat("yyyy/MM/dd ha");
+const generateDateTime = zone => DateTime.now().setZone(zone).toFormat("yyyy/MM/dd ha");
 const localToUTC = (localTimeString, localTimeZone) => {
   const parsed = parseTime(localTimeString, localTimeZone);
   return formatTime(parsed.toUTC());
@@ -20,7 +20,7 @@ const formatScheduleInfo = (time, questions) => {
 module.exports = {
   validateTime,
   formatTime,
-  formatDateTime,
+  generateDateTime,
   formatScheduleInfo,
   localToUTC,
   utcToLocal,
