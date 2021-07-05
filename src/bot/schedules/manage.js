@@ -1,5 +1,7 @@
 const db = require("../../db");
 const { schedules } = db;
+const { clean, MARKDOWN } = require("../../utils").telegram;
+
 const { utcToLocal, utcToLocal24 } = require("./utils");
 
 function handleManage({ bot, continueConversation }) {
@@ -15,14 +17,19 @@ function handleManage({ bot, continueConversation }) {
       send("Use /add_schedule to get started.");
     } else {
       const schedulesDisplay = userSchedules
-        .map(({ time, questions }) => `${utcToLocal(time, tz)}: ${questions.length} prompt(s)\n${questions.join("\n")}`)
+        .map(({ time, questions }) => {
+          return [
+            `*${utcToLocal(time, tz)}: ${questions.length} prompt(s)*`,
+            `${questions.join("\n")}`,
+          ].join("\n");
+        })
         .join("\n\n");
       const message = [
         "You currently have the following schedules set:",
         schedulesDisplay,
         "You can manage them using /add_schedule, /edit_schedule and /delete_schedule.",
       ].join("\n\n");
-      send(message);
+      send(clean(message), MARKDOWN);
     }
   });
 
