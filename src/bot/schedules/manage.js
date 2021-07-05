@@ -1,6 +1,6 @@
 const db = require("../../db");
 const { schedules } = db;
-const { formatTime, utcToLocal } = require("./utils");
+const { utcToLocal } = require("./utils");
 
 function handleManage({ bot, continueConversation }) {
   bot.onText(/\/manage_schedules/, async ({ send, chatId }) => {
