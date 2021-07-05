@@ -23,7 +23,7 @@ function handleEdit({ bot, continueConversation }) {
   });
 
   continueConversation["schedule - edit - select"] = async ({ send, chatId }, msg) => {
-    const time = msg.text;
+    const time = validateTime(msg.text);
     if (!time) return send("Please send a valid time using the keyboard provided");
 
     const tz = await db.users.timezone.get(chatId);
@@ -39,6 +39,8 @@ function handleEdit({ bot, continueConversation }) {
 
   continueConversation["schedule - edit - time"] = async({ send, chatId }, msg, { time, tz }) => {
     const newTime = validateTime(msg.text);
+    if (!newTime) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
+
     const questions = await schedules.getQuestions(chatId, newTime);
     if (time.toLowerCase() !== newTime.toLowerCase() && questions.length > 0) {
       send(`You already have a session set for ${formatScheduleInfo(newTime, questions)}\n\nYou cannot have two journalling sessions scheduled for the same time.`);

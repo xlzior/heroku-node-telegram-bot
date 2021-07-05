@@ -2,10 +2,9 @@ const db = require("../../db");
 const { schedules, users: { prevCommand } } = db;
 const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = require("../../utils").telegram;
 
-const { formatScheduleInfo, utcToLocal, localToUTC } = require("./utils");
+const { formatScheduleInfo, utcToLocal, localToUTC, validateTime } = require("./utils");
 
 function handleDelete({ bot, continueConversation }) {
-
   bot.onText(/\/delete_schedule/, async ({ send, chatId }) => {
     const userSchedules = await schedules.getUser(chatId);
     const tz = await db.users.timezone.get(chatId);
@@ -25,7 +24,9 @@ function handleDelete({ bot, continueConversation }) {
   });
 
   continueConversation["schedule - delete - select"] = async ({ send, chatId }, msg) => {
-    const time = msg.text;
+    const time = validateTime(msg.text);
+    if (!time) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
+
     const tz = await db.users.timezone.get(chatId);
     const questions = await schedules.getQuestions(chatId, localToUTC(time, tz));
     if (questions.length > 0) {
