@@ -22,7 +22,7 @@ function handleEdit({ bot, continueConversation }) {
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nPlease send a new time for this scheduled session.`);
       prevCommand.set(chatId, TIME, { time: localTime, tz });
     } else {
-      const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time)));
+      const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time, tz)));
       send("Which schedule would you like to edit?", withKeyboard(keyboard));
       prevCommand.set(chatId, SELECT, { tz });
     }
