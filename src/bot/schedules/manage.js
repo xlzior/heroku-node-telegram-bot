@@ -32,7 +32,7 @@ function handleManage({ bot, continueConversation }) {
 
   continueConversation["set timezone"] = async ({ send, chatId }, msg) => {
     const tz = msg.text;
-    if (tz.match(/UTC[\+-]\d+/)) {
+    if (tz.match(/UTC[+-]\d+/)) {
       send(`Alright, you have set your timezone to ${tz}. You can now add a new scheduled journalling session using /add_schedule`);
       db.users.timezone.set(chatId, tz);
       db.users.prevCommand.reset(chatId);

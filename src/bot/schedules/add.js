@@ -11,13 +11,13 @@ function handleAdd({ bot, continueConversation }) {
     const tz = await db.users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 
-    send("Nice, let's create a new scheduled journalling session! What time would you like to have this session every day? Please send a timestamp in 12-hour format (e.g. 9pm).");
+    send("Nice, let's create a new scheduled journalling session! What time would you like to have this session every day? Please send a time in 12-hour format (e.g. 9pm).");
     prevCommand.set(chatId, TIME);
   });
 
   continueConversation[TIME] = async ({ send, chatId }, msg, { tz }) => {
     const time = validateTime(msg.text);
-    if (!time) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
+    if (!time) return send("Please send a valid time in 12-hour format (e.g. 9pm)");
 
     const questions = await schedules.getQuestions(chatId, time);
     if (questions.length > 0) {
