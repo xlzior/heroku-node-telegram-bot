@@ -1,6 +1,6 @@
 const db = require("../../db");
 const { schedules } = db;
-const { utcToLocal } = require("./utils");
+const { utcToLocal, utcToLocal24 } = require("./utils");
 
 function handleManage({ bot, continueConversation }) {
   bot.onText(/\/manage_schedules/, async ({ send, chatId }) => {
@@ -10,6 +10,7 @@ function handleManage({ bot, continueConversation }) {
     if (!tz) return send("Use /set_timezone to get started.");
 
     const userSchedules = await schedules.getUser(chatId);
+    userSchedules.sort((a, b) => utcToLocal24(a.time, tz) - utcToLocal24(b.time, tz));
     if (userSchedules.length === 0) {
       send("Use /add_schedule to get started.");
     } else {

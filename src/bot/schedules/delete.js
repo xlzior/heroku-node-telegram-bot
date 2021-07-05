@@ -2,7 +2,7 @@ const db = require("../../db");
 const { schedules, users: { prevCommand } } = db;
 const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = require("../../utils").telegram;
 
-const { formatScheduleInfo, utcToLocal, localToUTC, validateTime } = require("./utils");
+const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } = require("./utils");
 
 const SELECT = "schedule - delete - select";
 const CONFIRM = "schedule - delete - confirm";
@@ -13,6 +13,7 @@ function handleDelete({ bot, continueConversation }) {
     if (!tz) return send("Use /set_timezone to get started.");
 
     const userSchedules = await schedules.getUser(chatId);
+    userSchedules.sort((a, b) => utcToLocal24(a.time, tz) - utcToLocal24(b.time, tz));
     if (userSchedules.length === 0) {
       send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
     } else if (userSchedules.length === 1) {

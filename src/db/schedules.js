@@ -1,7 +1,7 @@
 const { pool, getRows, getFirst } = require("./postgresql");
 
 const getUser = chatId => {
-  return pool.query("SELECT time, questions FROM schedules WHERE user_id=$1 ORDER BY time;", [chatId])
+  return pool.query("SELECT time, questions FROM schedules WHERE user_id=$1;", [chatId])
   .then(getRows);
 };
 

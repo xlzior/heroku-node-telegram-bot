@@ -12,6 +12,10 @@ const utcToLocal = (utcTimeString, localTimeZone) => {
   const parsed = parseTime(utcTimeString, "UTC");
   return formatTime(parsed.setZone(localTimeZone));
 };
+const utcToLocal24 = (utcTimeString, localTimeZone) => {
+  const parsed = parseTime(utcTimeString, "UTC");
+  return parsed.setZone(localTimeZone).hour;
+};
 
 const formatScheduleInfo = (time, questions) => {
   return `${time} with the following ${questions.length} question(s):\n${questions.join("\n")}`;
@@ -24,4 +28,5 @@ module.exports = {
   formatScheduleInfo,
   localToUTC,
   utcToLocal,
+  utcToLocal24,
 };
