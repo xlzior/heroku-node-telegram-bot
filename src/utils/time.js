@@ -1,4 +1,5 @@
 const { DateTime } = require("luxon");
+const { handlePlural } = require("./misc");
 
 const parseTime = (timeString, zone) => DateTime.fromFormat(timeString, "ha", { zone });
 const validateTime = rawText => parseTime(rawText).invalid ? false : rawText;
@@ -18,7 +19,11 @@ const utcToLocal24 = (utcTimeString, localTimeZone) => {
 };
 
 const formatScheduleInfo = (time, questions) => {
-  return `${time} with the following ${questions.length} question(s):\n${questions.join("\n")}`;
+  const numberOfPrompts = handlePlural("prompt", "prompts");
+  return [
+    `${time} with the following ${numberOfPrompts(questions.length)}:`,
+    questions.join("\n"),
+  ].join("\n");
 };
 
 module.exports = {

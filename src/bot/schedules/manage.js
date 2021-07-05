@@ -1,8 +1,9 @@
 const db = require("../../db");
 const { schedules } = db;
-const { clean, MARKDOWN } = require("../../utils").telegram;
 
-const { utcToLocal, utcToLocal24 } = require("../../utils").time;
+const utils = require("../../utils");
+const { clean, MARKDOWN } = utils.telegram;
+const { utcToLocal, utcToLocal24 } = utils.time;
 
 function handleManage({ bot, continueConversation }) {
   bot.onText(/\/manage_schedules/, async ({ send, chatId }) => {
@@ -16,10 +17,11 @@ function handleManage({ bot, continueConversation }) {
     if (userSchedules.length === 0) {
       send("Use /add_schedule to get started.");
     } else {
+      const numberOfPrompts = utils.handlePlural("prompt", "prompts");
       const schedulesDisplay = userSchedules
         .map(({ time, questions }) => {
           return [
-            `*${utcToLocal(time, tz)}: ${questions.length} prompt(s)*`,
+            `*${utcToLocal(time, tz)}: ${numberOfPrompts(questions.length)}*`,
             `${questions.join("\n")}`,
           ].join("\n");
         })
