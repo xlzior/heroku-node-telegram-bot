@@ -89,11 +89,11 @@ function handleBrowse({ bot, continueConversation }) {
     send(message, options);
   });
 
-  bot.on("callback_query", async ({ id, from, message: msg, data }) => {
+  bot.on("callback_query", async ({ id, message: msg, data }) => {
     const [type, pageNumber] = data.split(" - ");
     if (type === "reflections") {
       if (pageNumber === "current") return;
-      const { message, options } = await generateReflectionsList(from.id, parseInt(pageNumber));
+      const { message, options } = await generateReflectionsList(msg.chat.id, parseInt(pageNumber));
       bot.editMessageText(message, {
         ...options,
         chat_id: msg.chat.id,
@@ -131,13 +131,13 @@ function handleBrowse({ bot, continueConversation }) {
     db.users.prevCommand.reset(chatId);
   };
 
-  bot.on("callback_query", async ({ id, from, message: msg, data }) => {
+  bot.on("callback_query", async ({ id, message: msg, data }) => {
     const [type, hashtag, pageNumber] = data.split(" - ");
     if (type === "hashtag") {
       if (pageNumber === "current") return;
 
       const { message, options } = await generateHashtagList(
-        from.id, hashtag, parseInt(pageNumber));
+        msg.chat.id, hashtag, parseInt(pageNumber));
       bot.editMessageText(message, {
         ...options,
         chat_id: msg.chat.id,
