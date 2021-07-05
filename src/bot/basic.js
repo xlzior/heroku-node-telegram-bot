@@ -77,11 +77,11 @@ function handleBasic({ bot }) {
   bot.onText(/\/cancel/, async ({ send, chatId }) => {
     const { command } = await db.users.prevCommand.get(chatId);
     if (command) {
-      send(`The command '${command}' has been cancelled.`);
+      send(`The command '${command}' has been cancelled.`, utils.telegram.REMOVE_KEYBOARD);
       if (command === "open") db.reflections.cancel(chatId);
       await db.users.prevCommand.reset(chatId);
     } else {
-      send("There was no previous command.");
+      send("There was no previous command.", utils.telegram.REMOVE_KEYBOARD);
     }
   });
 }
