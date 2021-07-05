@@ -4,6 +4,10 @@ const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = require("../../utils").tel
 
 const { validateTime, formatScheduleInfo, utcToLocal, localToUTC } = require("./utils");
 
+const SELECT = "schedule - edit - select";
+const TIME = "schedule - edit - time";
+const QUESTIONS = "schedule - edit - questions";
+
 function handleEdit({ bot, continueConversation }) {
   bot.onText(/\/edit_schedule/, async ({ send, chatId }) => {
     const userSchedules = await schedules.getUser(chatId);
@@ -14,15 +18,15 @@ function handleEdit({ bot, continueConversation }) {
       const { time, questions } = userSchedules[0];
       const localTime = utcToLocal(time);
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nPlease send a new time for this scheduled session.`);
-      prevCommand.set(chatId, "schedule - edit - time", { time: localTime, tz });
+      prevCommand.set(chatId, TIME, { time: localTime, tz });
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time)));
       send("Which schedule would you like to edit?", withKeyboard(keyboard));
-      prevCommand.set(chatId, "schedule - edit - select");
+      prevCommand.set(chatId, SELECT);
     }
   });
 
-  continueConversation["schedule - edit - select"] = async ({ send, chatId }, msg) => {
+  continueConversation[SELECT] = async ({ send, chatId }, msg) => {
     const time = validateTime(msg.text);
     if (!time) return send("Please send a valid time using the keyboard provided");
 
@@ -31,13 +35,13 @@ function handleEdit({ bot, continueConversation }) {
     if (questions.length > 0) {
       send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}\n\nPlease send a new time for this scheduled session.`, REMOVE_KEYBOARD);
       // TODO: implement "no change" option?
-      prevCommand.set(chatId, "schedule - edit - time", { time, tz });
+      prevCommand.set(chatId, TIME, { time, tz });
     } else {
       send(`You do not have a session at ${time}. Please send a valid time using the keyboard provided.`);
     }
   };
 
-  continueConversation["schedule - edit - time"] = async({ send, chatId }, msg, { time, tz }) => {
+  continueConversation[TIME] = async({ send, chatId }, msg, { time, tz }) => {
     const newTime = validateTime(msg.text);
     if (!newTime) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
 
@@ -47,11 +51,11 @@ function handleEdit({ bot, continueConversation }) {
       prevCommand.reset(chatId);
     } else {
       send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
-      prevCommand.set(chatId, "schedule - edit - questions", { time, tz, newTime });
+      prevCommand.set(chatId, QUESTIONS, { time, tz, newTime });
     }
   };
 
-  continueConversation["schedule - edit - questions"] = async({ send, chatId }, msg, { time, tz, newTime }) => {
+  continueConversation[QUESTIONS] = async({ send, chatId }, msg, { time, tz, newTime }) => {
     const newQuestions = msg.text.split("\n").filter(Boolean);
     send(`Okay, your new session will be at ${formatScheduleInfo(newTime, newQuestions)}`);
     console.log({

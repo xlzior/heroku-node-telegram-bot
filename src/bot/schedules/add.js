@@ -3,13 +3,16 @@ const { schedules, users: { prevCommand } } = db;
 
 const { validateTime, formatScheduleInfo, localToUTC } = require("./utils");
 
+const TIME = "schedule - add - time";
+const QUESTIONS = "schedule - add - questions";
+
 function handleAdd({ bot, continueConversation }) {
   bot.onText(/\/add_schedule/, ({ send, chatId }) => {
     send("Nice, let's create a new scheduled journalling session! What time would you like to have this session every day? Please send a timestamp in 12-hour format (e.g. 9pm).");
-    prevCommand.set(chatId, "schedule - add - time");
+    prevCommand.set(chatId, TIME);
   });
 
-  continueConversation["schedule - add - time"] = async ({ send, chatId }, msg) => {
+  continueConversation[TIME] = async ({ send, chatId }, msg) => {
     const time = validateTime(msg.text);
     if (!time) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
 
@@ -20,11 +23,11 @@ function handleAdd({ bot, continueConversation }) {
       prevCommand.reset(chatId);
     } else {
       send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
-      prevCommand.set(chatId, "schedule - add - questions", { time, tz });
+      prevCommand.set(chatId, QUESTIONS, { time, tz });
     }
   };
 
-  continueConversation["schedule - add - questions"] = async ({ send, chatId }, msg, { time, tz }) => {
+  continueConversation[QUESTIONS] = async ({ send, chatId }, msg, { time, tz }) => {
     const questions = msg.text.split("\n").filter(Boolean);
     send(`Okay, I'm creating a new session at ${formatScheduleInfo(time, questions)}`);
     schedules.add(chatId, localToUTC(time, tz), questions);
