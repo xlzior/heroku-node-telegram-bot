@@ -2,8 +2,8 @@ const current = require("./current");
 const { pool, getRows, getFirst } = require("./postgresql");
 
 const getCount = async chatId => {
-  const res = await pool.query("SELECT COUNT(*) FROM emojis WHERE user_id=$1", [chatId]);
-  return getFirst(res).count;
+  const res = await pool.query("SELECT SUM(count) FROM emojis WHERE user_id=$1", [chatId]);
+  return getFirst(res).sum;
 };
 
 const getCurrent = async chatId => {
