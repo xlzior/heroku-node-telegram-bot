@@ -10,8 +10,10 @@ const QUESTIONS = "schedule - edit - questions";
 
 function handleEdit({ bot, continueConversation }) {
   bot.onText(/\/edit_schedule/, async ({ send, chatId }) => {
-    const userSchedules = await schedules.getUser(chatId);
     const tz = await db.users.timezone.get(chatId);
+    if (!tz) return send("Use /set_timezone to get started.");
+
+    const userSchedules = await schedules.getUser(chatId);
     if (userSchedules.length === 0) {
       send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
     } else if (userSchedules.length === 1) {
@@ -22,15 +24,14 @@ function handleEdit({ bot, continueConversation }) {
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time)));
       send("Which schedule would you like to edit?", withKeyboard(keyboard));
-      prevCommand.set(chatId, SELECT);
+      prevCommand.set(chatId, SELECT, { tz });
     }
   });
 
-  continueConversation[SELECT] = async ({ send, chatId }, msg) => {
+  continueConversation[SELECT] = async ({ send, chatId }, msg, { tz }) => {
     const time = validateTime(msg.text);
     if (!time) return send("Please send a valid time using the keyboard provided");
 
-    const tz = await db.users.timezone.get(chatId);
     const questions = await schedules.getQuestions(chatId, localToUTC(time, tz));
     if (questions.length > 0) {
       send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}\n\nPlease send a new time for this scheduled session.`, REMOVE_KEYBOARD);
