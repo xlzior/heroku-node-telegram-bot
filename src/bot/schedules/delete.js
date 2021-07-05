@@ -9,9 +9,10 @@ const CONFIRM = "schedule - delete - confirm";
 
 function handleDelete({ bot, continueConversation }) {
   bot.onText(/\/delete_schedule/, async ({ send, chatId }) => {
-    const userSchedules = await schedules.getUser(chatId);
     const tz = await db.users.timezone.get(chatId);
+    if (!tz) return send("Use /set_timezone to get started.");
 
+    const userSchedules = await schedules.getUser(chatId);
     if (userSchedules.length === 0) {
       send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
     } else if (userSchedules.length === 1) {
@@ -22,15 +23,14 @@ function handleDelete({ bot, continueConversation }) {
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time, tz)));
       send("Which schedule would you like to delete?", withKeyboard(keyboard));
-      prevCommand.set(chatId, SELECT);
+      prevCommand.set(chatId, SELECT, { tz });
     }
   });
 
-  continueConversation[SELECT] = async ({ send, chatId }, msg) => {
+  continueConversation[SELECT] = async ({ send, chatId }, msg, tz) => {
     const time = validateTime(msg.text);
     if (!time) return send("Please send a valid timestamp in 12-hour format (e.g. 9pm)");
 
-    const tz = await db.users.timezone.get(chatId);
     const questions = await schedules.getQuestions(chatId, localToUTC(time, tz));
     if (questions.length > 0) {
       send(`You have chosen to delete the schedule at ${formatScheduleInfo(time, questions)}\n\nAre you sure you would like to delete this session? Please send 'Yes' to confirm.`, REMOVE_KEYBOARD);
