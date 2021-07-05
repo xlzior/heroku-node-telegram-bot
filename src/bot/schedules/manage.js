@@ -2,7 +2,7 @@ const db = require("../../db");
 const { schedules } = db;
 const { clean, MARKDOWN } = require("../../utils").telegram;
 
-const { utcToLocal, utcToLocal24 } = require("./utils");
+const { utcToLocal, utcToLocal24 } = require("../../utils").time;
 
 function handleManage({ bot, continueConversation }) {
   bot.onText(/\/manage_schedules/, async ({ send, chatId }) => {

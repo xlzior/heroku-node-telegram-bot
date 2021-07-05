@@ -1,7 +1,7 @@
 const db = require("../../db");
 const { schedules, users: { prevCommand } } = db;
 
-const { validateTime, formatScheduleInfo, localToUTC } = require("./utils");
+const { validateTime, formatScheduleInfo, localToUTC } = require("../../utils").time;
 
 const TIME = "schedule - add - time";
 const QUESTIONS = "schedule - add - questions";

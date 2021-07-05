@@ -2,7 +2,7 @@ const db = require("../../db");
 const { schedules, users: { prevCommand } } = db;
 const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = require("../../utils").telegram;
 
-const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } = require("./utils");
+const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } = require("../../utils").time;
 
 const SELECT = "schedule - delete - select";
 const CONFIRM = "schedule - delete - confirm";

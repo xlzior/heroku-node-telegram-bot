@@ -1,8 +1,9 @@
 const db = require("../../db");
 const { schedules, users: { prevCommand } } = db;
-const { clean, MARKDOWN } = require("../../utils").telegram;
 
-const { generateDateTime } = require("./utils");
+const utils = require("../../utils");
+const { clean, MARKDOWN } = utils.telegram;
+const { generateDateTime } = utils.time;
 
 function handleSession({ bot }) {
   bot.onText(/\/skip/, async ({ chatId, send }) => {
