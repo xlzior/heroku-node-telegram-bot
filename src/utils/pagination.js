@@ -13,7 +13,7 @@ const generatePagination = type => (currentPage, lastPage) => {
 
   const first = { text: "<< 1", callback_data: `${type} - ${1}` };
   const prev = { text: `< ${currentPage - 1}`, callback_data: `${type} - ${currentPage - 1}` };
-  const current = { text: currentPage, callback_data: `${type} - ${"current"}` };
+  const current = { text: currentPage, callback_data: `${type} - current` };
   const next = { text: `${currentPage + 1} >`, callback_data: `${type} - ${currentPage + 1}` };
   const last = { text: `${lastPage} >>`, callback_data: `${type} - ${lastPage}` };
 
@@ -27,57 +27,51 @@ const generatePagination = type => (currentPage, lastPage) => {
   return [result.filter(Boolean)];
 };
 
-const generateReflectionsList = async (chatId, currentPage) => {
-  // reflections
-  const reflections = await reflectionsDb.get(
-    chatId, REFLECTIONS_PER_PAGE, pageToOffset(currentPage));
-  if (reflections.length === 0) {
-    return {
-      error: true,
-      message: "You do not have any reflections. Use /open to start a new journal entry",
-      options: {},
-    };
+const generateList = (
+  getPaginationType,
+  getEntities,
+  getNoEntitiesMessage,
+  getCount,
+) => async (chatId, ...data) => {
+  const currentPage = data[data.length - 1];
+
+  // entities
+  const entities = await getEntities(chatId, data);
+  if (entities.length === 0) {
+    return { error: true, message: getNoEntitiesMessage(chatId, data), options: {} };
   }
-  const reflectionsList = reflections.map(formatReflection).join("\n\n");
+  const list = entities.map(formatReflection).join("\n\n");
 
   // pagination
-  const reflectionsCount = await reflectionsDb.getCount(chatId);
-  const lastPage = countToNumPages(reflectionsCount);
-  const keyboard = generatePagination("reflections")(currentPage, lastPage);
+  const lastPage = await getCount(chatId, data).then(countToNumPages);
+  const keyboard = generatePagination(getPaginationType(chatId, data))(currentPage, lastPage);
 
+  // assemble the message
   const message = [
-    clean(reflectionsList),
+    clean(list),
     `Page ${currentPage} of ${lastPage}`,
   ].join("\n\n");
   const options = { ...MARKDOWN, ...withInlineKeyboard(keyboard) };
   return { message, options };
 };
 
-const generateHashtagList = async (chatId, hashtag, currentPage) => {
-  // reflections
-  const reflections = await hashtagsDb.get(chatId, hashtag,
-    REFLECTIONS_PER_PAGE, pageToOffset(currentPage));
-  if (reflections.length === 0) {
-    return {
-      error: true,
-      message: `Sorry, I don't recognise the hashtag '${hashtag}'. Please select a hashtag from the list.`,
-      options: {},
-    };
-  }
-  const reflectionsList = reflections.map(formatReflection).join("\n\n");
+// callback_data: `reflections - ${pageNumber}`
+// data = [pageNumber]
+const generateReflectionsList = generateList(
+  () => "reflections",
+  (chatId, data) => reflectionsDb.get(chatId, 5, pageToOffset(data[0])),
+  () => "You do not have any reflections. Use /open to start a new journal entry",
+  chatId => reflectionsDb.getCount(chatId),
+);
 
-  // pagination
-  const reflectionsCount = await hashtagsDb.getCount(chatId, hashtag);
-  const lastPage = countToNumPages(reflectionsCount);
-  const keyboard = generatePagination(`hashtag - ${hashtag}`)(currentPage, lastPage);
-
-  const message = clean([
-    reflectionsList,
-    `Page ${currentPage} of ${lastPage}`,
-  ].join("\n\n"));
-  const options = { ...MARKDOWN, ...withInlineKeyboard(keyboard) };
-  return { message, options };
-};
+// callback_data: `hashtag - ${hashtag} - ${pageNumber}`
+// data = [hashtag, pageNumber]
+const generateHashtagList = generateList(
+  (chatId, data) => `hashtag - ${data[0]}`,
+  (chatId, data) => hashtagsDb.get(chatId, data[0], 5, pageToOffset(data[1])),
+  (chatId, data) => `Sorry, I don't recognise the hashtag '${data[0]}'. Please select a hashtag from the list.`,
+  (chatId, data) => hashtagsDb.getCount(chatId, data[0]),
+);
 
 module.exports = {
   generateReflectionsList,

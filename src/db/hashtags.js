@@ -34,7 +34,7 @@ const get = async (chatId, hashtag, limit, offset) => {
     INNER JOIN reflections ON (hashtags.user_id = reflections.user_id AND hashtags.start_id = reflections.start_id)
     WHERE hashtags.user_id=$1 AND hashtag=$2
     GROUP BY hashtag, name, reflections.start_id
-    ORDER BY COUNT(hashtags.start_id) DESC
+    ORDER BY reflections.start_id DESC
     LIMIT $3 OFFSET $4;`,
     [chatId, hashtag, limit, offset]);
   return getRows(res);
