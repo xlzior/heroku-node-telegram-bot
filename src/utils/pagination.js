@@ -2,11 +2,10 @@ const reflectionsDb = require("../db/reflections");
 const hashtagsDb = require("../db/hashtags");
 
 const { clean, MARKDOWN, withInlineKeyboard } = require("./telegram");
-const { formatReflection } = require("./misc");
+const { formatReflection, formatHashtag } = require("./misc");
 
-const REFLECTIONS_PER_PAGE = 5;
-const pageToOffset = page => 5 * (page - 1);
-const countToNumPages = count => Math.ceil(count / REFLECTIONS_PER_PAGE);
+const pageToOffset = perPage => page => perPage * (page - 1);
+const countToNumPages = perPage => count => Math.ceil(count / perPage);
 
 const generatePagination = type => (currentPage, lastPage) => {
   if (lastPage === 1) return null;
@@ -29,21 +28,23 @@ const generatePagination = type => (currentPage, lastPage) => {
 
 const generateList = (
   getPaginationType,
+  perPage,
   getEntities,
   getNoEntitiesMessage,
+  formatEntities,
   getCount,
 ) => async (chatId, ...data) => {
   const currentPage = data[data.length - 1];
 
   // entities
-  const entities = await getEntities(chatId, data);
+  const entities = await getEntities(chatId, data, perPage);
   if (entities.length === 0) {
     return { error: true, message: getNoEntitiesMessage(chatId, data), options: {} };
   }
-  const list = entities.map(formatReflection).join("\n\n");
+  const list = formatEntities(entities);
 
   // pagination
-  const lastPage = await getCount(chatId, data).then(countToNumPages);
+  const lastPage = await getCount(chatId, data).then(countToNumPages(perPage));
   const keyboard = generatePagination(getPaginationType(chatId, data))(currentPage, lastPage);
 
   // assemble the message
@@ -59,8 +60,11 @@ const generateList = (
 // data = [pageNumber]
 const generateReflectionsList = generateList(
   () => "reflections",
-  (chatId, data) => reflectionsDb.get(chatId, 5, pageToOffset(data[0])),
+  5,
+  (chatId, data, perPage) => reflectionsDb.get(
+    chatId, perPage, pageToOffset(perPage)(data[0])),
   () => "You do not have any reflections. Use /open to start a new journal entry",
+  reflections => reflections.map(formatReflection).join("\n\n"),
   chatId => reflectionsDb.getCount(chatId),
 );
 
@@ -68,12 +72,28 @@ const generateReflectionsList = generateList(
 // data = [hashtag, pageNumber]
 const generateHashtagList = generateList(
   (chatId, data) => `hashtag - ${data[0]}`,
-  (chatId, data) => hashtagsDb.get(chatId, data[0], 5, pageToOffset(data[1])),
+  5,
+  (chatId, data, perPage) => hashtagsDb.get(
+    chatId, data[0], perPage, pageToOffset(perPage)(data[1])),
   (chatId, data) => `Sorry, I don't recognise the hashtag '${data[0]}'. Please select a hashtag from the list.`,
+  reflections => reflections.map(formatReflection).join("\n\n"),
   (chatId, data) => hashtagsDb.getCount(chatId, data[0]),
+);
+
+// callback_data: `hashtags - ${pageNumber}`
+// data = [pageNumber]
+const generateHashtagsList = generateList(
+  () => "hashtags",
+  25,
+  (chatId, data, perPage) => hashtagsDb.getAll(
+    chatId, perPage, pageToOffset(perPage)(data[0])),
+  () => "You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.",
+  hashtags => hashtags.map(formatHashtag).join("\n"),
+  chatId => hashtagsDb.getUniqueCount(chatId),
 );
 
 module.exports = {
   generateReflectionsList,
   generateHashtagList,
+  generateHashtagsList,
 };

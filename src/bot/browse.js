@@ -1,9 +1,8 @@
 const db = require("../db");
 const utils = require("../utils");
-const { generateReflectionsList, generateHashtagList } = utils.pagination;
+const { generateReflectionsList, generateHashtagsList, generateHashtagList } = utils.pagination;
 
 const {
-  clean, MARKDOWN,
   groupPairs, withKeyboard, REMOVE_KEYBOARD,
   replyTo,
 } = utils.telegram;
@@ -11,15 +10,26 @@ const {
 function handleBrowse({ bot, continueConversation }) {
   bot.onText(/\/reflections/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateReflectionsList(chatId, 1);
-    if (!error) send("All reflections");
-    send(message, options);
+    if (!error) await send("All reflections");
+    await send(message, options);
+  });
+
+  bot.onText(/\/hashtags/, async ({ send, chatId }) => {
+    const { error = false, message, options } = await generateHashtagsList(chatId, 1);
+    if (!error) await send("All hashtags");
+    await send(message, options);
+    await send("Use /hashtag to view all reflections with a particular hashtag");
   });
 
   bot.on("callback_query", async ({ id, message: msg, data }) => {
     const [type, pageNumber] = data.split(" - ");
-    if (type === "reflections") {
+    const generateList = {
+      reflections: generateReflectionsList,
+      hashtags: generateHashtagsList,
+    };
+    if (generateList[type]) {
       if (pageNumber === "current") return;
-      const { message, options } = await generateReflectionsList(msg.chat.id, parseInt(pageNumber));
+      const { message, options } = await generateList[type](msg.chat.id, parseInt(pageNumber));
       bot.editMessageText(message, {
         ...options,
         chat_id: msg.chat.id,
@@ -27,17 +37,6 @@ function handleBrowse({ bot, continueConversation }) {
       });
       bot.answerCallbackQuery(id);
     }
-  });
-
-  bot.onText(/\/hashtags/, async ({ send, chatId }) => {
-    const hashtags = await db.hashtags.getAll(chatId);
-    if (hashtags.length === 0) {
-      return send("You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
-    }
-    const message = `You've used these hashtags in your reflections:
-    \n${hashtags.map(utils.formatHashtag).join("\n")}`;
-    await send(clean(message), MARKDOWN);
-    await send("Use /hashtag to view all reflections with a particular hashtag");
   });
 
   bot.onText(/\/hashtag(@lifexp_bot)?$/, async ({ send, chatId }) => {

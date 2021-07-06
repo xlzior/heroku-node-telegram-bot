@@ -16,14 +16,15 @@ const getUniqueCount = async chatId => {
   return parseInt(getFirst(res).count);
 };
 
-const getAll = async chatId => {
+const getAll = async (chatId, limit, offset) => {
   const res = await pool.query(
     `SELECT hashtag, COUNT(hashtag) AS count
     FROM hashtags
     WHERE user_id=$1
     GROUP BY hashtag
-    ORDER BY count DESC;`,
-    [chatId]);
+    ORDER BY count DESC, hashtag ASC
+    LIMIT $2 OFFSET $3;`,
+    [chatId, limit, offset]);
   return getRows(res);
 };
 
