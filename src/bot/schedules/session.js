@@ -24,7 +24,7 @@ function handleSession({ bot }) {
     const questions = await schedules.getQuestions(chatId, time);
 
     if (index < questions.length) {
-      send(clean(`*${questions[index]}*\n\n✅ /done with prompt`), MARKDOWN);
+      send(clean(`*${questions[index]}*\n\n✅ /done`), MARKDOWN);
       prevCommand.set(chatId, "scheduled", { time, index: index + 1 });
     } else {
       const botMsg = await send("You've completed your scheduled journalling session. Good job!");
@@ -33,7 +33,6 @@ function handleSession({ bot }) {
       await prevCommand.reset(chatId);
     }
   });
-
 }
 
 module.exports = handleSession;
