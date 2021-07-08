@@ -1,5 +1,8 @@
+const { DateTime } = require("luxon");
+
 const { checkForNewBadge } = require("../achievements");
 const { incrementXP } = require("../levels");
+
 const { pool, getFirst } = require("./postgresql");
 const achievementsDb = require("./achievements");
 const errors = require("./errors");
@@ -90,6 +93,20 @@ const timezone = {
   },
 };
 
+const sleep = {
+  getBedtime: async chatId => {
+    const res = await pool.query("SELECT bedtime FROM users WHERE user_id=$1", [chatId]);
+    return DateTime.fromFormat(getFirst(res).bedtime, "HH:mm:ss");
+  },
+  getWakeup: async chatId => {
+    const res = await pool.query("SELECT wakeup_time FROM users WHERE user_id=$1", [chatId]);
+    return DateTime.fromFormat(getFirst(res).wakeup_time, "HH:mm:ss");
+  },
+  set: async (chatId, bedtime, wakeup) => {
+    return pool.query("UPDATE users SET bedtime=$1, wakeup_time=$2 WHERE user_id=$3", [bedtime, wakeup, chatId]);
+  },
+};
+
 module.exports = {
   create,
   progress,
@@ -97,4 +114,5 @@ module.exports = {
   idat,
   prevCommand,
   timezone,
+  sleep,
 };

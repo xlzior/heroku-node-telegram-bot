@@ -7,7 +7,9 @@ CREATE TABLE users(
   current_reflection_id INTEGER,
   prev_command VARCHAR,
   partial JSONB,
-  tz VARCHAR
+  tz VARCHAR,
+  bedtime TIME,
+  wakeup_time TIME
 );
 
 CREATE TABLE reflections(
