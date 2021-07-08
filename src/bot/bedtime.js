@@ -81,9 +81,11 @@ function handleBedtime({ bot, continueConversation }) {
     const wakeupGoal = await sleep.getWakeup(chatId);
     if (wakeupGoal) {
       const { xp, message } = calculateXP(now, wakeupGoal);
-      const xpData = await progress.addXP(chatId, xp);
       await send(message);
-      if (xp > 0) await bot.notifyXP(chatId, "waking up on time", xpData);
+      if (xp > 0) {
+        const xpData = await progress.addXP(chatId, xp);
+        await bot.notifyXP(chatId, "waking up on time", xpData);
+      }
     } else {
       send("You haven't set your bedtime goals yet! Use /set_bedtime to get started");
     }
@@ -96,9 +98,11 @@ function handleBedtime({ bot, continueConversation }) {
     const bedtimeGoal = await sleep.getBedtime(chatId);
     if (bedtimeGoal) {
       const { xp, message } = calculateXP(now, bedtimeGoal);
-      const xpData = await progress.addXP(chatId, xp);
       await send(message);
-      if (xp > 0) await bot.notifyXP(chatId, "going to sleep on time", xpData);
+      if (xp > 0) {
+        const xpData = await progress.addXP(chatId, xp);
+        await bot.notifyXP(chatId, "going to sleep on time", xpData);
+      }
     } else {
       send("You haven't set your bedtime goals yet! Use /set_bedtime to get started");
     }
