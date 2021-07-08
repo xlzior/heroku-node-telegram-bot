@@ -8,6 +8,7 @@ const handleReflections = require("./reflections");
 const handleIDAT = require("./idat");
 const handleStats = require("./stats");
 const handleSchedules = require("./schedules");
+const handleBedtime = require("./bedtime");
 
 const token = process.env.TOKEN;
 
@@ -31,6 +32,7 @@ handleIDAT({ bot, continueConversation });
 handleBrowse({ bot, continueConversation });
 handleStats({ bot, continueConversation });
 handleSchedules({ bot, continueConversation });
+handleBedtime({ bot, continueConversation });
 
 bot.onMessage(async (shortcuts, msg) => {
   if (msg.text && !msg.text.startsWith("/")) {
