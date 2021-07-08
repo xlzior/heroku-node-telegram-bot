@@ -12,9 +12,15 @@ const XP_DECAY_PER_MIN = 2;
 const EARLY_MINS = 60; // full XP still given if you are EARLY_MINS earlier than goal
 const GRACE_PERIOD_MINS = 10; // full XP given up to GRACE_PERIOD minutes after goal
 
+const HALF_DAY_IN_MINUTES = 12 * 60;
+const FULL_DAY_IN_MINUTES = 24 * 60;
 const calculateDeltaInMinutes = (a, b) => {
-  return a.diff(b, "minutes").values.minutes;
+  const rawDelta = a.diff(b, "minutes").values.minutes;
+  if (rawDelta < -HALF_DAY_IN_MINUTES) return rawDelta + FULL_DAY_IN_MINUTES;
+  if (rawDelta > HALF_DAY_IN_MINUTES) return rawDelta - FULL_DAY_IN_MINUTES;
+  return rawDelta;
 };
+// output ranges from -HALF_DAY_IN_MINUTES to HALF_DAY_IN_MINUTES i.e. -720 to 720
 
 const calculateXP = (goal, now) => {
   const delta = calculateDeltaInMinutes(goal, now);
