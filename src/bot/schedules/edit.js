@@ -19,7 +19,7 @@ function handleEdit({ bot, continueConversation }) {
       send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
     } else if (userSchedules.length === 1) {
       const { time, questions } = userSchedules[0];
-      const localTime = utcToLocal(time);
+      const localTime = utcToLocal(time, tz);
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nPlease send a new time for this scheduled session.`);
       prevCommand.set(chatId, TIME, { time: localTime, tz });
     } else {

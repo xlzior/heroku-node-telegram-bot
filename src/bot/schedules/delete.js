@@ -18,7 +18,7 @@ function handleDelete({ bot, continueConversation }) {
       send("You don't have any scheduled journalling sessions yet! Use /add_schedule to add a new one instead.");
     } else if (userSchedules.length === 1) {
       const { time, questions } = userSchedules[0];
-      const localTime = utcToLocal(time);
+      const localTime = utcToLocal(time, tz);
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nAre you sure you would like to delete this scheduled journalling session? Please send 'Yes' to confirm.`);
       prevCommand.set(chatId, CONFIRM, { time: localTime, tz });
     } else {
