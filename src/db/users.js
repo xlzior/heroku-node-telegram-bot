@@ -94,13 +94,16 @@ const timezone = {
 };
 
 const sleep = {
+  // bedtime and wakeup_time are stored as user's local timezone
   getBedtime: async chatId => {
-    const res = await pool.query("SELECT bedtime FROM users WHERE user_id=$1", [chatId]);
-    return DateTime.fromFormat(getFirst(res).bedtime, "HH:mm:ss");
+    const res = await pool.query("SELECT bedtime, tz FROM users WHERE user_id=$1", [chatId]);
+    const { bedtime: time, tz } = getFirst(res);
+    return time ? DateTime.fromFormat(time, "HH:mm:ss", { zone: tz }) : time;
   },
   getWakeup: async chatId => {
-    const res = await pool.query("SELECT wakeup_time FROM users WHERE user_id=$1", [chatId]);
-    return DateTime.fromFormat(getFirst(res).wakeup_time, "HH:mm:ss");
+    const res = await pool.query("SELECT wakeup_time, tz FROM users WHERE user_id=$1", [chatId]);
+    const { wakeup_time: time, tz } = getFirst(res);
+    return time ? DateTime.fromFormat(time, "HH:mm:ss", { zone: tz }) : time;
   },
   set: async (chatId, bedtime, wakeup) => {
     return pool.query("UPDATE users SET bedtime=$1, wakeup_time=$2 WHERE user_id=$3", [bedtime, wakeup, chatId]);

@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 
-const { prevCommand, sleep, progress } = require("../db").users;
+const { prevCommand, sleep, progress, timezone } = require("../db").users;
 
 // continueConversation
 const BEDTIME = "set bedtime";
@@ -42,13 +42,17 @@ const calculateXP = (goal, now) => {
 function handleBedtime({ bot, continueConversation }) {
   bot.onText(/\/set_bedtime/, async ({ send, chatId }) => {
     await send("Welcome to the bedtime feature. I can give you XP for going to sleep and waking up on time.");
-    const bedtime = await sleep.getBedtime(chatId).then(time => time.toFormat("h:mma"));
-    const wakeup = await sleep.getWakeup(chatId).then(time => time.toFormat("h:mma"));
+    const bedtime = await sleep.getBedtime(chatId);
+    const wakeup = await sleep.getWakeup(chatId);
 
     if (bedtime || wakeup) {
-      await send(`Your current settings are as follows:\nBedtime: ${bedtime}\nWake up time: ${wakeup}`);
+      await send([
+        "Your current settings are as follows:",
+        `Bedtime: ${bedtime.toFormat("h:mma")}`,
+        `Wake up time: ${wakeup.toFormat("h:mma")}`,
+      ].join("\n"));
     }
-    send("What time would you like to set as your bedtime goal? Please send a time in 12-hour format (e.g. 11:00pm)");
+    send("What time do you aim to go to sleep? Please send a time in 12-hour format (e.g. 11:00pm)");
     prevCommand.set(chatId, BEDTIME);
   });
 
@@ -57,7 +61,7 @@ function handleBedtime({ bot, continueConversation }) {
     if (bedtime.invalid) {
       send("Please send a valid time in 12-hour format (e.g. 11:00pm)");
     } else {
-      send("What time would you like to set as your wakeup goal? Please send a time in 12-hour format (e.g. 8:00am)");
+      send("What time do you aim to wake up? Please send a time in 12-hour format (e.g. 8:00am)");
       prevCommand.set(chatId, WAKEUP, { bedtime });
     }
   };
