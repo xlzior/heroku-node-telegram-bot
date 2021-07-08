@@ -1,4 +1,3 @@
-
 const intro = [
   "Welcome to LifeXP, a gamified journalling chatbot.",
   "I'm here to help you pen down your thoughts in a safe and convenient environment.",
