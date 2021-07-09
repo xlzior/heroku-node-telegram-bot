@@ -49,18 +49,17 @@ const generateProgressBar = (percentageFilled, length) => {
 };
 
 // xp is cumulative, over all levels
-const formatLevel = (level, xp) => {
+const formatStats = (level, xp, streak) => {
   const levelDisplay = `Level ${level}`;
   if (level < MAX_LEVEL) {
     const numer = xp - xpBaseForLevel(level); // display non-cumulative so progress bar is intuitive
     const denom = xpForNextLevel(level);
     const progressBar = generateProgressBar(numer / denom, PROGRESS_BAR_LENGTH);
-    return `${levelDisplay}    ${progressBar}    ${numer}/${denom}`;
+    return `${levelDisplay}    ${progressBar}    ${numer}/${denom}    🔥 ${streak}`;
   }
 
   // max level reached
-  const progressBar = generateProgressBar(1, PROGRESS_BAR_LENGTH);
-  return `${levelDisplay} (MAX)    ${progressBar}    ${xp} XP`;
+  return `${levelDisplay} (MAX)    ${xp} XP    🔥 ${streak}`;
 };
 
 const incrementXP = (level, originalXP, additionalXP) => {
@@ -80,6 +79,6 @@ const incrementXP = (level, originalXP, additionalXP) => {
 };
 
 module.exports = {
-  formatLevel,
+  formatStats,
   incrementXP,
 };

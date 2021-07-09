@@ -1,14 +1,14 @@
 const db = require("../db");
-const { formatLevel } = require("../levels");
+const { formatStats } = require("../levels");
 const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require("../achievements");
 
 const utils = require("../utils");
 
 function handleStats({ bot }) {
   bot.onText(/\/lifexp/, async ({ chatId }) => {
-    const { level, xp, pinnedMessageId } = await db.users.progress.get(chatId);
+    const { level, xp, streak, pinnedMessageId } = await db.users.progress.get(chatId);
     bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
-    const messageId = await bot.sendAndPin(chatId, formatLevel(level, xp));
+    const messageId = await bot.sendAndPin(chatId, formatStats(level, xp, streak));
     db.users.pinnedMessageId.set(chatId, messageId);
   });
 

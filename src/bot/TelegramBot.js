@@ -1,7 +1,7 @@
 const Bot = require("node-telegram-bot-api");
 
 const { getBadgeImage, getBadgeLabel, checkForNewBadge } = require("../achievements");
-const { formatLevel } = require("../levels");
+const { formatStats } = require("../levels");
 const db = require("../db");
 const errors = require("../db/errors");
 const utils = require("../utils");
@@ -33,10 +33,10 @@ Bot.prototype.onMessage = function(callback) {
 };
 
 Bot.prototype.notifyXP = async function(chatId, type, xpData) {
-  const { level, levelledUp, additionalXP, xp, pinnedMessageId } = xpData;
+  const { level, levelledUp, additionalXP, xp, streak, pinnedMessageId } = xpData;
   await this.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
   if (levelledUp) await this.sendMessage(chatId, `You levelled up! You are now Level ${level}.`);
-  await this.editMessageText(formatLevel(level, xp), {
+  await this.editMessageText(formatStats(level, xp, streak), {
     chat_id: chatId,
     message_id: pinnedMessageId,
   });
@@ -77,7 +77,7 @@ Bot.prototype.sendPhotos = async function(chatId, photos) {
   }
 };
 
-Bot.prototype.sendClosingStats = async function({ send, chatId }, messageId, name) {
+Bot.prototype.sendClosingStats = async function({ send, chatId }, messageId, name, date) {
   // emojis
   const emojis = await db.emojis.getCurrent(chatId);
   const emojiCounts = emojis.map(({ count }) => count);
@@ -95,6 +95,7 @@ Bot.prototype.sendClosingStats = async function({ send, chatId }, messageId, nam
       }
     });
 
+  await db.users.progress.updateStreak(chatId, date);
   const xpData = await db.users.progress.addXP(chatId, convoLength);
   await this.notifyXP(chatId, "this reflection", xpData);
 

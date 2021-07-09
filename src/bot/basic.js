@@ -2,7 +2,7 @@ const db = require("../db");
 const errors = require("../db/errors");
 const utils = require("../utils");
 const { clean, MARKDOWN } = utils.telegram;
-const { formatLevel } = require("../levels");
+const { formatStats } = require("../levels");
 
 const helpMessage = require("./help");
 
@@ -23,7 +23,7 @@ function handleBasic({ bot }) {
 
     try {
       await db.users.create(chatId);
-      const messageId = await bot.sendAndPin(chatId, formatLevel(1, 0));
+      const messageId = await bot.sendAndPin(chatId, formatStats(1, 0, 0));
       db.users.pinnedMessageId.set(chatId, messageId);
     } catch (error) {
       if (error !== errors.USER_ALREADY_EXISTS) {

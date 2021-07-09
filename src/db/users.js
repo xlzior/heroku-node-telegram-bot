@@ -16,11 +16,37 @@ const create = async chatId => {
 
 const progress = {
   get: async chatId => {
-    const res = await pool.query("SELECT level, xp, pinned_message_id FROM users WHERE user_id=$1", [chatId]);
+    const res = await pool.query("SELECT level, xp, streak, pinned_message_id FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res);
   },
   set: (chatId, level, xp) => {
     return pool.query("UPDATE users SET level=$1, xp=$2 WHERE user_id=$3", [level, xp, chatId]);
+  },
+  updateStreak: async (chatId, newReflectionDate) => {
+    const res = await pool.query("SELECT streak, last_reflection_date, tz FROM users WHERE user_id=$1", [chatId]);
+    const { streak, last_reflection_date: lastReflectionDate, tz } = getFirst(res);
+    const current = DateTime
+      .fromSeconds(newReflectionDate, { zone: tz })
+      .set({ hour: 0, minute: 0, second: 0 });
+    let newStreak = streak;
+    let newLastReflectionDate = lastReflectionDate;
+
+    if (lastReflectionDate) {
+      const previous = DateTime.fromJSDate(lastReflectionDate, { zone: tz });
+      const delta = current.diff(previous, "day").values.days;
+
+      if (delta === 1) { // increment streak
+        newStreak = streak + 1;
+        newLastReflectionDate = current.toFormat("yyyy-MM-dd");
+      } else if (delta > 1) { // streak broken
+        newStreak = 1;
+        newLastReflectionDate = current.toFormat("yyyy-MM-dd");
+      }
+    } else { // initialise streak to 1
+      newStreak = 1;
+      newLastReflectionDate = current.toFormat("yyyy-MM-dd");
+    }
+    return pool.query("UPDATE users SET streak=$1, last_reflection_date=$2 WHERE user_id=$3;", [newStreak, newLastReflectionDate, chatId]);
   },
   addXP: async (chatId, additionalXP) => {
     const currentProgress = await progress.get(chatId);
@@ -29,6 +55,7 @@ const progress = {
     return {
       ...newProgress,
       pinnedMessageId: currentProgress.pinned_message_id,
+      streak: currentProgress.streak,
       additionalXP,
     };
   },
