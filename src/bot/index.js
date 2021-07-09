@@ -35,12 +35,19 @@ handleSchedules({ bot, continueConversation });
 handleBedtime({ bot, continueConversation });
 
 bot.onMessage(async (shortcuts, msg) => {
+  const { chatId } = shortcuts;
+
+  // continueConversation
   if (msg.text && !msg.text.startsWith("/")) {
-    const { command, partial } = await db.users.prevCommand.get(shortcuts.chatId);
+    const { command, partial } = await db.users.prevCommand.get(chatId);
     if (continueConversation[command]) {
       continueConversation[command](shortcuts, msg, partial);
     }
   }
+
+  // keep track of convoLength
+  const reflectionId = await db.reflections.current.getId(chatId);
+  if (reflectionId) db.reflections.incrementLength(chatId, reflectionId);
 });
 
 bot.on("polling_error", err => console.error(err));

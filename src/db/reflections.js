@@ -9,8 +9,8 @@ const getCount = async chatId => {
 };
 
 const getLengths = async chatId => {
-  const res = await pool.query("SELECT start_id, end_id FROM reflections WHERE user_id=$1", [chatId]);
-  return getRows(res).map(({ start_id, end_id }) => end_id - start_id + 1);
+  const res = await pool.query("SELECT length FROM reflections WHERE user_id=$1", [chatId]);
+  return getRows(res).map(({ length }) => length);
 };
 
 const get = async (chatId, limit, offset) => {
@@ -45,12 +45,16 @@ const getAll = async chatId => {
 };
 
 const insert = (chatId, start) => {
-  return pool.query("INSERT INTO reflections(user_id, start_id) VALUES($1, $2)", [chatId, start]);
+  return pool.query("INSERT INTO reflections(user_id, start_id, length) VALUES($1, $2, 0)", [chatId, start]);
 };
 
-const update = (chatId, start, end, name) => {
-  return pool.query("UPDATE reflections SET end_id=$1, name=$2 WHERE user_id=$3 AND start_id=$4",
+const update = async (chatId, start, end, name) => {
+  const res = await pool.query(
+    `UPDATE reflections SET end_id=$1, name=$2
+    WHERE user_id=$3 AND start_id=$4
+    RETURNING length`,
     [end, name, chatId, start]);
+  return getFirst(res).length;
 };
 
 const deleteReflection = (chatId, start) => {
@@ -69,15 +73,20 @@ const open = async (chatId, start) => {
   current.setId(chatId, start);
 };
 
+const incrementLength = (chatId, start) => {
+  return pool.query(
+    "UPDATE reflections SET length=length+1 WHERE user_id=$1 AND start_id=$2",
+    [chatId, start]);
+};
+
 const close = async (chatId, end, name) => {
   const start = await current.getId(chatId);
 
   if (!start) return Promise.reject(errors.NO_REFLECTION_OPEN);
 
-  update(chatId, start, end, name);
   current.resetId(chatId);
-
-  return end - start + 1;
+  const length = await update(chatId, start, end, name);
+  return length;
 };
 
 const cancel = async chatId => {
@@ -93,5 +102,5 @@ module.exports = {
   current,
   getCount, getLengths,
   get, getAll,
-  isOpen, open, close, cancel,
+  isOpen, open, incrementLength, close, cancel,
 };

@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 
-const { prevCommand, sleep, progress, timezone } = require("../db").users;
+const { prevCommand, sleep, progress } = require("../db").users;
 
 // continueConversation
 const BEDTIME = "set bedtime";
