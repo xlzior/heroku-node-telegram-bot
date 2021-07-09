@@ -9,7 +9,9 @@ CREATE TABLE users(
   partial JSONB,
   tz VARCHAR,
   bedtime TIME,
-  wakeup_time TIME
+  wakeup_time TIME,
+  streak INTEGER,
+  last_reflection_date DATE
 );
 
 CREATE TABLE reflections(

@@ -1,14 +1,14 @@
 const db = require("../db");
-const { formatLevel } = require("../levels");
+const { formatStats } = require("../levels");
 const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require("../achievements");
 
 const utils = require("../utils");
 
 function handleStats({ bot }) {
   bot.onText(/\/lifexp/, async ({ chatId }) => {
-    const { level, xp, pinnedMessageId } = await db.users.progress.get(chatId);
+    const { level, xp, streak, pinnedMessageId } = await db.users.progress.get(chatId);
     bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
-    const messageId = await bot.sendAndPin(chatId, formatLevel(level, xp));
+    const messageId = await bot.sendAndPin(chatId, formatStats(level, xp, streak));
     db.users.pinnedMessageId.set(chatId, messageId);
   });
 
@@ -16,7 +16,7 @@ function handleStats({ bot }) {
     const { progress, idat, reflections, hashtags } = await db.stats.get(chatId);
 
     const statsDisplay = [
-      `*Level*: ${progress.level}\n*Total XP*: ${progress.xp}`,
+      `*Level*: ${progress.level}\n*Total XP*: ${progress.xp}\n*Streak*: 🔥 ${progress.streak}`,
       `*Journal entries*: ${reflections.count}
       Total: ${reflections.length.total} messages
       Average: ${Math.round(reflections.length.average)} messages per reflection

@@ -15,7 +15,7 @@ function handleSession({ bot }) {
     send("Alright, skipping this session.");
   });
 
-  bot.onText(/\/done/, async shortcuts => {
+  bot.onText(/\/done/, async (shortcuts, msg) => {
     const { chatId, send } = shortcuts;
     const { command, partial } = await prevCommand.get(chatId);
     if (command !== "scheduled") return;
@@ -29,7 +29,7 @@ function handleSession({ bot }) {
     } else {
       const botMsg = await send("You've completed your scheduled journalling session. Good job!");
       const tz = await db.users.timezone.get(chatId);
-      await bot.sendClosingStats(shortcuts, botMsg.message_id, generateDateTime(tz));
+      await bot.sendClosingStats(shortcuts, botMsg.message_id, generateDateTime(tz), msg.date);
       await prevCommand.reset(chatId);
     }
   });

@@ -49,7 +49,7 @@ function handleReflections({ bot, continueConversation }) {
   continueConversation["close"] = async (shortcuts, msg) => {
     const { send, chatId } = shortcuts;
     await send(`Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`);
-    await bot.sendClosingStats(shortcuts, msg.message_id, msg.text);
+    await bot.sendClosingStats(shortcuts, msg.message_id, msg.text, msg.date);
     await db.users.prevCommand.reset(chatId);
   };
 
