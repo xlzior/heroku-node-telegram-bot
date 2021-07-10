@@ -5,6 +5,8 @@ const utils = require("../utils");
 const { clean, MARKDOWN } = utils.telegram;
 const { generateQuestsList } = utils.pagination;
 
+const QUEST_HASHTAG = "#lifexp_quest";
+
 function handleQuests({ bot }) {
   bot.onText(/\/quests/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateQuestsList(chatId, 1);
@@ -45,7 +47,6 @@ function handleQuests({ bot }) {
     if (isOpen) return send("You already have a reflection open. Please /close the reflection before starting the quest.");
 
     const quest = await quests.get(match[1]);
-
     if (!quest) return send("Quest not found.");
 
     await bot.sendMessage(chatId, `You've started the quest "${quest.name}"! Here's your first prompt:`);
@@ -53,6 +54,7 @@ function handleQuests({ bot }) {
     const message = `*${quest.questions[0]}*\n\n✅ /done with prompt`;
     const botMsg = await bot.sendMessage(chatId, clean(message) , MARKDOWN);
     await db.reflections.open(chatId, botMsg.message_id);
+    await db.hashtags.add(chatId, [QUEST_HASHTAG]);
     await db.users.prevCommand.set(chatId, "quests", { index: 1, questId: match[1] });
   });
 
