@@ -4,7 +4,7 @@ const intro = [
 ].join("\n");
 
 const journal = [
-  "*Journal*",
+  "📝 *Journal*",
   "/open - start a new journal entry",
   "/prompt - get a randomised prompt",
   "/echo - give yourself a prompt",
@@ -13,21 +13,21 @@ const journal = [
 ].join("\n");
 
 const browse = [
-  "*Browse*",
+  "📖 *Browse*",
   "/reflections - list all reflections",
   "/hashtags - list all hashtags",
   "/hashtag - browse reflections with a particular hashtag",
 ].join("\n");
 
 const game = [
-  "*Game Features*",
+  "🎮 *Game Features*",
   "/lifexp - show level and XP",
   "/achievements - show display cabinet of achievement badges",
   "/stats - show statistics",
 ].join("\n");
 
 const scheduled = [
-  "*Scheduled Journalling Sessions*",
+  "⏰ *Scheduled Journalling Sessions*",
   "/manage_schedules",
   "/add_schedule",
   "/edit_schedule",
@@ -35,7 +35,7 @@ const scheduled = [
 ].join("\n");
 
 const bedtime = [
-  "*Bedtime*",
+  "🛌 *Bedtime*",
   "/set_bedtime",
   "/good_morning",
   "/good_night",
