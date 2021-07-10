@@ -5,7 +5,8 @@ const getId = async chatId => {
   const res = await pool.query(
     "SELECT current_reflection_id FROM users WHERE user_id=$1",
     [chatId]);
-  return getFirst(res).current_reflection_id;
+  if (res.rows.length > 0) return getFirst(res).current_reflection_id;
+  return null;
 };
 
 const setId = (chatId, start) => {
