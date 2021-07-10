@@ -65,3 +65,9 @@ CREATE TABLE schedules(
     FOREIGN KEY(user_id)
       REFERENCES users(user_id)
 );
+
+CREATE TABLE quests(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR,
+  questions VARCHAR[]
+);
