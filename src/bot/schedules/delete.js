@@ -1,15 +1,17 @@
 const db = require("../../db");
-const { schedules, users: { prevCommand } } = db;
-const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = require("../../utils").telegram;
+const { schedules, users: { prevCommand, timezone } } = db;
 
-const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } = require("../../utils").time;
+const utils = require("../../utils");
+const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = utils.telegram;
+const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } = utils.time;
 
+// continueConversation
 const SELECT = "schedule - delete - select";
 const CONFIRM = "schedule - delete - confirm";
 
 function handleDelete({ bot, continueConversation }) {
   bot.onText(/\/delete_schedule/, async ({ send, chatId }) => {
-    const tz = await db.users.timezone.get(chatId);
+    const tz = await timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 
     const userSchedules = await schedules.getUser(chatId);

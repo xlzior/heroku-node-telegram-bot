@@ -1,14 +1,15 @@
 const db = require("../../db");
-const { schedules, users: { prevCommand } } = db;
+const { schedules, users: { prevCommand, timezone } } = db;
 
 const { validateTime, formatScheduleInfo, localToUTC } = require("../../utils").time;
 
+// continueConversation
 const TIME = "schedule - add - time";
 const QUESTIONS = "schedule - add - questions";
 
 function handleAdd({ bot, continueConversation }) {
   bot.onText(/\/add_schedule/, async ({ send, chatId }) => {
-    const tz = await db.users.timezone.get(chatId);
+    const tz = await timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 
     send("Nice, let's create a new scheduled journalling session! What time would you like to have this session every day? Please send a time in 12-hour format (e.g. 9pm).");

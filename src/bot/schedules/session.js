@@ -1,5 +1,5 @@
 const db = require("../../db");
-const { schedules, users: { prevCommand } } = db;
+const { schedules, reflections, users: { prevCommand, timezone } } = db;
 
 const utils = require("../../utils");
 const { clean, MARKDOWN } = utils.telegram;
@@ -11,7 +11,7 @@ function handleSession({ bot }) {
     if (command !== "scheduled") return;
 
     prevCommand.reset(chatId);
-    db.reflections.cancel(chatId);
+    reflections.cancel(chatId);
     send("Alright, skipping this session.");
   });
 
@@ -28,7 +28,7 @@ function handleSession({ bot }) {
       prevCommand.set(chatId, "scheduled", { time, index: index + 1 });
     } else {
       const botMsg = await send("You've completed your scheduled journalling session. Good job!");
-      const tz = await db.users.timezone.get(chatId);
+      const tz = await timezone.get(chatId);
       await bot.sendClosingStats(shortcuts, botMsg.message_id, generateDateTime(tz), msg.date);
       await prevCommand.reset(chatId);
     }

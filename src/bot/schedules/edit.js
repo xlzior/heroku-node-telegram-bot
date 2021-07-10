@@ -1,16 +1,18 @@
 const db = require("../../db");
-const { schedules, users: { prevCommand } } = db;
-const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = require("../../utils").telegram;
+const { schedules, users: { prevCommand, timezone } } = db;
 
-const { validateTime, formatScheduleInfo, utcToLocal, localToUTC, utcToLocal24 } = require("../../utils").time;
+const utils = require("../../utils");
+const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = utils.telegram;
+const { validateTime, formatScheduleInfo, utcToLocal, localToUTC, utcToLocal24 } = utils.time;
 
+// continueConversation
 const SELECT = "schedule - edit - select";
 const TIME = "schedule - edit - time";
 const QUESTIONS = "schedule - edit - questions";
 
 function handleEdit({ bot, continueConversation }) {
   bot.onText(/\/edit_schedule/, async ({ send, chatId }) => {
-    const tz = await db.users.timezone.get(chatId);
+    const tz = await timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 
     const userSchedules = await schedules.getUser(chatId);
@@ -20,7 +22,7 @@ function handleEdit({ bot, continueConversation }) {
     } else if (userSchedules.length === 1) {
       const { time, questions } = userSchedules[0];
       const localTime = utcToLocal(time, tz);
-      send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nPlease send a new time for this scheduled session.`);
+      send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nPlease send a new time for this scheduled session in 12-hour format (e.g. 9pm).`);
       prevCommand.set(chatId, TIME, { time: localTime, tz });
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time, tz)));
@@ -35,7 +37,7 @@ function handleEdit({ bot, continueConversation }) {
 
     const questions = await schedules.getQuestions(chatId, localToUTC(time, tz));
     if (questions.length > 0) {
-      send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}\n\nPlease send a new time for this scheduled session.`, REMOVE_KEYBOARD);
+      send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}\n\nPlease send a new time for this scheduled session in 12-hour format (e.g. 9pm).`, REMOVE_KEYBOARD);
       // TODO: implement "no change" option?
       prevCommand.set(chatId, TIME, { time, tz });
     } else {
