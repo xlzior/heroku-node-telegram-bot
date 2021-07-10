@@ -7,7 +7,7 @@ const { formatStats } = require("../levels");
 const helpMessage = require("./help");
 
 function handleBasic({ bot }) {
-  bot.onText(/\/start/, async ({ send, chatId }, msg) => {
+  bot.onText(/\/start(@lifexp_bot)?$/, async ({ send, chatId }, msg) => {
     await send(`Hello, ${msg.from.first_name}!`);
 
     const message = [

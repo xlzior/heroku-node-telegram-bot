@@ -1,8 +1,9 @@
 const reflectionsDb = require("../db/reflections");
 const hashtagsDb = require("../db/hashtags");
+const questsDb = require("../db/quests");
 
 const { clean, MARKDOWN, withInlineKeyboard } = require("./telegram");
-const { formatReflection, formatHashtag } = require("./misc");
+const { formatReflection, formatHashtag, formatQuest } = require("./misc");
 
 const pageToOffset = perPage => page => perPage * (page - 1);
 const countToNumPages = perPage => count => Math.ceil(count / perPage);
@@ -92,8 +93,20 @@ const generateHashtagsList = generateList(
   chatId => hashtagsDb.getUniqueCount(chatId),
 );
 
+// callback_data: `quests`
+// data = [pageNumber]
+const generateQuestsList = generateList(
+  () => "quests",
+  5,
+  (chatId, data, perPage) => questsDb.getAll(perPage, pageToOffset(perPage)(data[0])),
+  () => "No quests found.",
+  quests => quests.map(formatQuest).join("\n\n"),
+  () => questsDb.getCount(),
+);
+
 module.exports = {
   generateReflectionsList,
   generateHashtagList,
   generateHashtagsList,
+  generateQuestsList,
 };

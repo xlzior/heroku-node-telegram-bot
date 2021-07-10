@@ -9,6 +9,7 @@ const handleIDAT = require("./idat");
 const handleStats = require("./stats");
 const handleSchedules = require("./schedules");
 const handleBedtime = require("./bedtime");
+const handleQuests = require("./quests");
 
 const token = process.env.TOKEN;
 
@@ -33,6 +34,7 @@ handleBrowse({ bot, continueConversation });
 handleStats({ bot, continueConversation });
 handleSchedules({ bot, continueConversation });
 handleBedtime({ bot, continueConversation });
+handleQuests({ bot, continueConversation });
 
 bot.onMessage(async (shortcuts, msg) => {
   const { chatId } = shortcuts;
