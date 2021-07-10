@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 
-const { prevCommand, sleep, progress } = require("../db").users;
+const { prevCommand, sleep, progress, timezone } = require("../db").users;
 
 // continueConversation
 const BEDTIME = "set bedtime";
@@ -42,6 +42,10 @@ const calculateXP = (goal, now) => {
 function handleBedtime({ bot, continueConversation }) {
   bot.onText(/\/set_bedtime/, async ({ send, chatId }) => {
     await send("Welcome to the bedtime feature. I can give you XP for going to sleep and waking up on time.");
+
+    const tz = await timezone.get(chatId);
+    if (!tz) return send("Use /set_timezone to get started.");
+
     const bedtime = await sleep.getBedtime(chatId);
     const wakeup = await sleep.getWakeup(chatId);
 

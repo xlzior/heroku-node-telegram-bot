@@ -1,5 +1,4 @@
 const db = require("../../db");
-const { schedules } = db;
 
 const utils = require("../../utils");
 const { clean, MARKDOWN } = utils.telegram;
@@ -12,7 +11,7 @@ function handleManage({ bot, continueConversation }) {
     const tz = await db.users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 
-    const userSchedules = await schedules.getUser(chatId);
+    const userSchedules = await db.schedules.getUser(chatId);
     userSchedules.sort((a, b) => utcToLocal24(a.time, tz) - utcToLocal24(b.time, tz));
     if (userSchedules.length === 0) {
       send("Use /add_schedule to get started.");
@@ -43,7 +42,7 @@ function handleManage({ bot, continueConversation }) {
   continueConversation["set timezone"] = async ({ send, chatId }, msg) => {
     const tz = msg.text;
     if (tz.match(/UTC[+-]\d+/)) {
-      send(`Alright, you have set your timezone to ${tz}. You can now add a new scheduled journalling session using /add_schedule`);
+      send(`Alright, you have set your timezone to ${tz}. You may now make use of time-related features such as scheduled journalling sessions or bedtime. Use /add_schedule or /set_bedtime to get started.`);
       db.users.timezone.set(chatId, tz);
       db.users.prevCommand.reset(chatId);
     } else {
