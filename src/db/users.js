@@ -89,10 +89,13 @@ const idat = {
 const prevCommand = {
   get: async chatId => {
     const res = await pool.query("SELECT prev_command, partial FROM users WHERE user_id=$1;", [chatId]);
-    return {
-      command: getFirst(res).prev_command,
-      partial: getFirst(res).partial,
-    };
+    if (res.length > 0) {
+      return {
+        command: getFirst(res).prev_command,
+        partial: getFirst(res).partial,
+      };
+    }
+    return {};
   },
   set: (chatId, command, partial={}) => {
     return pool.query(
