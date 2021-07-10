@@ -28,25 +28,19 @@ const progress = {
     const current = DateTime
       .fromSeconds(newReflectionDate, { zone: tz })
       .set({ hour: 0, minute: 0, second: 0 });
-    let newStreak = streak;
-    let newLastReflectionDate = lastReflectionDate;
 
+    let newStreak;
     if (lastReflectionDate) {
-      const previous = DateTime.fromJSDate(lastReflectionDate, { zone: tz });
+      const previous = DateTime.fromFormat(lastReflectionDate, "yyyy-MM-dd", { zone: tz });
       const delta = current.diff(previous, "day").values.days;
 
-      if (delta === 1) { // increment streak
-        newStreak = streak + 1;
-        newLastReflectionDate = current.toFormat("yyyy-MM-dd");
-      } else if (delta > 1) { // streak broken
-        newStreak = 1;
-        newLastReflectionDate = current.toFormat("yyyy-MM-dd");
-      }
-    } else { // initialise streak to 1
-      newStreak = 1;
-      newLastReflectionDate = current.toFormat("yyyy-MM-dd");
+      if (delta === 0) newStreak = streak;          // maintain streak
+      else if (delta === 1) newStreak = streak + 1; // increment streak
+      else if (delta > 1) newStreak = 1;            // streak broken
+    } else {
+      newStreak = 1;                                // initialise streak to 1
     }
-    return pool.query("UPDATE users SET streak=$1, last_reflection_date=$2 WHERE user_id=$3;", [newStreak, newLastReflectionDate, chatId]);
+    return pool.query("UPDATE users SET streak=$1, last_reflection_date=$2 WHERE user_id=$3;", [newStreak, current.toFormat("yyyy-MM-dd"), chatId]);
   },
   addXP: async (chatId, additionalXP) => {
     const currentProgress = await progress.get(chatId);

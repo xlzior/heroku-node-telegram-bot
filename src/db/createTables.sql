@@ -11,7 +11,7 @@ CREATE TABLE users(
   bedtime TIME,
   wakeup_time TIME,
   streak INTEGER,
-  last_reflection_date DATE
+  last_reflection_date VARCHAR -- stored as a string in yyyy-MM-dd format, to be interpreted as timezone tz
 );
 
 CREATE TABLE reflections(
