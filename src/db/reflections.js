@@ -69,8 +69,8 @@ const open = async (chatId, start) => {
   const reflectionId = await current.getId(chatId);
   if (reflectionId) return Promise.reject(errors.REFLECTION_ALREADY_OPEN);
 
-  insert(chatId, start);
-  current.setId(chatId, start);
+  await insert(chatId, start);
+  await current.setId(chatId, start);
 };
 
 const incrementLength = (chatId, start) => {
