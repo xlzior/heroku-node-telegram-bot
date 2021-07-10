@@ -10,7 +10,7 @@ const QUEST_HASHTAG = "#lifexp_quest";
 function handleQuests({ bot }) {
   bot.onText(/\/quests/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateQuestsList(chatId, 1);
-    if (!error) await send("All quests");
+    if (!error) await send("LifeXP quests provide you with a series of question prompts around a theme. Here are some quests for you to try, depending on what you wish to reflect on.");
     await send(message, options);
   });
 

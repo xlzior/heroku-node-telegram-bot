@@ -26,6 +26,11 @@ const game = [
   "/stats - show statistics",
 ].join("\n");
 
+const quests = [
+  "⚔️ *Quests*",
+  "/quests - browse quests",
+];
+
 const scheduled = [
   "⏰ *Scheduled Journalling Sessions*",
   "/manage_schedules",
@@ -49,4 +54,4 @@ const outro = [
   "I hope you have a meaningful journalling session. 😊",
 ].join("\n");
 
-module.exports = [intro, journal, browse, game, scheduled, bedtime, misc, outro];
+module.exports = [intro, journal, browse, game, quests, scheduled, bedtime, misc, outro];
