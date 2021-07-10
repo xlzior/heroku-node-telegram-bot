@@ -1,5 +1,5 @@
 CREATE TABLE users(
-  user_id INTEGER PRIMARY KEY,
+  user_id BIGINT PRIMARY KEY,
   level INTEGER,
   xp INTEGER,
   pinned_message_id INTEGER,
@@ -15,7 +15,7 @@ CREATE TABLE users(
 );
 
 CREATE TABLE reflections(
-  user_id INTEGER,
+  user_id BIGINT,
   start_id INTEGER,
   end_id INTEGER,
   name VARCHAR,
@@ -26,7 +26,7 @@ CREATE TABLE reflections(
 );
 
 CREATE TABLE achievements(
-  user_id INTEGER,
+  user_id BIGINT,
   type VARCHAR,
   level SMALLINT,
   PRIMARY KEY(user_id, type),
@@ -36,7 +36,7 @@ CREATE TABLE achievements(
 );
 
 CREATE TABLE hashtags(
-  user_id INTEGER,
+  user_id BIGINT,
   start_id INTEGER,
   hashtag VARCHAR,
   PRIMARY KEY(user_id, start_id, hashtag),
@@ -46,7 +46,7 @@ CREATE TABLE hashtags(
 );
 
 CREATE TABLE emojis(
-  user_id INTEGER,
+  user_id BIGINT,
   start_id INTEGER,
   emoji VARCHAR,
   count INTEGER,
@@ -57,7 +57,7 @@ CREATE TABLE emojis(
 );
 
 CREATE TABLE schedules(
-  user_id INTEGER,
+  user_id BIGINT,
   time VARCHAR,
   questions VARCHAR[],
   PRIMARY KEY(user_id, time),
