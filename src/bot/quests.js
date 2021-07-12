@@ -5,6 +5,7 @@ const utils = require("../utils");
 const { clean, MARKDOWN } = utils.telegram;
 const { generateQuestsList } = utils.pagination;
 
+const QUESTS = "quests";
 const QUEST_HASHTAG = "#lifexp_quest";
 
 function handleQuests({ bot }) {
@@ -17,7 +18,7 @@ function handleQuests({ bot }) {
   bot.on("callback_query", async ({ id, message: msg, data }) => {
     const [type, pageNumber] = data.split(" - ");
 
-    if (type === "quests") {
+    if (type === QUESTS) {
       if (pageNumber === "current") return;
 
       const { message, options } = await generateQuestsList(msg.chat.id, parseInt(pageNumber));
@@ -55,20 +56,20 @@ function handleQuests({ bot }) {
     const botMsg = await bot.sendMessage(chatId, clean(message) , MARKDOWN);
     await db.reflections.open(chatId, botMsg.message_id);
     await db.hashtags.add(chatId, [QUEST_HASHTAG]);
-    await db.users.prevCommand.set(chatId, "quests", { index: 1, questId: match[1] });
+    await db.users.prevCommand.set(chatId, QUESTS, { index: 1, questId: match[1] });
   });
 
   bot.onText(/\/done/, async (shortcuts, msg) => {
     const { chatId, send } = shortcuts;
     const { command, partial } = await prevCommand.get(chatId);
-    if (command !== "quests") return;
+    if (command !== QUESTS) return;
 
     const { questId, index } = partial;
     const { name, questions } = await quests.get(questId);
 
     if (index < questions.length) {
       send(clean(`*${questions[index]}*\n\n✅ /done`), MARKDOWN);
-      prevCommand.set(chatId, "quests", { questId, index: index + 1 });
+      prevCommand.set(chatId, QUESTS, { questId, index: index + 1 });
     } else {
       const botMsg = await send(`You've completed the quest "${name}". Good job!`);
       await bot.sendClosingStats(shortcuts, botMsg.message_id, name, msg.date);

@@ -5,10 +5,12 @@ const utils = require("../../utils");
 const { clean, MARKDOWN } = utils.telegram;
 const { generateDateTime } = utils.time;
 
+const SCHEDULED = "scheduled";
+
 function handleSession({ bot }) {
   bot.onText(/\/skip/, async ({ chatId, send }) => {
     const { command } = await prevCommand.get(chatId);
-    if (command !== "scheduled") return;
+    if (command !== SCHEDULED) return;
 
     prevCommand.reset(chatId);
     reflections.cancel(chatId);
@@ -18,14 +20,14 @@ function handleSession({ bot }) {
   bot.onText(/\/done/, async (shortcuts, msg) => {
     const { chatId, send } = shortcuts;
     const { command, partial } = await prevCommand.get(chatId);
-    if (command !== "scheduled") return;
+    if (command !== SCHEDULED) return;
 
     const { time, index } = partial;
     const questions = await schedules.getQuestions(chatId, time);
 
     if (index < questions.length) {
       send(clean(`*${questions[index]}*\n\n✅ /done`), MARKDOWN);
-      prevCommand.set(chatId, "scheduled", { time, index: index + 1 });
+      prevCommand.set(chatId, SCHEDULED, { time, index: index + 1 });
     } else {
       const botMsg = await send("You've completed your scheduled journalling session. Good job!");
       const tz = await timezone.get(chatId);
