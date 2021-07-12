@@ -45,7 +45,9 @@ const getAll = async chatId => {
 };
 
 const insert = (chatId, start) => {
-  return pool.query("INSERT INTO reflections(user_id, start_id, length) VALUES($1, $2, 0)", [chatId, start]);
+  return pool.query(
+    "INSERT INTO reflections(user_id, start_id, name, length) VALUES($1, $2, 'Reflection in progress', 0)",
+    [chatId, start]);
 };
 
 const update = async (chatId, start, end, name) => {
