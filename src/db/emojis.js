@@ -16,6 +16,18 @@ const getCurrent = async chatId => {
   ).then(getRows);
 };
 
+const getUser = async chatId => {
+  const res = await pool.query(
+    `SELECT emoji, SUM(count) AS count FROM emojis
+    WHERE user_id=$1
+    GROUP BY emoji
+    ORDER BY count DESC;`,
+    [chatId],
+  );
+  return getRows(res)
+    .map(({ emoji, count }) => ({ emoji, count: parseInt(count) }));
+};
+
 const add = async (chatId, emojis = []) => {
   if (emojis.length === 0) return;
   const startId = await current.getId(chatId);
@@ -31,6 +43,6 @@ const add = async (chatId, emojis = []) => {
 };
 
 module.exports = {
-  getCurrent, getCount,
+  getCurrent, getCount, getUser,
   add,
 };

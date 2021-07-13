@@ -3,6 +3,7 @@ const utils = require("../utils");
 const users = require("./users");
 const reflections = require("./reflections");
 const hashtagsDb = require("./hashtags");
+const emojisDb = require("./emojis");
 
 const get = async chatId => {
   const progress = users.progress.get(chatId);
@@ -11,6 +12,7 @@ const get = async chatId => {
   const reflectionLengths = reflections.getLengths(chatId);
   const hashtagsTotalCount = hashtagsDb.getTotalCount(chatId);
   const hashtagsUniqueCount = hashtagsDb.getUniqueCount(chatId);
+  const emojis = emojisDb.getUser(chatId);
 
   return {
     progress: await progress,
@@ -27,6 +29,7 @@ const get = async chatId => {
       total: await hashtagsTotalCount,
       unique: await hashtagsUniqueCount,
     },
+    emojis: await emojis,
   };
 };
 

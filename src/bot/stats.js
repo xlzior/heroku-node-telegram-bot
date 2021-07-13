@@ -13,21 +13,33 @@ function handleStats({ bot }) {
   });
 
   bot.onText(/\/stats/, async ({ send, chatId }) => {
-    const { progress, idat, reflections, hashtags } = await db.stats.get(chatId);
+    const { progress, idat, reflections, hashtags, emojis } = await db.stats.get(chatId);
 
-    const statsDisplay = [
-      `*Level*: ${progress.level}\n*Total XP*: ${progress.xp}\n*Streak*: 🔥 ${progress.streak}`,
-      `*Journal entries*: ${reflections.count}
-      Total: ${reflections.length.total} messages
-      Average: ${Math.round(reflections.length.average)} messages per reflection
-      Longest: ${reflections.length.maximum} messages
-      <i>(use /reflections to browse)</i>`,
-      `*Hashtags used*: ${hashtags.total}
-      ${hashtags.unique} unique hashtags
-      <i>(use /hashtags to browse)</i>`,
+    const game = [
+      `*Level*: ${progress.level}`,
+      `*Total XP*: ${progress.xp}`,
+      `*Streak*: 🔥 ${progress.streak}`,
+    ].join("\n");
+    const journal = [
+      `*Journal entries*: ${reflections.count}`,
+      `Total: ${reflections.length.total} messages`,
+      `Average: ${Math.round(reflections.length.average)} messages per reflection`,
+      `Longest: ${reflections.length.maximum} messages`,
+      "<i>(use /reflections to browse)</i>",
+    ].join("\n");
+    const hashtagsMessage = [
+      `*Hashtags used*: ${hashtags.total}`,
+      `${hashtags.unique} unique hashtags`,
+      "<i>(use /hashtags to browse)</i>",
+    ].join("\n");
+    const idatMessage = [
       `*Great things done*: ${idat}`,
-    ];
-    const message = statsDisplay.join("\n\n");
+    ].join("\n");
+    const emojisMessage = [
+      `*Emojis used*: ${utils.sum(emojis.map(({ count }) => count))}`,
+      `Top 10 emojis:\n${utils.emojiChart(emojis.slice(0, 10))}`,
+    ].join("\n");
+    const message = [game, journal, hashtagsMessage, idatMessage, emojisMessage].join("\n\n");
     send(utils.telegram.clean(message), utils.telegram.MARKDOWN);
   });
 
