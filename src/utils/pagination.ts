@@ -1,9 +1,11 @@
-const reflectionsDb = require("../db/reflections");
-const hashtagsDb = require("../db/hashtags");
-const questsDb = require("../db/quests");
+import reflectionsDb = require("../db/reflections");
+import hashtagsDb = require("../db/hashtags");
+import questsDb = require("../db/quests");
 
-const { clean, MARKDOWN, withInlineKeyboard } = require("./telegram");
-const { formatReflection, formatHashtag, formatQuest } = require("./misc");
+import telegram = require("./telegram");
+const { clean, MARKDOWN, withInlineKeyboard } = telegram;
+import misc = require("./misc");
+const { formatReflection, formatHashtag, formatQuest } = misc;
 
 const pageToOffset = perPage => page => perPage * (page - 1);
 const countToNumPages = perPage => count => Math.ceil(count / perPage);
@@ -59,7 +61,7 @@ const generateList = (
 
 // callback_data: `reflections - ${pageNumber}`
 // data = [pageNumber]
-const generateReflectionsList = generateList(
+export const generateReflectionsList = generateList(
   () => "reflections",
   5,
   (chatId, data, perPage) => reflectionsDb.get(
@@ -71,7 +73,7 @@ const generateReflectionsList = generateList(
 
 // callback_data: `hashtag - ${hashtag} - ${pageNumber}`
 // data = [hashtag, pageNumber]
-const generateHashtagList = generateList(
+export const generateHashtagList = generateList(
   (chatId, data) => `hashtag - ${data[0]}`,
   5,
   (chatId, data, perPage) => hashtagsDb.get(
@@ -83,7 +85,7 @@ const generateHashtagList = generateList(
 
 // callback_data: `hashtags - ${pageNumber}`
 // data = [pageNumber]
-const generateHashtagsList = generateList(
+export const generateHashtagsList = generateList(
   () => "hashtags",
   25,
   (chatId, data, perPage) => hashtagsDb.getAll(
@@ -95,7 +97,7 @@ const generateHashtagsList = generateList(
 
 // callback_data: `quests`
 // data = [pageNumber]
-const generateQuestsList = generateList(
+export const generateQuestsList = generateList(
   () => "quests",
   5,
   (chatId, data, perPage) => questsDb.getAll(perPage, pageToOffset(perPage)(data[0])),
@@ -103,10 +105,3 @@ const generateQuestsList = generateList(
   quests => quests.map(formatQuest).join("\n\n"),
   () => questsDb.getCount(),
 );
-
-module.exports = {
-  generateReflectionsList,
-  generateHashtagList,
-  generateHashtagsList,
-  generateQuestsList,
-};
