@@ -1,13 +1,13 @@
-const db = require("../../db");
-const { schedules, reflections, users: { prevCommand, timezone } } = db;
+import db = require("../../db");
+import utils = require("../../utils");
 
-const utils = require("../../utils");
+const { schedules, reflections, users: { prevCommand, timezone } } = db;
 const { clean, MARKDOWN } = utils.telegram;
 const { generateDateTime } = utils.time;
 
 const SCHEDULED = "scheduled";
 
-function handleSession({ bot }) {
+function handleSession(bot, continueConversation) {
   bot.onText(/\/skip/, async ({ chatId, send }) => {
     const { command } = await prevCommand.get(chatId);
     if (command !== SCHEDULED) return;
@@ -37,4 +37,4 @@ function handleSession({ bot }) {
   });
 }
 
-module.exports = handleSession;
+export = handleSession;

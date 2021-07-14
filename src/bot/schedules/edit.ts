@@ -1,7 +1,7 @@
-const db = require("../../db");
-const { schedules, users: { prevCommand, timezone } } = db;
+import db = require("../../db");
+import utils = require("../../utils");
 
-const utils = require("../../utils");
+const { schedules, users: { prevCommand, timezone } } = db;
 const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = utils.telegram;
 const { validateTime, formatScheduleInfo, utcToLocal, localToUTC, utcToLocal24 } = utils.time;
 
@@ -10,7 +10,7 @@ const SELECT = "schedule - edit - select";
 const TIME = "schedule - edit - time";
 const QUESTIONS = "schedule - edit - questions";
 
-function handleEdit({ bot, continueConversation }) {
+function handleEdit(bot, continueConversation) {
   bot.onText(/\/edit_schedule/, async ({ send, chatId }) => {
     const tz = await timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
@@ -67,4 +67,4 @@ function handleEdit({ bot, continueConversation }) {
   };
 }
 
-module.exports = handleEdit;
+export = handleEdit;

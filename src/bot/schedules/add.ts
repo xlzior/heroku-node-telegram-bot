@@ -1,4 +1,4 @@
-const db = require("../../db");
+import db = require("../../db");
 const { schedules, users: { prevCommand, timezone } } = db;
 
 const { validateTime, formatScheduleInfo, localToUTC } = require("../../utils").time;
@@ -7,7 +7,7 @@ const { validateTime, formatScheduleInfo, localToUTC } = require("../../utils").
 const TIME = "schedule - add - time";
 const QUESTIONS = "schedule - add - questions";
 
-function handleAdd({ bot, continueConversation }) {
+function handleAdd(bot, continueConversation) {
   bot.onText(/\/add_schedule/, async ({ send, chatId }) => {
     const tz = await timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
@@ -38,4 +38,4 @@ function handleAdd({ bot, continueConversation }) {
   };
 }
 
-module.exports = handleAdd;
+export = handleAdd;

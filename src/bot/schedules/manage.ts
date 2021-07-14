@@ -1,11 +1,11 @@
-const db = require("../../db");
-const { schedules, users: { prevCommand, timezone } } = db;
+import db = require("../../db");
+import utils = require("../../utils");
 
-const utils = require("../../utils");
+const { schedules, users: { prevCommand, timezone } } = db;
 const { clean, MARKDOWN } = utils.telegram;
 const { utcToLocal, utcToLocal24 } = utils.time;
 
-function handleManage({ bot, continueConversation }) {
+function handleManage(bot, continueConversation) {
   bot.onText(/\/manage_schedules/, async ({ send, chatId }) => {
     await send("Welcome to the scheduled journalling prompts feature. I can send you a fixed set of prompts every day at a time of your choosing.");
 
@@ -52,4 +52,4 @@ function handleManage({ bot, continueConversation }) {
   };
 }
 
-module.exports = handleManage;
+export = handleManage;
