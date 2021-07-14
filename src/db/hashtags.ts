@@ -1,22 +1,24 @@
-const current = require("./current");
-const { pool, getFirst, getRows } = require("./postgresql");
+import current = require("./current");
+import postgresql = require("./postgresql");
 
-const getCount = async (chatId, hashtag) => {
+const { pool, getFirst, getRows } = postgresql;
+
+export const getCount = async (chatId, hashtag) => {
   const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1 AND hashtag=$2;", [chatId, hashtag]);
   return parseInt(getFirst(res).count);
 };
 
-const getTotalCount = async chatId => {
+export const getTotalCount = async chatId => {
   const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1;", [chatId]);
   return parseInt(getFirst(res).count);
 };
 
-const getUniqueCount = async chatId => {
+export const getUniqueCount = async chatId => {
   const res = await pool.query("SELECT COUNT(DISTINCT hashtag) FROM hashtags WHERE user_id=$1;", [chatId]);
   return parseInt(getFirst(res).count);
 };
 
-const getAll = async (chatId, limit, offset) => {
+export const getAll = async (chatId, limit, offset) => {
   const res = await pool.query(
     `SELECT hashtag, COUNT(hashtag) AS count
     FROM hashtags
@@ -28,7 +30,7 @@ const getAll = async (chatId, limit, offset) => {
   return getRows(res);
 };
 
-const get = async (chatId, hashtag, limit, offset) => {
+export const get = async (chatId, hashtag, limit, offset) => {
   const res = await pool.query(
     `SELECT name, reflections.start_id
     FROM hashtags
@@ -41,7 +43,7 @@ const get = async (chatId, hashtag, limit, offset) => {
   return getRows(res);
 };
 
-const add = async (chatId, hashtags = []) => {
+export const add = async (chatId, hashtags = []) => {
   if (hashtags.length === 0) return;
   const startId = await current.getId(chatId);
   const promises = hashtags.map(hashtag => {
@@ -51,13 +53,4 @@ const add = async (chatId, hashtags = []) => {
       [chatId, startId, hashtag]);
   });
   return Promise.all(promises);
-};
-
-module.exports = {
-  getCount,
-  getTotalCount,
-  getUniqueCount,
-  getAll,
-  get,
-  add,
 };

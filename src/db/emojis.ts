@@ -1,12 +1,12 @@
-const current = require("./current");
+import current = require("./current");
 const { pool, getRows, getFirst } = require("./postgresql");
 
-const getCount = async chatId => {
+export const getCount = async chatId => {
   const res = await pool.query("SELECT SUM(count) FROM emojis WHERE user_id=$1", [chatId]);
   return getFirst(res).sum;
 };
 
-const getCurrent = async chatId => {
+export const getCurrent = async chatId => {
   const startId = await current.getId(chatId);
   return pool.query(
     `SELECT emoji, count FROM emojis
@@ -16,7 +16,7 @@ const getCurrent = async chatId => {
   ).then(getRows);
 };
 
-const getUser = async chatId => {
+export const getUser = async chatId => {
   const res = await pool.query(
     `SELECT emoji, SUM(count) AS count FROM emojis
     WHERE user_id=$1
@@ -28,7 +28,7 @@ const getUser = async chatId => {
     .map(({ emoji, count }) => ({ emoji, count: parseInt(count) }));
 };
 
-const add = async (chatId, emojis = []) => {
+export const add = async (chatId, emojis = []) => {
   if (emojis.length === 0) return;
   const startId = await current.getId(chatId);
   const promises = emojis.map(({ emoji, count }) => {
@@ -40,9 +40,4 @@ const add = async (chatId, emojis = []) => {
       [chatId, startId, emoji, count]);
   });
   return Promise.all(promises);
-};
-
-module.exports = {
-  getCurrent, getCount, getUser,
-  add,
 };

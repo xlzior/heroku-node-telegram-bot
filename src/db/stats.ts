@@ -1,11 +1,11 @@
-const utils = require("../utils");
+import utils = require("../utils");
 
-const users = require("./users");
-const reflections = require("./reflections");
-const hashtagsDb = require("./hashtags");
-const emojisDb = require("./emojis");
+import users = require("./users");
+import reflections = require("./reflections");
+import hashtagsDb = require("./hashtags");
+import emojisDb = require("./emojis");
 
-const get = async chatId => {
+export const get = async chatId => {
   const progress = users.progress.get(chatId);
   const idat = users.idat.get(chatId);
   const reflectionsCount = reflections.getCount(chatId);
@@ -31,8 +31,4 @@ const get = async chatId => {
     },
     emojis: await emojis,
   };
-};
-
-module.exports = {
-  get,
 };
