@@ -1,14 +1,14 @@
-const db = require("../db");
+import db = require("../db");
 const { quests, users: { prevCommand } } = db;
 
-const utils = require("../utils");
+import utils = require("../utils");
 const { clean, MARKDOWN } = utils.telegram;
 const { generateQuestsList } = utils.pagination;
 
 const QUESTS = "quests";
 const QUEST_HASHTAG = "#lifexp_quest";
 
-function handleQuests({ bot }) {
+function handleQuests(bot, continueConversation) {
   bot.onText(/\/quests/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateQuestsList(chatId, 1);
     if (!error) await send("LifeXP quests provide you with a series of question prompts around a theme. Here are some quests for you to try, depending on what you wish to reflect on.");
@@ -78,4 +78,4 @@ function handleQuests({ bot }) {
   });
 }
 
-module.exports = handleQuests;
+export = handleQuests;

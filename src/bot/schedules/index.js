@@ -4,7 +4,7 @@ const handleEdit = require("./edit");
 const handleDelete = require("./delete");
 const handleManage = require("./manage");
 
-function handleSchedules({ bot, continueConversation }) {
+function handleSchedules(bot, continueConversation) {
   handleSession({ bot, continueConversation });
   handleAdd({ bot, continueConversation });
   handleEdit({ bot, continueConversation });

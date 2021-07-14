@@ -1,8 +1,8 @@
-const db = require("../db");
-const errors = require("../db/errors");
-const utils = require("../utils");
+import db = require("../db");
+import errors = require("../db/errors");
+import utils = require("../utils");
 
-function handleReflections({ bot, continueConversation }) {
+function handleReflections(bot, continueConversation) {
   bot.onText(/\/prompt/, ({ send }) => {
     send(utils.getRandomPrompt());
   });
@@ -67,4 +67,4 @@ function handleReflections({ bot, continueConversation }) {
   });
 }
 
-module.exports = handleReflections;
+export = handleReflections;

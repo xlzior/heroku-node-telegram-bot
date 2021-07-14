@@ -1,15 +1,15 @@
-const Bot = require("./TelegramBot");
+import Bot = require("./TelegramBot");
 
-const db = require("../db");
+import db = require("../db");
 
-const handleBasic = require("./basic");
-const handleBrowse = require("./browse");
-const handleReflections = require("./reflections");
-const handleIDAT = require("./idat");
-const handleStats = require("./stats");
-const handleSchedules = require("./schedules");
-const handleBedtime = require("./bedtime");
-const handleQuests = require("./quests");
+import handleBasic = require("./basic");
+import handleBrowse = require("./browse");
+import handleReflections = require("./reflections");
+import handleIDAT = require("./idat");
+import handleStats = require("./stats");
+import handleSchedules = require("./schedules");
+import handleBedtime = require("./bedtime");
+import handleQuests = require("./quests");
 
 const token = process.env.TOKEN;
 
@@ -27,14 +27,14 @@ console.info(`Bot server started in ${process.env.NODE_ENV} mode`);
 
 const continueConversation = {};
 
-handleBasic({ bot, continueConversation });
-handleReflections({ bot, continueConversation });
-handleIDAT({ bot, continueConversation });
-handleBrowse({ bot, continueConversation });
-handleStats({ bot, continueConversation });
-handleSchedules({ bot, continueConversation });
-handleBedtime({ bot, continueConversation });
-handleQuests({ bot, continueConversation });
+handleBasic(bot, continueConversation);
+handleReflections(bot, continueConversation);
+handleIDAT(bot, continueConversation);
+handleBrowse(bot, continueConversation);
+handleStats(bot, continueConversation);
+handleSchedules(bot, continueConversation);
+handleBedtime(bot, continueConversation);
+handleQuests(bot, continueConversation);
 
 bot.onMessage(async (shortcuts, msg) => {
   const { chatId } = shortcuts;

@@ -1,5 +1,5 @@
-const db = require("../db");
-const utils = require("../utils");
+import db = require("../db");
+import utils = require("../utils");
 const { generateReflectionsList, generateHashtagsList, generateHashtagList } = utils.pagination;
 
 const {
@@ -7,7 +7,7 @@ const {
   replyTo,
 } = utils.telegram;
 
-function handleBrowse({ bot, continueConversation }) {
+function handleBrowse(bot, continueConversation) {
   bot.onText(/\/reflections/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateReflectionsList(chatId, 1);
     if (!error) await send("All reflections");
@@ -78,4 +78,4 @@ function handleBrowse({ bot, continueConversation }) {
   });
 }
 
-module.exports = handleBrowse;
+export = handleBrowse;

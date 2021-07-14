@@ -1,12 +1,12 @@
-const db = require("../db");
-const errors = require("../db/errors");
-const utils = require("../utils");
+import db = require("../db");
+import errors = require("../db/errors");
+import utils = require("../utils");
 const { clean, MARKDOWN } = utils.telegram;
 const { formatStats } = require("../levels");
 
 const helpMessage = require("./help");
 
-function handleBasic({ bot }) {
+function handleBasic(bot, continueConversation) {
   bot.onText(/\/start(@lifexp_bot)?$/, async ({ send, chatId }, msg) => {
     await send(`Hello, ${msg.from.first_name}!`);
 
@@ -48,4 +48,4 @@ function handleBasic({ bot }) {
   });
 }
 
-module.exports = handleBasic;
+export = handleBasic;
