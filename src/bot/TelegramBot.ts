@@ -1,10 +1,13 @@
 const Bot = require("node-telegram-bot-api");
 
-const { getBadgeImage, getBadgeLabel, checkForNewBadge } = require("../achievements");
-const { formatStats } = require("../levels");
-const db = require("../db");
-const errors = require("../db/errors");
-const utils = require("../utils");
+import achievementUtils = require("../achievements");
+import levelUtils = require("../levels");
+import db = require("../db");
+import errors = require("../db/errors");
+import utils = require("../utils");
+
+const { getBadgeImage, getBadgeLabel, checkForNewBadge } = achievementUtils;
+const { formatStats } = levelUtils;
 
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)
@@ -120,4 +123,4 @@ Bot.prototype.sendClosingStats = async function({ send, chatId }, messageId, nam
   });
 };
 
-module.exports = Bot;
+export = Bot;

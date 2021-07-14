@@ -1,6 +1,8 @@
 const { DateTime } = require("luxon");
 
-const { prevCommand, sleep, progress, timezone } = require("../db").users;
+import db = require("../db");
+
+const { prevCommand, sleep, progress, timezone } = db.users;
 
 // continueConversation
 const BEDTIME = "set bedtime";
@@ -39,7 +41,7 @@ const calculateXP = (goal, now) => {
   return { xp: 0, message: "You're too late 😔 Try not to deviate too much from your goal!" };
 };
 
-function handleBedtime({ bot, continueConversation }) {
+function handleBedtime(bot, continueConversation) {
   bot.onText(/\/set_bedtime/, async ({ send, chatId }) => {
     await send("Welcome to the bedtime feature. I can give you XP for going to sleep and waking up on time.");
 
@@ -117,4 +119,4 @@ function handleBedtime({ bot, continueConversation }) {
   });
 }
 
-module.exports = handleBedtime;
+export = handleBedtime;

@@ -1,10 +1,13 @@
-const db = require("../db");
-const { formatStats } = require("../levels");
-const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = require("../achievements");
+import db = require("../db");
+import levelUtils = require("../levels");
+import achievementsUtils = require("../achievements");
+
+const { formatStats } = levelUtils;
+const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = achievementsUtils;
 
 const utils = require("../utils");
 
-function handleStats({ bot }) {
+function handleStats(bot, continueConversation) {
   bot.onText(/\/lifexp/, async ({ chatId }) => {
     const { level, xp, streak, pinnedMessageId } = await db.users.progress.get(chatId);
     bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
@@ -69,4 +72,4 @@ function handleStats({ bot }) {
   });
 }
 
-module.exports = handleStats;
+export = handleStats;
