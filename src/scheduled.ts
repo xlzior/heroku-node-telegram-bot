@@ -1,9 +1,9 @@
 require("dotenv").config();
-const { DateTime } = require("luxon");
-const Bot = require("node-telegram-bot-api");
+import { DateTime } from "luxon";
+import Bot = require("node-telegram-bot-api");
 
-const { handleRequests, server } = require("../web");
-const db = require("./db");
+import { handleRequests, server } from "../web";
+import db = require("./db");
 const { telegram: { clean, MARKDOWN }, time: { formatTime } } = require("./utils");
 
 const token = process.env.TOKEN;
