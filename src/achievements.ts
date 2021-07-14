@@ -1,7 +1,7 @@
 // const BADGE_LEVEL_LABELS = ["", "Bronze", "Silver", "Gold"];
 const BADGE_LEVEL_EMOJIS = ["", "🥉", "🥈", "🥇"];
 
-const BLANK_BADGE = "AgACAgUAAxkBAAIGB2DA0i_hf0S1ngYqmqp-f-pW7as5AALsrjEbEjMAAVYAAWO6j_uMthMYaJVydAADAQADAgADeAADilAAAh8E";
+export const BLANK_BADGE = "AgACAgUAAxkBAAIGB2DA0i_hf0S1ngYqmqp-f-pW7as5AALsrjEbEjMAAVYAAWO6j_uMthMYaJVydAADAQADAgADeAADilAAAh8E";
 
 const BADGES = {
   reflections: {
@@ -63,7 +63,7 @@ const getBadgeLevel = (badgeValues, value) => {
   }
 };
 
-const checkForNewBadge = (type, previousLevel = 0, value) => {
+export const checkForNewBadge = (type, previousLevel = 0, value) => {
   const currentLevel = getBadgeLevel(BADGES[type].values, value);
   return {
     hasNewBadge: currentLevel > previousLevel,
@@ -72,17 +72,10 @@ const checkForNewBadge = (type, previousLevel = 0, value) => {
   };
 };
 
-const getBadgeImage = (type, badgeLevel) => {
+export const getBadgeImage = (type, badgeLevel) => {
   return BADGES[type].images[badgeLevel];
 };
 
-const getBadgeLabel = (type, badgeLevel) => {
+export const getBadgeLabel = (type, badgeLevel) => {
   return `${BADGES[type].name} ${BADGE_LEVEL_EMOJIS[badgeLevel]}`;
-};
-
-module.exports = {
-  checkForNewBadge,
-  getBadgeImage,
-  getBadgeLabel,
-  BLANK_BADGE,
 };
