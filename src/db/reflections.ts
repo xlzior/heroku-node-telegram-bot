@@ -1,7 +1,8 @@
-const { pool, getFirst, getRows } = require("./postgresql");
+import postgresql = require("./postgresql");
+const { pool, getFirst, getRows } = postgresql;
 
-const current = require("./current");
-const errors = require("./errors");
+import current = require("./current");
+import errors = require("./errors");
 
 const getCount = async chatId => {
   const res = await pool.query("SELECT COUNT(*) FROM reflections WHERE user_id=$1", [chatId]);
@@ -100,7 +101,7 @@ const cancel = async chatId => {
   current.resetId(chatId);
 };
 
-module.exports = {
+export = {
   current,
   getCount, getLengths,
   get, getAll,

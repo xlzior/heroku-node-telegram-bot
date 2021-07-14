@@ -1,20 +1,20 @@
-const { DateTime } = require("luxon");
+import { DateTime } from "luxon";
 
-const { checkForNewBadge } = require("../achievements");
-const { incrementXP } = require("../levels");
+import { checkForNewBadge } from "../achievements";
+import { incrementXP } from "../levels";
 
-const { pool, getFirst } = require("./postgresql");
-const achievementsDb = require("./achievements");
-const errors = require("./errors");
+import { pool, getFirst } from "./postgresql";
+import achievementsDb = require("./achievements");
+import errors = require("./errors");
 
-const create = async chatId => {
+export const create = async chatId => {
   return pool.query(
     "INSERT INTO users(user_id, level, xp, idat) VALUES($1, 1, 0, 0);",
     [chatId])
     .catch(() => Promise.reject(errors.USER_ALREADY_EXISTS));
 };
 
-const progress = {
+export const progress = {
   get: async chatId => {
     const res = await pool.query("SELECT level, xp, streak, pinned_message_id FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res);
@@ -55,7 +55,7 @@ const progress = {
   },
 };
 
-const pinnedMessageId = {
+export const pinnedMessageId = {
   get: async chatId => {
     const res = await pool.query("SELECT pinned_message_id FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res);
@@ -65,7 +65,7 @@ const pinnedMessageId = {
   },
 };
 
-const idat = {
+export const idat = {
   get: async chatId => {
     const res = await pool.query("SELECT idat FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res).idat;
@@ -86,7 +86,7 @@ const idat = {
   },
 };
 
-const prevCommand = {
+export const prevCommand = {
   get: async chatId => {
     const res = await pool.query("SELECT prev_command, partial FROM users WHERE user_id=$1;", [chatId]);
     if (res.rows.length > 0) {
@@ -107,7 +107,7 @@ const prevCommand = {
   },
 };
 
-const timezone = {
+export const timezone = {
   get: async chatId => {
     const res = await pool.query("SELECT tz FROM users WHERE user_id=$1", [chatId]);
     return getFirst(res).tz;
@@ -117,7 +117,7 @@ const timezone = {
   },
 };
 
-const sleep = {
+export const sleep = {
   // bedtime and wakeup_time are stored as user's local timezone
   getBedtime: async chatId => {
     const res = await pool.query("SELECT bedtime, tz FROM users WHERE user_id=$1", [chatId]);
@@ -132,14 +132,4 @@ const sleep = {
   set: async (chatId, bedtime, wakeup) => {
     return pool.query("UPDATE users SET bedtime=$1, wakeup_time=$2 WHERE user_id=$3", [bedtime, wakeup, chatId]);
   },
-};
-
-module.exports = {
-  create,
-  progress,
-  pinnedMessageId,
-  idat,
-  prevCommand,
-  timezone,
-  sleep,
 };

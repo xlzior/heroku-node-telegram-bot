@@ -1,22 +1,17 @@
-const { pool, getFirst, getRows } = require("./postgresql");
+import postgresql = require("./postgresql");
+const { pool, getFirst, getRows } = postgresql;
 
-const getAll = async (limit, offset) => {
+export const getAll = async (limit, offset) => {
   const res = await pool.query("SELECT * FROM quests LIMIT $1 OFFSET $2;", [limit, offset]);
   return getRows(res);
 };
 
-const get = async questId => {
+export const get = async questId => {
   const res = await pool.query("SELECT name, questions FROM quests WHERE id=$1;", [questId]);
   return getFirst(res);
 };
 
-const getCount = async () => {
+export const getCount = async () => {
   const res = await pool.query("SELECT COUNT(id) FROM quests;");
   return getFirst(res).count;
-};
-
-module.exports = {
-  getAll,
-  get,
-  getCount,
 };

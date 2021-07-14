@@ -1,4 +1,5 @@
-const { pool, getRows, getFirst } = require("./postgresql");
+import postgresql = require("./postgresql");
+const { pool, getRows, getFirst } = postgresql;
 
 const getUser = chatId => {
   return pool.query("SELECT time, questions FROM schedules WHERE user_id=$1;", [chatId])
@@ -32,7 +33,7 @@ const deleteSchedule = (chatId, time) => {
   return pool.query("DELETE FROM schedules WHERE user_id=$1 AND time=$2;", [chatId, time]);
 };
 
-module.exports = {
+export = {
   getUser,
   getTime,
   getQuestions,
