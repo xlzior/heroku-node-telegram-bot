@@ -8,6 +8,7 @@ module.exports = {
   "parserOptions": {
     "ecmaVersion": 12,
   },
+  "ignorePatterns": ["built/**/*.js"],
   "rules": {
     "arrow-parens": ["error", "as-needed"],
     "comma-dangle": ["error", {
