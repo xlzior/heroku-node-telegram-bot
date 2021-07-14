@@ -25,7 +25,7 @@ function handleAdd({ bot, continueConversation }) {
       send(`You already have a session set for ${formatScheduleInfo(time, questions)}\n\nPlease use /edit_schedule instead.`);
       prevCommand.reset(chatId);
     } else {
-      send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
+      send("What question prompts would you like to use in this session? You may have more than one prompt, just be sure to separate them with a line break.");
       prevCommand.set(chatId, QUESTIONS, { time, tz });
     }
   };

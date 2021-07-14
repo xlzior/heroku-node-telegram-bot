@@ -54,7 +54,7 @@ function handleEdit({ bot, continueConversation }) {
       send(`You already have a session set for ${formatScheduleInfo(newTime, questions)}\n\nYou cannot have two journalling sessions scheduled for the same time.`);
       prevCommand.reset(chatId);
     } else {
-      send("What question prompts would you like to use in this session? You may have more than one question, just be sure to separate them with a line break.");
+      send("What question prompts would you like to use in this session? You may have more than one prompt, just be sure to separate them with a line break.");
       prevCommand.set(chatId, QUESTIONS, { time, tz, newTime });
     }
   };
