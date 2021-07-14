@@ -32,7 +32,7 @@ export const progress = {
     let newStreak;
     if (lastReflectionDate) {
       const previous = DateTime.fromFormat(lastReflectionDate, "yyyy-MM-dd", { zone: tz });
-      const delta = current.diff(previous, "day").values.days;
+      const delta = current.diff(previous, "day").days;
 
       if (delta === 0) newStreak = streak;          // maintain streak
       else if (delta === 1) newStreak = streak + 1; // increment streak
