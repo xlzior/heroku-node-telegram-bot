@@ -1,7 +1,7 @@
-const db = require("../../db");
-const { schedules, users: { prevCommand, timezone } } = db;
+import db = require("../../db");
+import utils = require("../../utils");
 
-const utils = require("../../utils");
+const { schedules, users: { prevCommand, timezone } } = db;
 const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = utils.telegram;
 const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } = utils.time;
 
@@ -9,7 +9,7 @@ const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 }
 const SELECT = "schedule - delete - select";
 const CONFIRM = "schedule - delete - confirm";
 
-function handleDelete({ bot, continueConversation }) {
+function handleDelete(bot, continueConversation) {
   bot.onText(/\/delete_schedule/, async ({ send, chatId }) => {
     const tz = await timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
@@ -54,4 +54,4 @@ function handleDelete({ bot, continueConversation }) {
   };
 }
 
-module.exports = handleDelete;
+export = handleDelete;
