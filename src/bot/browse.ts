@@ -40,7 +40,7 @@ function handleBrowse(bot, continueConversation) {
   });
 
   bot.onText(/\/hashtag(@lifexp_bot)?$/, async ({ send, chatId }) => {
-    const hashtags = await db.hashtags.getAll(chatId);
+    const hashtags = await db.hashtags.getAll(chatId, null, 0);
     if (hashtags.length === 0) {
       return send("You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
     }
