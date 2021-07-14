@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "./built",
+    "allowJs": true,
+    "target": "es2017",
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+  },
+  "include": [
+    "./src/**/*",
+    "./src/**/*.json"
+  ]
+}
