@@ -1,6 +1,6 @@
-import emojiTree = require("emoji-tree");
+import * as emojiTree from "emoji-tree";
 
-import prompts = require("../prompts.json");
+import * as prompts from "../prompts.json";
 
 export const getRandomPrompt = () => {
   const index = Math.floor(Math.random() * prompts.random.length);

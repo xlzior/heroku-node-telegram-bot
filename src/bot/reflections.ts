@@ -1,10 +1,10 @@
-import db = require("../db");
-import errors = require("../db/errors");
-import utils = require("../utils");
+import * as db from "../db";
+import * as errors from "../db/errors";
+import { getRandomPrompt, telegram, countEmojis } from "../utils";
 
-function handleReflections(bot, continueConversation) {
+export default function handleReflections(bot, continueConversation) {
   bot.onText(/\/prompt/, ({ send }) => {
-    send(utils.getRandomPrompt());
+    send(getRandomPrompt());
   });
 
   bot.onText(/\/echo(@lifexp_bot)? (.+)/, ({ send }, msg, match) => {
@@ -38,7 +38,7 @@ function handleReflections(bot, continueConversation) {
     const isOpen = await db.reflections.isOpen(chatId);
     if (isOpen) {
       send("Whew! Nice journalling session. How would you like to name this reflection for future browsing?",
-        utils.telegram.FORCE_REPLY);
+        telegram.FORCE_REPLY);
       db.users.prevCommand.set(chatId, "close");
     } else {
       send("You have not started a reflection. Use /open to start a new reflection");
@@ -63,8 +63,6 @@ function handleReflections(bot, continueConversation) {
       db.hashtags.add(chatId, hashtags);
     }
 
-    db.emojis.add(chatId, utils.countEmojis(msg.text));
+    db.emojis.add(chatId, countEmojis(msg.text));
   });
 }
-
-export = handleReflections;

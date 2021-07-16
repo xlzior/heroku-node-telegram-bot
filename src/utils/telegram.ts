@@ -1,6 +1,8 @@
-export const FORCE_REPLY = { reply_markup: { force_reply: true } };
-export const REMOVE_KEYBOARD = { reply_markup: { remove_keyboard: true } };
-export const MARKDOWN = { parse_mode: "MarkdownV2" };
+import { SendMessageOptions } from "node-telegram-bot-api";
+
+export const FORCE_REPLY: SendMessageOptions = { reply_markup: { force_reply: true } };
+export const REMOVE_KEYBOARD: SendMessageOptions = { reply_markup: { remove_keyboard: true } };
+export const MARKDOWN: SendMessageOptions = { parse_mode: "MarkdownV2" };
 
 export const groupPairs = array => {
   const result = [];
@@ -9,12 +11,15 @@ export const groupPairs = array => {
   }
   return result;
 };
+
 export const withKeyboard = (keyboard, resize_keyboard = true, one_time_keyboard = true) => {
   return { reply_markup: { keyboard, resize_keyboard, one_time_keyboard } };
 };
+
 export const withInlineKeyboard = keyboard => {
   return keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {};
 };
+
 export const replyTo = messageId => ({ reply_to_message_id: messageId });
 
 const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")", "."];

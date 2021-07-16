@@ -1,11 +1,9 @@
-import reflectionsDb = require("../db/reflections");
-import hashtagsDb = require("../db/hashtags");
-import questsDb = require("../db/quests");
+import * as reflectionsDb from "../db/reflections";
+import * as hashtagsDb from "../db/hashtags";
+import * as questsDb from "../db/quests";
 
-import telegram = require("./telegram");
-const { clean, MARKDOWN, withInlineKeyboard } = telegram;
-import misc = require("./misc");
-const { formatReflection, formatHashtag, formatQuest } = misc;
+import { clean, MARKDOWN, withInlineKeyboard } from "./telegram";
+import { formatReflection, formatHashtag, formatQuest } from "./misc";
 
 const pageToOffset = perPage => page => perPage * (page - 1);
 const countToNumPages = perPage => count => Math.ceil(count / perPage);

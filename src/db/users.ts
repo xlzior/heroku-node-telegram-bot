@@ -4,8 +4,8 @@ import { checkForNewBadge } from "../achievements";
 import { incrementXP } from "../levels";
 
 import { pool, getFirst } from "./postgresql";
-import achievementsDb = require("./achievements");
-import errors = require("./errors");
+import * as achievementsDb from "./achievements";
+import * as errors from "./errors";
 
 export const create = async chatId => {
   return pool.query(

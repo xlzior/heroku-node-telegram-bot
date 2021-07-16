@@ -1,12 +1,11 @@
-import db = require("../db");
-import errors = require("../db/errors");
-import utils = require("../utils");
-const { clean, MARKDOWN } = utils.telegram;
-const { formatStats } = require("../levels");
+import { users, reflections } from "../db";
+import * as errors from "../db/errors";
+import { clean, MARKDOWN, REMOVE_KEYBOARD } from "../utils/telegram";
+import { formatStats } from "../levels";
 
-const helpMessage = require("./help");
+import helpMessage from "./help";
 
-function handleBasic(bot, continueConversation) {
+export default function handleBasic(bot, continueConversation) {
   bot.onText(/\/start(@lifexp_bot)?$/, async ({ send, chatId }, msg) => {
     await send(`Hello, ${msg.from.first_name}!`);
 
@@ -22,9 +21,9 @@ function handleBasic(bot, continueConversation) {
     await send(message);
 
     try {
-      await db.users.create(chatId);
+      await users.create(chatId);
       const messageId = await bot.sendAndPin(chatId, formatStats(1, 0, 0));
-      db.users.pinnedMessageId.set(chatId, messageId);
+      users.pinnedMessageId.set(chatId, messageId);
     } catch (error) {
       if (error !== errors.USER_ALREADY_EXISTS) {
         console.error("error:", error);
@@ -37,15 +36,13 @@ function handleBasic(bot, continueConversation) {
   });
 
   bot.onText(/\/cancel/, async ({ send, chatId }) => {
-    const { command } = await db.users.prevCommand.get(chatId);
+    const { command } = await users.prevCommand.get(chatId);
     if (command) {
-      send(`The command '${command}' has been cancelled.`, utils.telegram.REMOVE_KEYBOARD);
-      if (command === "open") db.reflections.cancel(chatId);
-      await db.users.prevCommand.reset(chatId);
+      send(`The command '${command}' has been cancelled.`, REMOVE_KEYBOARD);
+      if (command === "open") reflections.cancel(chatId);
+      await users.prevCommand.reset(chatId);
     } else {
-      send("There was no previous command.", utils.telegram.REMOVE_KEYBOARD);
+      send("There was no previous command.", REMOVE_KEYBOARD);
     }
   });
 }
-
-export = handleBasic;

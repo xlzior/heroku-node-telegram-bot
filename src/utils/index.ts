@@ -1,11 +1,6 @@
-import telegram = require("./telegram");
-import time = require("./time");
-import pagination = require("./pagination");
-import misc = require("./misc");
+export * as telegram from "./telegram";
+export * as time from "./time";
+export * as pagination from "./pagination";
+export * from "./misc";
 
-export = {
-  ...misc,
-  telegram,
-  time,
-  pagination,
-};
+// TODO: make use of typescript re-exporting?

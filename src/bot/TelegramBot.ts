@@ -1,13 +1,10 @@
 import Bot = require("node-telegram-bot-api");
 
-import achievementUtils = require("../achievements");
-import levelUtils = require("../levels");
-import db = require("../db");
-import errors = require("../db/errors");
-import utils = require("../utils");
-
-const { getBadgeImage, getBadgeLabel, checkForNewBadge } = achievementUtils;
-const { formatStats } = levelUtils;
+import { getBadgeImage, getBadgeLabel, checkForNewBadge } from "../achievements";
+import { formatStats } from "../levels";
+import * as db from "../db";
+import * as errors from "../db/errors";
+import { sum, emojiChart } from "../utils";
 
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)
@@ -87,8 +84,8 @@ export default class MyTelegramBot extends Bot {
     // emojis
     const emojis = await db.emojis.getCurrent(chatId);
     const emojiCounts = emojis.map(({ count }) => count);
-    if (emojis.length >= 2 && utils.sum(emojiCounts) >= 5) {
-      await send(`You used these emojis in this entry:\n\n${utils.emojiChart(emojis)}`);
+    if (emojis.length >= 2 && sum(emojiCounts) >= 5) {
+      await send(`You used these emojis in this entry:\n\n${emojiChart(emojis)}`);
     }
   
     // XP

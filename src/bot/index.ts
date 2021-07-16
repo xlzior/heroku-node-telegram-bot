@@ -1,15 +1,15 @@
-import Bot = require("./TelegramBot");
+import Bot from "./TelegramBot";
 
-import db = require("../db");
+import * as db from "../db";
 
-import handleBasic = require("./basic");
-import handleBrowse = require("./browse");
-import handleReflections = require("./reflections");
-import handleIDAT = require("./idat");
-import handleStats = require("./stats");
-import handleSchedules = require("./schedules");
-import handleBedtime = require("./bedtime");
-import handleQuests = require("./quests");
+import handleBasic from "./basic";
+import handleBrowse from "./browse";
+import handleReflections from "./reflections";
+import handleIDAT from "./idat";
+import handleStats from "./stats";
+import handleSchedules from "./schedules";
+import handleBedtime from "./bedtime";
+import handleQuests from "./quests";
 
 const token = process.env.TOKEN;
 

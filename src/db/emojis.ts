@@ -1,5 +1,5 @@
-import current = require("./current");
-const { pool, getRows, getFirst } = require("./postgresql");
+import { getId } from "./current";
+import { pool, getRows, getFirst } from "./postgresql";
 
 export const getCount = async chatId => {
   const res = await pool.query("SELECT SUM(count) FROM emojis WHERE user_id=$1", [chatId]);
@@ -7,7 +7,7 @@ export const getCount = async chatId => {
 };
 
 export const getCurrent = async chatId => {
-  const startId = await current.getId(chatId);
+  const startId = await getId(chatId);
   return pool.query(
     `SELECT emoji, count FROM emojis
     WHERE user_id=$1 AND start_id=$2
@@ -30,7 +30,7 @@ export const getUser = async chatId => {
 
 export const add = async (chatId, emojis = []) => {
   if (emojis.length === 0) return;
-  const startId = await current.getId(chatId);
+  const startId = await getId(chatId);
   const promises = emojis.map(({ emoji, count }) => {
     return pool.query(
       `INSERT INTO emojis(user_id, start_id, emoji, count)

@@ -1,19 +1,8 @@
-import users = require("./users");
-import reflections = require("./reflections");
-import hashtags = require("./hashtags");
-import emojis = require("./emojis");
-import achievements = require("./achievements");
-import stats = require("./stats");
-import schedules = require("./schedules");
-import quests = require("./quests");
-
-export = {
-  users,
-  reflections,
-  hashtags,
-  emojis,
-  achievements,
-  stats,
-  schedules,
-  quests,
-};
+export * as users from "./users";
+export * as reflections from "./reflections";
+export * as hashtags from "./hashtags";
+export * as emojis from "./emojis";
+export * as achievements from "./achievements";
+export * as stats from "./stats";
+export * as schedules from "./schedules";
+export * as quests from "./quests";

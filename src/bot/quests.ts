@@ -1,14 +1,12 @@
-import db = require("../db");
-const { quests, users: { prevCommand } } = db;
+import { quests, users, reflections, hashtags } from "../db";
 
-import utils = require("../utils");
-const { clean, MARKDOWN } = utils.telegram;
-const { generateQuestsList } = utils.pagination;
+import { clean, MARKDOWN } from "../utils/telegram";
+import { generateQuestsList } from "../utils/pagination";
 
 const QUESTS = "quests";
 const QUEST_HASHTAG = "#lifexp_quest";
 
-function handleQuests(bot, continueConversation) {
+export default function handleQuests(bot, continueConversation) {
   bot.onText(/\/quests/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateQuestsList(chatId, 1);
     if (!error) await send("LifeXP quests provide you with a series of question prompts around a theme. Here are some quests for you to try, depending on what you wish to reflect on.");
@@ -44,7 +42,7 @@ function handleQuests(bot, continueConversation) {
   });
 
   bot.onText(/\/start_quest_(\d+)/, async ({ send, chatId }, msg, match) => {
-    const isOpen = await db.reflections.isOpen(chatId);
+    const isOpen = await reflections.isOpen(chatId);
     if (isOpen) return send("You already have a reflection open. Please /close the reflection before starting the quest.");
 
     const quest = await quests.get(match[1]);
@@ -54,14 +52,14 @@ function handleQuests(bot, continueConversation) {
 
     const message = `*${quest.questions[0]}*\n\n✅ /done with prompt`;
     const botMsg = await bot.sendMessage(chatId, clean(message) , MARKDOWN);
-    await db.reflections.open(chatId, botMsg.message_id);
-    await db.hashtags.add(chatId, [QUEST_HASHTAG]);
-    await db.users.prevCommand.set(chatId, QUESTS, { index: 1, questId: match[1] });
+    await reflections.open(chatId, botMsg.message_id);
+    await hashtags.add(chatId, [QUEST_HASHTAG]);
+    await users.prevCommand.set(chatId, QUESTS, { index: 1, questId: match[1] });
   });
 
   bot.onText(/\/done/, async (shortcuts, msg) => {
     const { chatId, send } = shortcuts;
-    const { command, partial } = await prevCommand.get(chatId);
+    const { command, partial } = await users.prevCommand.get(chatId);
     if (command !== QUESTS) return;
 
     const { questId, index } = partial;
@@ -69,13 +67,11 @@ function handleQuests(bot, continueConversation) {
 
     if (index < questions.length) {
       send(clean(`*${questions[index]}*\n\n✅ /done`), MARKDOWN);
-      prevCommand.set(chatId, QUESTS, { questId, index: index + 1 });
+      users.prevCommand.set(chatId, QUESTS, { questId, index: index + 1 });
     } else {
       const botMsg = await send(`You've completed the quest "${name}". Good job!`);
       await bot.sendClosingStats(shortcuts, botMsg.message_id, name, msg.date);
-      await prevCommand.reset(chatId);
+      await users.prevCommand.reset(chatId);
     }
   });
 }
-
-export = handleQuests;

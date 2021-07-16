@@ -1,17 +1,14 @@
-import db = require("../../db");
-import utils = require("../../utils");
-
-const { schedules, users: { prevCommand, timezone } } = db;
-const { groupPairs, withKeyboard, REMOVE_KEYBOARD } = utils.telegram;
-const { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } = utils.time;
+import { schedules, users } from "../../db"
+import { groupPairs, withKeyboard, REMOVE_KEYBOARD } from "../../utils/telegram";
+import { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } from "../../utils/time";
 
 // continueConversation
 const SELECT = "schedule - delete - select";
 const CONFIRM = "schedule - delete - confirm";
 
-function handleDelete(bot, continueConversation) {
+export default function handleDelete(bot, continueConversation) {
   bot.onText(/\/delete_schedule/, async ({ send, chatId }) => {
-    const tz = await timezone.get(chatId);
+    const tz = await users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 
     const userSchedules = await schedules.getUser(chatId);
@@ -22,11 +19,11 @@ function handleDelete(bot, continueConversation) {
       const { time, questions } = userSchedules[0];
       const localTime = utcToLocal(time, tz);
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nAre you sure you would like to delete this scheduled journalling session? Please send 'Yes' to confirm.`);
-      prevCommand.set(chatId, CONFIRM, { time: localTime, tz });
+      users.prevCommand.set(chatId, CONFIRM, { time: localTime, tz });
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time, tz)));
       send("Which schedule would you like to delete?", withKeyboard(keyboard));
-      prevCommand.set(chatId, SELECT, { tz });
+      users.prevCommand.set(chatId, SELECT, { tz });
     }
   });
 
@@ -37,7 +34,7 @@ function handleDelete(bot, continueConversation) {
     const questions = await schedules.getQuestions(chatId, localToUTC(time, tz));
     if (questions.length > 0) {
       send(`You have chosen to delete the schedule at ${formatScheduleInfo(time, questions)}\n\nAre you sure you would like to delete this session? Please send 'Yes' to confirm.`, REMOVE_KEYBOARD);
-      prevCommand.set(chatId, CONFIRM, { time, tz });
+      users.prevCommand.set(chatId, CONFIRM, { time, tz });
     } else {
       send(`You do not have a session at ${time}. Please send a valid time using the keyboard provided.`);
     }
@@ -50,8 +47,6 @@ function handleDelete(bot, continueConversation) {
     } else {
       send("Deleting cancelled.");
     }
-    prevCommand.reset(chatId);
+    users.prevCommand.reset(chatId);
   };
 }
-
-export = handleDelete;

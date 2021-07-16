@@ -1,13 +1,8 @@
-import db = require("../db");
-import utils = require("../utils");
-const { generateReflectionsList, generateHashtagsList, generateHashtagList } = utils.pagination;
+import * as db from "../db";
+import { generateReflectionsList, generateHashtagsList, generateHashtagList } from "../utils/pagination";
+import { groupPairs, withKeyboard, REMOVE_KEYBOARD, replyTo } from "../utils/telegram";
 
-const {
-  groupPairs, withKeyboard, REMOVE_KEYBOARD,
-  replyTo,
-} = utils.telegram;
-
-function handleBrowse(bot, continueConversation) {
+export default function handleBrowse(bot, continueConversation) {
   bot.onText(/\/reflections/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateReflectionsList(chatId, 1);
     if (!error) await send("All reflections");
@@ -77,5 +72,3 @@ function handleBrowse(bot, continueConversation) {
     .catch(() => send("Reflection not found."));
   });
 }
-
-export = handleBrowse;
