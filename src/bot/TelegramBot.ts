@@ -75,8 +75,10 @@ export default class MyTelegramBot extends Bot {
     } else if (photos.length <= MAX_PER_MEDIA_GROUP) { // send a media group
       await this.sendMediaGroup(chatId, photos);
     } else { // send multiple media groups
-      await this.sendMediaGroup(chatId, photos.slice(0, MAX_PER_MEDIA_GROUP)); // send the first batch
-      await this.sendPhotos(chatId, photos.slice(MAX_PER_MEDIA_GROUP));        // recurse for the rest
+      // send the first batch
+      await this.sendMediaGroup(chatId, photos.slice(0, MAX_PER_MEDIA_GROUP));
+      // recurse for the rest
+      await this.sendPhotos(chatId, photos.slice(MAX_PER_MEDIA_GROUP));
     }
   }
 
@@ -87,7 +89,7 @@ export default class MyTelegramBot extends Bot {
     if (emojis.length >= 2 && sum(emojiCounts) >= 5) {
       await send(`You used these emojis in this entry:\n\n${emojiChart(emojis)}`);
     }
-  
+
     // XP
     const convoLength = await db.reflections.close(chatId, messageId, name)
       .catch(error => {
@@ -97,11 +99,11 @@ export default class MyTelegramBot extends Bot {
           console.error("error:", error);
         }
       });
-  
+
     await db.users.progress.updateStreak(chatId, date);
     const xpData = await db.users.progress.addXP(chatId, convoLength);
     await this.notifyXP(chatId, "this reflection", xpData);
-  
+
     // achievements
     const stats = [
       { type: "convoLength", value: convoLength },
@@ -109,9 +111,9 @@ export default class MyTelegramBot extends Bot {
       { type: "hashtags", value: await db.hashtags.getTotalCount(chatId) },
       { type: "emojis", value: await db.emojis.getCount(chatId) },
     ];
-  
+
     const achievements = await db.achievements.getAll(chatId);
-  
+
     stats.forEach(async ({ type, value }) => {
       const previousAchievement = achievements.find(elem => elem.type === type);
       const previousLevel = previousAchievement ? previousAchievement.level : 0;
