@@ -1,5 +1,5 @@
-import * as current from "./current";
 import { pool, getRows, getFirst } from "./postgresql";
+import * as current from "./current";
 
 export const getCount = async (chatId, hashtag) => {
   const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1 AND hashtag=$2;", [chatId, hashtag]);

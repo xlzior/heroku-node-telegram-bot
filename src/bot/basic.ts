@@ -1,5 +1,5 @@
 import { users, reflections } from "../db";
-import * as errors from "../db/errors";
+import { USER_ALREADY_EXISTS } from "../db/errors";
 import { clean, MARKDOWN, REMOVE_KEYBOARD } from "../utils/telegram";
 import { formatStats } from "../levels";
 
@@ -25,7 +25,7 @@ export default function handleBasic(bot, continueConversation) {
       const messageId = await bot.sendAndPin(chatId, formatStats(1, 0, 0));
       users.pinnedMessageId.set(chatId, messageId);
     } catch (error) {
-      if (error !== errors.USER_ALREADY_EXISTS) {
+      if (error !== USER_ALREADY_EXISTS) {
         console.error("error:", error);
       }
     }

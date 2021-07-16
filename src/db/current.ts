@@ -1,5 +1,5 @@
-import * as errors from "./errors";
 import { pool, getFirst } from "./postgresql";
+import { NO_CURRENT_REFLECTION } from "./errors";
 
 export const getId = async chatId => {
   const res = await pool.query(
@@ -21,7 +21,7 @@ export const resetId = chatId => {
 
 export const get = async chatId => {
   const startId = await getId(chatId);
-  if (!startId) return Promise.reject(errors.NO_CURRENT_REFLECTION);
+  if (!startId) return Promise.reject(NO_CURRENT_REFLECTION);
   return pool.query(
     "SELECT * FROM reflections WHERE user_id=$1 AND start_id=$2",
     [chatId, startId])

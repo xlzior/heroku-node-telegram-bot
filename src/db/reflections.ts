@@ -1,6 +1,6 @@
 import { pool, getRows, getFirst } from "./postgresql";
 import * as current from "./current";
-import * as errors from "./errors";
+import { REFLECTION_ALREADY_OPEN, NO_REFLECTION_OPEN } from "./errors";
 
 export const getCount = async chatId => {
   const res = await pool.query("SELECT COUNT(*) FROM reflections WHERE user_id=$1", [chatId]);
@@ -68,7 +68,7 @@ export const isOpen = chatId => {
 
 export const open = async (chatId, start) => {
   const reflectionId = await current.getId(chatId);
-  if (reflectionId) return Promise.reject(errors.REFLECTION_ALREADY_OPEN);
+  if (reflectionId) return Promise.reject(REFLECTION_ALREADY_OPEN);
 
   await insert(chatId, start);
   await current.setId(chatId, start);
@@ -83,7 +83,7 @@ export const incrementLength = (chatId, start) => {
 export const close = async (chatId, end, name) => {
   const start = await current.getId(chatId);
 
-  if (!start) return Promise.reject(errors.NO_REFLECTION_OPEN);
+  if (!start) return Promise.reject(NO_REFLECTION_OPEN);
 
   current.resetId(chatId);
   const length = await update(chatId, start, end, name);
@@ -93,7 +93,7 @@ export const close = async (chatId, end, name) => {
 export const cancel = async chatId => {
   const start = await current.getId(chatId);
 
-  if (!start) return Promise.reject(errors.NO_REFLECTION_OPEN);
+  if (!start) return Promise.reject(NO_REFLECTION_OPEN);
 
   deleteReflection(chatId, start);
   current.resetId(chatId);

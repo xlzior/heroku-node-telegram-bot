@@ -1,6 +1,6 @@
 import Bot from "./TelegramBot";
 
-import * as db from "../db";
+import { users, reflections } from "../db";
 
 import handleBasic from "./basic";
 import handleBrowse from "./browse";
@@ -41,15 +41,15 @@ bot.onMessage(async (shortcuts, msg) => {
 
   // continueConversation
   if (msg.text && !msg.text.startsWith("/")) {
-    const { command, partial } = await db.users.prevCommand.get(chatId);
+    const { command, partial } = await users.prevCommand.get(chatId);
     if (continueConversation[command]) {
       continueConversation[command](shortcuts, msg, partial);
     }
   }
 
   // keep track of convoLength
-  const reflectionId = await db.reflections.current.getId(chatId);
-  if (reflectionId) db.reflections.incrementLength(chatId, reflectionId);
+  const reflectionId = await reflections.current.getId(chatId);
+  if (reflectionId) reflections.incrementLength(chatId, reflectionId);
 });
 
 bot.on("polling_error", err => console.error(err));
