@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const express = require("express");
 const bodyParser = require("body-parser");
 
@@ -16,12 +17,14 @@ const server = app.listen(process.env.PORT, "0.0.0.0", () => {
   console.info(`Web server started at http://${host}:${port}`);
 });
 
+const handleRequests = bot => {
+  app.post("/" + bot.token, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  });
+};
+
 module.exports = {
-  handleRequests: bot => {
-    app.post("/" + bot.token, (req, res) => {
-      bot.processUpdate(req.body);
-      res.sendStatus(200);
-    });
-  },
   server,
+  handleRequests,
 };
