@@ -1,20 +1,26 @@
-const { DateTime } = require("luxon");
-const { handlePlural } = require("./misc");
+import { DateTime } from "luxon";
+import { handlePlural } from "./misc";
 
-const parseTime = (timeString, zone) => DateTime.fromFormat(timeString, "ha", { zone });
-const validateTime = rawText => parseTime(rawText).invalid ? false : rawText;
+const parseTime = (timeString, zone = "UTC") => DateTime.fromFormat(timeString, "ha", { zone });
+
+const validateTime = rawText => parseTime(rawText).isValid && rawText;
+
 const formatTime = timeObj => timeObj.toFormat("ha");
+
 const generateDateTime = zone => DateTime.now().setZone(zone).toFormat("yyyy/MM/dd ha");
+
 const localToUTC = (localTimeString, localTimeZone) => {
   const parsed = parseTime(localTimeString, localTimeZone);
   return formatTime(parsed.toUTC());
 };
+
 const utcToLocal = (utcTimeString, localTimeZone) => {
-  const parsed = parseTime(utcTimeString, "UTC");
+  const parsed = parseTime(utcTimeString);
   return formatTime(parsed.setZone(localTimeZone));
 };
+
 const utcToLocal24 = (utcTimeString, localTimeZone) => {
-  const parsed = parseTime(utcTimeString, "UTC");
+  const parsed = parseTime(utcTimeString);
   return parsed.setZone(localTimeZone).hour;
 };
 
@@ -26,7 +32,7 @@ const formatScheduleInfo = (time, questions) => {
   ].join("\n");
 };
 
-module.exports = {
+export = {
   validateTime,
   formatTime,
   generateDateTime,
