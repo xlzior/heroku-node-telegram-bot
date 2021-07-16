@@ -4,14 +4,14 @@ import { checkForNewBadge } from "../achievements";
 import { incrementXP } from "../levels";
 
 import { pool, getFirst } from "./postgresql";
-import * as achievementsDb from "./achievements";
-import * as errors from "./errors";
+import * as achievements from "./achievements";
+import { USER_ALREADY_EXISTS } from "./errors";
 
 export const create = async chatId => {
   return pool.query(
     "INSERT INTO users(user_id, level, xp, idat) VALUES($1, 1, 0, 0);",
     [chatId])
-    .catch(() => Promise.reject(errors.USER_ALREADY_EXISTS));
+    .catch(() => Promise.reject(USER_ALREADY_EXISTS));
 };
 
 export const progress = {
@@ -76,11 +76,11 @@ export const idat = {
       [chatId]);
     const idatCount = getFirst(res).idat;
 
-    const currentIDATAchievement = await achievementsDb.get(chatId, "idat");
+    const currentIDATAchievement = await achievements.get(chatId, "idat");
     const newBadge = checkForNewBadge("idat", currentIDATAchievement.level, idatCount);
     const { hasNewBadge, currentLevel } = newBadge;
     if (hasNewBadge) {
-      achievementsDb.update(chatId, "idat", currentLevel);
+      achievements.update(chatId, "idat", currentLevel);
     }
     return newBadge;
   },

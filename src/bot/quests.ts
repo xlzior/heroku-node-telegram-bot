@@ -1,5 +1,4 @@
 import { quests, users, reflections, hashtags } from "../db";
-
 import { clean, MARKDOWN } from "../utils/telegram";
 import { generateQuestsList } from "../utils/pagination";
 

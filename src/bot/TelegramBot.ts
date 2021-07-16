@@ -3,7 +3,7 @@ import Bot = require("node-telegram-bot-api");
 import { getBadgeImage, getBadgeLabel, checkForNewBadge } from "../achievements";
 import { formatStats } from "../levels";
 import * as db from "../db";
-import * as errors from "../db/errors";
+import { NO_REFLECTION_OPEN } from "../db/errors";
 import { sum, emojiChart } from "../utils";
 
 // refactor out commonly used functionality
@@ -91,7 +91,7 @@ export default class MyTelegramBot extends Bot {
     // XP
     const convoLength = await db.reflections.close(chatId, messageId, name)
       .catch(error => {
-        if (error === errors.NO_REFLECTION_OPEN) {
+        if (error === NO_REFLECTION_OPEN) {
           send("You have not started a reflection. Use /open to start a new reflection");
         } else {
           console.error("error:", error);

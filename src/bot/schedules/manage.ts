@@ -3,7 +3,6 @@ import { handlePlural } from "../../utils";
 import { clean, MARKDOWN } from "../../utils/telegram";
 import { utcToLocal, utcToLocal24 } from "../../utils/time";
 
-
 export default function handleManage(bot, continueConversation) {
   bot.onText(/\/manage_schedules/, async ({ send, chatId }) => {
     await send("Welcome to the scheduled journalling prompts feature. I can send you a fixed set of prompts every day at a time of your choosing.");

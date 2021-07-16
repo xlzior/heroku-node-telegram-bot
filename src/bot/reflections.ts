@@ -1,5 +1,5 @@
 import * as db from "../db";
-import * as errors from "../db/errors";
+import { REFLECTION_ALREADY_OPEN } from "../db/errors";
 import { getRandomPrompt, telegram, countEmojis } from "../utils";
 
 export default function handleReflections(bot, continueConversation) {
@@ -21,7 +21,7 @@ export default function handleReflections(bot, continueConversation) {
       send("Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.");
       await db.users.prevCommand.set(chatId, "open");
     } catch (error) {
-      if (error === errors.REFLECTION_ALREADY_OPEN) {
+      if (error === REFLECTION_ALREADY_OPEN) {
         send("A reflection is already in progress, please /close the reflection before opening a new one.");
       } else {
         console.error("error:", error);

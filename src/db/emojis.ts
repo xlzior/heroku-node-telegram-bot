@@ -1,5 +1,5 @@
-import { getId } from "./current";
 import { pool, getRows, getFirst } from "./postgresql";
+import { getId } from "./current";
 
 export const getCount = async chatId => {
   const res = await pool.query("SELECT SUM(count) FROM emojis WHERE user_id=$1", [chatId]);
