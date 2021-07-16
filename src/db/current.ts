@@ -25,6 +25,6 @@ export const get = async (chatId: number) => {
   const res = await pool.query(
     "SELECT * FROM reflections WHERE user_id=$1 AND start_id=$2",
     [chatId, startId]);
-  
+
   return getFirst(res);
 };

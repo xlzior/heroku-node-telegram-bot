@@ -12,7 +12,7 @@ export const getRandomPrompt = () => {
 export const countEmojis = (rawText: string) => {
   const result = emojiTree(rawText)
     .filter(({ type }) => type === "emoji")
-    .reduce((acc: {}, { text: emoji }) => {
+    .reduce((acc: Record<string, { emoji: string, count: number }>, { text: emoji }) => {
       if (!acc[emoji]) acc[emoji] = { emoji, count: 0 };
       acc[emoji].count++;
       return acc;
@@ -26,9 +26,9 @@ export const emojiChart = (emojis: { emoji: string; count: number; }[]) => {
 
 /* MATH */
 
-export const sum = (arr: number[]) => arr.reduce((x, y) => x + y, 0);
-export const average = (arr: number[]) => arr.length === 0 ? 0 : sum(arr) / arr.length;
-export const max = (arr: number[]) => Math.max(0, ...arr);
+export const sum = (arr: number[]): number => arr.reduce((x, y) => x + y, 0);
+export const average = (arr: number[]): number => arr.length === 0 ? 0 : sum(arr) / arr.length;
+export const max = (arr: number[]): number => Math.max(0, ...arr);
 
 /* STRINGS */
 

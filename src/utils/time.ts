@@ -6,17 +6,17 @@ export const parseTime = (
   zone = FixedOffsetZone.utcInstance
 ): DateTime => {
   return DateTime.fromFormat(timeString, "ha", { zone });
-}
+};
 
 export const validateTime = (rawText: string) => {
   return parseTime(rawText).isValid && rawText;
-}
+};
 
 export const formatTime = (timeObj: DateTime): string => timeObj.toFormat("ha");
 
 export const generateDateTime = (zone: Zone): string => {
   return DateTime.now().setZone(zone).toFormat("yyyy/MM/dd ha");
-}
+};
 
 export const localToUTC = (
   localTimeString: string,

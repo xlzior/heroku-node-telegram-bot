@@ -1,4 +1,4 @@
-import { schedules, users } from "../../db"
+import { schedules, users } from "../../db";
 import { groupPairs, withKeyboard, REMOVE_KEYBOARD } from "../../utils/telegram";
 import { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } from "../../utils/time";
 
