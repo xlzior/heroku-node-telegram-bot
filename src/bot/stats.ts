@@ -1,7 +1,7 @@
 import * as db from "../db";
-import { formatStats } from "../levels";
-import { getBadgeImage, getBadgeLabel, BLANK_BADGE } from "../achievements";
 import { sum, emojiChart, telegram } from "../utils";
+import { getBadgeImage, getBadgeLabel, BLANK_BADGE } from "../utils/achievements";
+import { formatStats } from "../utils/levels";
 
 export default function handleStats(bot, continueConversation) {
   bot.onText(/\/lifexp/, async ({ chatId }) => {

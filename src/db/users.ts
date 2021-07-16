@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 
-import { checkForNewBadge } from "../achievements";
-import { incrementXP } from "../levels";
+import { checkForNewBadge } from "../utils/achievements";
+import { incrementXP } from "../utils/levels";
 
 import { pool, getFirst } from "./postgresql";
 import * as achievements from "./achievements";

@@ -29,12 +29,12 @@ XP_PER_LEVEL.forEach((xpNeeded, index) => {
   ROLLING_SUM[index] = ROLLING_SUM[index - 1] + xpNeeded;
 });
 
-const xpForNextLevel = currentLevel => {
+const xpForNextLevel = (currentLevel: number) => {
   if (currentLevel < MAX_LEVEL) return XP_PER_LEVEL[currentLevel];
   return 0;
 };
 
-const xpBaseForLevel = currentLevel => {
+const xpBaseForLevel = (currentLevel: number) => {
   if (currentLevel < MAX_LEVEL) return ROLLING_SUM[currentLevel - 1];
   return ROLLING_SUM[MAX_LEVEL - 1];
 };
@@ -42,14 +42,14 @@ const xpBaseForLevel = currentLevel => {
 const FILLED_BAR = "█";
 const EMPTY_BAR = "▁";
 const PROGRESS_BAR_LENGTH = 10;
-const generateProgressBar = (percentageFilled, length) => {
+const generateProgressBar = (percentageFilled: number, length: number) => {
   const filled = Math.floor(percentageFilled * length);
   const empty = length - filled;
   return `${FILLED_BAR.repeat(filled)}${EMPTY_BAR.repeat(empty)}`;
 };
 
 // xp is cumulative, over all levels
-export const formatStats = (level, xp, streak) => {
+export const formatStats = (level: number, xp: number, streak: number) => {
   const levelDisplay = `Level ${level}`;
   if (level < MAX_LEVEL) {
     const numer = xp - xpBaseForLevel(level); // display non-cumulative so progress bar is intuitive
@@ -62,7 +62,7 @@ export const formatStats = (level, xp, streak) => {
   return `${levelDisplay} (MAX)    ${xp} XP    🔥 ${streak}`;
 };
 
-export const incrementXP = (level, originalXP, additionalXP) => {
+export const incrementXP = (level: number, originalXP: number, additionalXP: number) => {
   const xpThreshold = xpBaseForLevel(level + 1);
   const newXP = originalXP + additionalXP;
   const levelledUp = newXP >= xpThreshold;
