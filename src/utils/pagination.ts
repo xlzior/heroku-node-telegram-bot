@@ -5,15 +5,16 @@ import * as questsDb from "../db/quests";
 import { clean, MARKDOWN, withInlineKeyboard } from "./telegram";
 import { formatReflection, formatHashtag, formatQuest } from "./misc";
 
-const pageToOffset = perPage => page => perPage * (page - 1);
-const countToNumPages = perPage => count => Math.ceil(count / perPage);
+const pageToOffset = (perPage: number) => (page: number) => perPage * (page - 1);
+const countToNumPages = (perPage: number) => (count: number) => Math.ceil(count / perPage);
 
-const generatePagination = type => (currentPage, lastPage) => {
+const generatePagination = (type: string) =>
+  (currentPage: number, lastPage: number) => {
   if (lastPage === 1) return null;
 
   const first = { text: "<< 1", callback_data: `${type} - ${1}` };
   const prev = { text: `< ${currentPage - 1}`, callback_data: `${type} - ${currentPage - 1}` };
-  const current = { text: currentPage, callback_data: `${type} - current` };
+  const current = { text: currentPage.toString(), callback_data: `${type} - current` };
   const next = { text: `${currentPage + 1} >`, callback_data: `${type} - ${currentPage + 1}` };
   const last = { text: `${lastPage} >>`, callback_data: `${type} - ${lastPage}` };
 
@@ -34,7 +35,7 @@ const generateList = (
   getNoEntitiesMessage,
   formatEntities,
   getCount,
-) => async (chatId, ...data) => {
+) => async (chatId: number, ...data: any[]) => {
   const currentPage = data[data.length - 1];
 
   // entities
@@ -62,23 +63,23 @@ const generateList = (
 export const generateReflectionsList = generateList(
   () => "reflections",
   5,
-  (chatId, data, perPage) => reflectionsDb.get(
-    chatId, perPage, pageToOffset(perPage)(data[0])),
+  (chatId: number, data, perPage: number) =>
+    reflectionsDb.get(chatId, perPage, pageToOffset(perPage)(data[0])),
   () => "You do not have any reflections. Use /open to start a new journal entry",
   reflections => reflections.map(formatReflection).join("\n\n"),
-  chatId => reflectionsDb.getCount(chatId),
+  (chatId: number) => reflectionsDb.getCount(chatId),
 );
 
 // callback_data: `hashtag - ${hashtag} - ${pageNumber}`
 // data = [hashtag, pageNumber]
 export const generateHashtagList = generateList(
-  (chatId, data) => `hashtag - ${data[0]}`,
+  (_chatId, data) => `hashtag - ${data[0]}`,
   5,
-  (chatId, data, perPage) => hashtagsDb.get(
-    chatId, data[0], perPage, pageToOffset(perPage)(data[1])),
-  (chatId, data) => `Sorry, I don't recognise the hashtag '${data[0]}'. Please select a hashtag from the list.`,
+  (chatId, data, perPage: number) =>
+    hashtagsDb.get(chatId, data[0], perPage, pageToOffset(perPage)(data[1])),
+  (_chatId, data) => `Sorry, I don't recognise the hashtag '${data[0]}'. Please select a hashtag from the list.`,
   reflections => reflections.map(formatReflection).join("\n\n"),
-  (chatId, data) => hashtagsDb.getCount(chatId, data[0]),
+  (chatId: number, data: any[]) => hashtagsDb.getCount(chatId, data[0]),
 );
 
 // callback_data: `hashtags - ${pageNumber}`
@@ -86,8 +87,8 @@ export const generateHashtagList = generateList(
 export const generateHashtagsList = generateList(
   () => "hashtags",
   25,
-  (chatId, data, perPage) => hashtagsDb.getAll(
-    chatId, perPage, pageToOffset(perPage)(data[0])),
+  (chatId: number, data: any[], perPage: number) =>
+    hashtagsDb.getAll(chatId, perPage, pageToOffset(perPage)(data[0])),
   () => "You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.",
   hashtags => hashtags.map(formatHashtag).join("\n"),
   chatId => hashtagsDb.getUniqueCount(chatId),
@@ -98,7 +99,8 @@ export const generateHashtagsList = generateList(
 export const generateQuestsList = generateList(
   () => "quests",
   5,
-  (chatId, data, perPage) => questsDb.getAll(perPage, pageToOffset(perPage)(data[0])),
+  (_chatId: number, data: any[], perPage: number) =>
+    questsDb.getAll(perPage, pageToOffset(perPage)(data[0])),
   () => "No quests found.",
   quests => quests.map(formatQuest).join("\n\n"),
   () => questsDb.getCount(),
