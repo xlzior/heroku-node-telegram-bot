@@ -1,13 +1,9 @@
-import db = require("../db");
-import levelUtils = require("../levels");
-import achievementsUtils = require("../achievements");
+import * as db from "../db";
+import { formatStats } from "../levels";
+import { getBadgeImage, getBadgeLabel, BLANK_BADGE } from "../achievements";
+import { sum, emojiChart, telegram } from "../utils";
 
-const { formatStats } = levelUtils;
-const { getBadgeImage, getBadgeLabel, BLANK_BADGE } = achievementsUtils;
-
-const utils = require("../utils");
-
-function handleStats(bot, continueConversation) {
+export default function handleStats(bot, continueConversation) {
   bot.onText(/\/lifexp/, async ({ chatId }) => {
     const { level, xp, streak, pinnedMessageId } = await db.users.progress.get(chatId);
     bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
@@ -39,16 +35,16 @@ function handleStats(bot, continueConversation) {
       `*Great things done*: ${idat}`,
     ].join("\n");
     const emojisMessage = [
-      `*Emojis used*: ${utils.sum(emojis.map(({ count }) => count))}`,
-      `Top 10 emojis:\n${utils.emojiChart(emojis.slice(0, 10))}`,
+      `*Emojis used*: ${sum(emojis.map(({ count }) => count))}`,
+      `Top 10 emojis:\n${emojiChart(emojis.slice(0, 10))}`,
     ].join("\n");
     const message = [game, journal, hashtagsMessage, idatMessage, emojisMessage].join("\n\n");
-    send(utils.telegram.clean(message), utils.telegram.MARKDOWN);
+    send(telegram.clean(message), telegram.MARKDOWN);
   });
 
   bot.onText(/\/achievements/, async ({ send, chatId }) => {
     const achievements = await db.achievements.getAll(chatId);
-    const achievementsCount = utils.sum(Object.values(achievements));
+    const achievementsCount = sum(Object.values(achievements));
 
     // KIV: delete all previous badges sent? so that it's not so repetitive
 
@@ -71,5 +67,3 @@ function handleStats(bot, continueConversation) {
     await send("Tip: View the chat's 'shared media' to see a display cabinet of all your achievement badges!");
   });
 }
-
-export = handleStats;

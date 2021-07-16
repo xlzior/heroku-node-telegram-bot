@@ -1,20 +1,18 @@
-import postgresql = require("./postgresql");
-const { pool, getFirst, getRows } = postgresql;
+import { pool, getRows, getFirst } from "./postgresql";
+import * as current from "./current";
+import * as errors from "./errors";
 
-import current = require("./current");
-import errors = require("./errors");
-
-const getCount = async chatId => {
+export const getCount = async chatId => {
   const res = await pool.query("SELECT COUNT(*) FROM reflections WHERE user_id=$1", [chatId]);
   return parseInt(getFirst(res).count);
 };
 
-const getLengths = async chatId => {
+export const getLengths = async chatId => {
   const res = await pool.query("SELECT length FROM reflections WHERE user_id=$1", [chatId]);
   return getRows(res).map(({ length }) => length);
 };
 
-const get = async (chatId, limit, offset) => {
+export const get = async (chatId, limit, offset) => {
   const res = await pool.query(
     `SELECT
       reflections.start_id,
@@ -30,7 +28,7 @@ const get = async (chatId, limit, offset) => {
   return getRows(res);
 };
 
-const getAll = async chatId => {
+export const getAll = async chatId => {
   const res = await pool.query(
     `SELECT
       reflections.start_id,
@@ -64,11 +62,11 @@ const deleteReflection = (chatId, start) => {
   return pool.query("DELETE FROM reflections WHERE user_id=$1 AND start_id=$2;", [chatId, start]);
 };
 
-const isOpen = chatId => {
+export const isOpen = chatId => {
   return current.getId(chatId).then(Boolean);
 };
 
-const open = async (chatId, start) => {
+export const open = async (chatId, start) => {
   const reflectionId = await current.getId(chatId);
   if (reflectionId) return Promise.reject(errors.REFLECTION_ALREADY_OPEN);
 
@@ -76,13 +74,13 @@ const open = async (chatId, start) => {
   await current.setId(chatId, start);
 };
 
-const incrementLength = (chatId, start) => {
+export const incrementLength = (chatId, start) => {
   return pool.query(
     "UPDATE reflections SET length=length+1 WHERE user_id=$1 AND start_id=$2",
     [chatId, start]);
 };
 
-const close = async (chatId, end, name) => {
+export const close = async (chatId, end, name) => {
   const start = await current.getId(chatId);
 
   if (!start) return Promise.reject(errors.NO_REFLECTION_OPEN);
@@ -92,7 +90,7 @@ const close = async (chatId, end, name) => {
   return length;
 };
 
-const cancel = async chatId => {
+export const cancel = async chatId => {
   const start = await current.getId(chatId);
 
   if (!start) return Promise.reject(errors.NO_REFLECTION_OPEN);
@@ -101,9 +99,4 @@ const cancel = async chatId => {
   current.resetId(chatId);
 };
 
-export = {
-  current,
-  getCount, getLengths,
-  get, getAll,
-  isOpen, open, incrementLength, close, cancel,
-};
+export { current };

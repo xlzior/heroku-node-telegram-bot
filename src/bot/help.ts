@@ -54,4 +54,4 @@ const outro = [
   "I hope you have a meaningful journalling session. 😊",
 ].join("\n");
 
-export = [intro, journal, browse, game, quests, scheduled, bedtime, misc, outro];
+export default [intro, journal, browse, game, quests, scheduled, bedtime, misc, outro];

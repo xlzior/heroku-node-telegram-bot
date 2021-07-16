@@ -1,21 +1,21 @@
-import db = require("../db");
-import utils = require("../utils");
+import { users } from "../db";
+import { FORCE_REPLY } from "../utils/telegram";
 
-function handleIDAT(bot, continueConversation) {
+export default function handleIDAT(bot, continueConversation) {
   bot.onText(/\/ididathing/, async ({ send, chatId }) => {
     await send("Congrats! Whether it's a small win or a big win, let's celebrate it!");
-    send("So tell me, what did you do?", utils.telegram.FORCE_REPLY);
-    db.users.prevCommand.set(chatId, "idat - what");
+    send("So tell me, what did you do?", FORCE_REPLY);
+    users.prevCommand.set(chatId, "idat - what");
   });
 
   continueConversation["idat - what"] = ({ send, chatId }) => {
-    send("Amazing! How do you feel about it now?", utils.telegram.FORCE_REPLY);
-    db.users.prevCommand.set(chatId, "idat - feeling");
+    send("Amazing! How do you feel about it now?", FORCE_REPLY);
+    users.prevCommand.set(chatId, "idat - feeling");
   };
 
   continueConversation["idat - feeling"] = ({ send, chatId }) => {
-    send("Nice~ On a scale of 1 to 10, how difficult would you rate it?", utils.telegram.FORCE_REPLY);
-    db.users.prevCommand.set(chatId, "idat - difficulty");
+    send("Nice~ On a scale of 1 to 10, how difficult would you rate it?", FORCE_REPLY);
+    users.prevCommand.set(chatId, "idat - difficulty");
   };
 
   const DIFFICULTY_XP_MULTIPLIER = 100;
@@ -40,18 +40,16 @@ function handleIDAT(bot, continueConversation) {
       }
 
       // give XP
-      const xpData = await db.users.progress.addXP(chatId, difficulty * DIFFICULTY_XP_MULTIPLIER);
+      const xpData = await users.progress.addXP(chatId, difficulty * DIFFICULTY_XP_MULTIPLIER);
       await bot.notifyXP(chatId, "your achievement", xpData);
 
       // give badge
-      const { hasNewBadge, previousLevel, currentLevel } = await db.users.idat.increment(chatId);
+      const { hasNewBadge, previousLevel, currentLevel } = await users.idat.increment(chatId);
       if (hasNewBadge) {
         await bot.notifyBadges(chatId, "idat", previousLevel, currentLevel);
       }
 
-      return db.users.prevCommand.reset(chatId);
+      return users.prevCommand.reset(chatId);
     }
   };
 }
-
-export = handleIDAT;

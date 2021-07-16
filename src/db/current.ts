@@ -1,7 +1,5 @@
-import errors = require("./errors");
-import postgresql = require("./postgresql");
-
-const { pool, getFirst } = postgresql;
+import * as errors from "./errors";
+import { pool, getFirst } from "./postgresql";
 
 export const getId = async chatId => {
   const res = await pool.query(
