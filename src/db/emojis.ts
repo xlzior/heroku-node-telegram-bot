@@ -1,22 +1,25 @@
 import { pool, getRows, getFirst } from "./postgresql";
 import { getId } from "./current";
 
-export const getCount = async chatId => {
+export const getCount = async (chatId: number): Promise<number> => {
   const res = await pool.query("SELECT SUM(count) FROM emojis WHERE user_id=$1", [chatId]);
   return getFirst(res).sum;
 };
 
-export const getCurrent = async chatId => {
+export const getCurrent = async (chatId: number) => {
   const startId = await getId(chatId);
-  return pool.query(
+  const res = await pool.query(
     `SELECT emoji, count FROM emojis
     WHERE user_id=$1 AND start_id=$2
     ORDER BY count DESC;`,
     [chatId, startId]
-  ).then(getRows);
+  );
+  return getRows(res);
 };
 
-export const getUser = async chatId => {
+export const getUser = async (
+  chatId: number
+): Promise<{ emoji: string; count: number; }[]> => {
   const res = await pool.query(
     `SELECT emoji, SUM(count) AS count FROM emojis
     WHERE user_id=$1
@@ -28,7 +31,7 @@ export const getUser = async chatId => {
     .map(({ emoji, count }) => ({ emoji, count: parseInt(count) }));
 };
 
-export const add = async (chatId, emojis = []) => {
+export const add = async (chatId: number, emojis = []) => {
   if (emojis.length === 0) return;
   const startId = await getId(chatId);
   const promises = emojis.map(({ emoji, count }) => {

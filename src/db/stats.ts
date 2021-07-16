@@ -5,7 +5,7 @@ import * as reflections from "./reflections";
 import * as hashtags from "./hashtags";
 import * as emojisDb from "./emojis";
 
-export const get = async chatId => {
+export const get = async (chatId: number) => {
   const progress = users.progress.get(chatId);
   const idat = users.idat.get(chatId);
   const reflectionsCount = reflections.getCount(chatId);

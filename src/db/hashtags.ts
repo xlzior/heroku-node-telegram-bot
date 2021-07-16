@@ -1,22 +1,26 @@
 import { pool, getRows, getFirst } from "./postgresql";
 import * as current from "./current";
 
-export const getCount = async (chatId, hashtag) => {
+export const getCount = async (chatId: number, hashtag: string): Promise<number> => {
   const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1 AND hashtag=$2;", [chatId, hashtag]);
   return parseInt(getFirst(res).count);
 };
 
-export const getTotalCount = async chatId => {
+export const getTotalCount = async (chatId: number): Promise<number> => {
   const res = await pool.query("SELECT COUNT(hashtag) FROM hashtags WHERE user_id=$1;", [chatId]);
   return parseInt(getFirst(res).count);
 };
 
-export const getUniqueCount = async chatId => {
+export const getUniqueCount = async (chatId: number): Promise<number> => {
   const res = await pool.query("SELECT COUNT(DISTINCT hashtag) FROM hashtags WHERE user_id=$1;", [chatId]);
   return parseInt(getFirst(res).count);
 };
 
-export const getAll = async (chatId, limit, offset) => {
+export const getAll = async (
+  chatId: number,
+  limit: number,
+  offset: number
+) => {
   const res = await pool.query(
     `SELECT hashtag, COUNT(hashtag) AS count
     FROM hashtags
@@ -28,7 +32,12 @@ export const getAll = async (chatId, limit, offset) => {
   return getRows(res);
 };
 
-export const get = async (chatId, hashtag, limit, offset) => {
+export const get = async (
+  chatId: number,
+  hashtag: string,
+  limit: number,
+  offset: number
+) => {
   const res = await pool.query(
     `SELECT name, reflections.start_id
     FROM hashtags
@@ -41,7 +50,7 @@ export const get = async (chatId, hashtag, limit, offset) => {
   return getRows(res);
 };
 
-export const add = async (chatId, hashtags = []) => {
+export const add = async (chatId: number, hashtags = []) => {
   if (hashtags.length === 0) return;
   const startId = await current.getId(chatId);
   const promises = hashtags.map(hashtag => {

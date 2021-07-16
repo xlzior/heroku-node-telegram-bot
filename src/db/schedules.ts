@@ -1,26 +1,26 @@
 import { pool, getRows, getFirst } from "./postgresql";
 
-export const getUser = chatId => {
+export const getUser = (chatId: number) => {
   return pool.query("SELECT time, questions FROM schedules WHERE user_id=$1;", [chatId])
   .then(getRows);
 };
 
-export const getTime = time => {
+export const getTime = (time: string) => {
   return pool.query("SELECT user_id, questions FROM schedules WHERE time=$1;", [time]).then(getRows);
 };
 
-export const getQuestions = async (chatId, time) => {
+export const getQuestions = async (chatId: number, time: string) => {
   const res = await pool.query("SELECT questions FROM schedules WHERE user_id=$1 AND time=$2;", [chatId, time]);
   return getFirst(res) ? getFirst(res).questions : [];
 };
 
-export const add = (chatId, time, questions) => {
+export const add = (chatId: number, time: string, questions: string[]) => {
   return pool.query(
     "INSERT INTO schedules(user_id, time, questions) VALUES($1, $2, $3);",
     [chatId, time, questions]);
 };
 
-export const edit = (chatId, time, newTime, newQuestions) => {
+export const edit = (chatId: number, time: string, newTime: string, newQuestions: string[]) => {
   return pool.query(
     `UPDATE schedules
     SET time=$1, questions=$2
@@ -28,7 +28,7 @@ export const edit = (chatId, time, newTime, newQuestions) => {
     [newTime, newQuestions, chatId, time]);
 };
 
-const deleteSchedule = (chatId, time) => {
+const deleteSchedule = (chatId: number, time: string) => {
   return pool.query("DELETE FROM schedules WHERE user_id=$1 AND time=$2;", [chatId, time]);
 };
 

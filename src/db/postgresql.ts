@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, QueryResult } from "pg";
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -7,5 +7,5 @@ export const pool = new Pool({
   },
 });
 
-export const getRows = res => res.rows;
-export const getFirst = res => res.rows[0];
+export const getRows = (res: QueryResult<any>) => res.rows;
+export const getFirst = (res: QueryResult<any>) => res.rows[0];
