@@ -1,10 +1,10 @@
 import Bot = require("node-telegram-bot-api");
 
-import { getBadgeImage, getBadgeLabel, checkForNewBadge } from "../achievements";
-import { formatStats } from "../levels";
 import * as db from "../db";
 import { NO_REFLECTION_OPEN } from "../db/errors";
 import { sum, emojiChart } from "../utils";
+import { getBadgeImage, getBadgeLabel, checkForNewBadge } from "../utils/achievements";
+import { formatStats } from "../utils/levels";
 
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)

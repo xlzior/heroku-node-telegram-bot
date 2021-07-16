@@ -57,13 +57,13 @@ const BADGES = {
 };
 
 // return the index of the largest item in badgeValues that is <= value
-const getBadgeLevel = (badgeValues, value) => {
+const getBadgeLevel = (badgeValues: number[], value: number) => {
   for (let i = badgeValues.length - 1; i >= 0; i--) {
     if (value >= badgeValues[i]) return i;
   }
 };
 
-export const checkForNewBadge = (type, previousLevel = 0, value) => {
+export const checkForNewBadge = (type: string, previousLevel = 0, value: number) => {
   const currentLevel = getBadgeLevel(BADGES[type].values, value);
   return {
     hasNewBadge: currentLevel > previousLevel,
@@ -72,10 +72,10 @@ export const checkForNewBadge = (type, previousLevel = 0, value) => {
   };
 };
 
-export const getBadgeImage = (type, badgeLevel) => {
+export const getBadgeImage = (type: string, badgeLevel: number) => {
   return BADGES[type].images[badgeLevel];
 };
 
-export const getBadgeLabel = (type, badgeLevel) => {
+export const getBadgeLabel = (type: string, badgeLevel: number) => {
   return `${BADGES[type].name} ${BADGE_LEVEL_EMOJIS[badgeLevel]}`;
 };

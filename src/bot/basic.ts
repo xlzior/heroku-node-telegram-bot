@@ -1,7 +1,7 @@
 import { users, reflections } from "../db";
 import { USER_ALREADY_EXISTS } from "../db/errors";
 import { clean, MARKDOWN, REMOVE_KEYBOARD } from "../utils/telegram";
-import { formatStats } from "../levels";
+import { formatStats } from "../utils/levels";
 
 import helpMessage from "./help";
 
