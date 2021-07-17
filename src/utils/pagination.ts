@@ -30,12 +30,12 @@ const generatePagination = (type: string) =>
 
 const generateList = (
   getPaginationType,
-  perPage,
+  perPage: number,
   getEntities,
   getNoEntitiesMessage,
   formatEntities,
   getCount,
-) => async (chatId: number, ...data: any[]) => {
+) => async (chatId: number, ...data) => {
   const currentPage = data[data.length - 1];
 
   // entities
@@ -79,7 +79,7 @@ export const generateHashtagList = generateList(
     hashtagsDb.get(chatId, data[0], perPage, pageToOffset(perPage)(data[1])),
   (_chatId, data) => `Sorry, I don't recognise the hashtag '${data[0]}'. Please select a hashtag from the list.`,
   reflections => reflections.map(formatReflection).join("\n\n"),
-  (chatId: number, data: any[]) => hashtagsDb.getCount(chatId, data[0]),
+  (chatId: number, data) => hashtagsDb.getCount(chatId, data[0]),
 );
 
 // callback_data: `hashtags - ${pageNumber}`
@@ -87,7 +87,7 @@ export const generateHashtagList = generateList(
 export const generateHashtagsList = generateList(
   () => "hashtags",
   25,
-  (chatId: number, data: any[], perPage: number) =>
+  (chatId: number, data, perPage: number) =>
     hashtagsDb.getAll(chatId, perPage, pageToOffset(perPage)(data[0])),
   () => "You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.",
   hashtags => hashtags.map(formatHashtag).join("\n"),
@@ -99,7 +99,7 @@ export const generateHashtagsList = generateList(
 export const generateQuestsList = generateList(
   () => "quests",
   5,
-  (_chatId: number, data: any[], perPage: number) =>
+  (_chatId: number, data, perPage: number) =>
     questsDb.getAll(perPage, pageToOffset(perPage)(data[0])),
   () => "No quests found.",
   quests => quests.map(formatQuest).join("\n\n"),
