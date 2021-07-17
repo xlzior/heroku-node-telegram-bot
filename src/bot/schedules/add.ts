@@ -1,11 +1,12 @@
 import { schedules, users } from "../../db";
 import { validateTime, formatScheduleInfo, localToUTC } from "../../utils/time";
+import { HandlerArguments } from "../../types/continueConversation";
 
 // continueConversation
 const TIME = "schedule - add - time";
 const QUESTIONS = "schedule - add - questions";
 
-export default function handleAdd(bot, continueConversation) {
+export default function handleAdd({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/add_schedule/, async ({ send, chatId }) => {
     const tz = await users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");

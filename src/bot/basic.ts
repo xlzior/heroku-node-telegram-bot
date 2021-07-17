@@ -2,10 +2,11 @@ import { users, reflections } from "../db";
 import { USER_ALREADY_EXISTS } from "../db/errors";
 import { clean, MARKDOWN, REMOVE_KEYBOARD } from "../utils/telegram";
 import { formatStats } from "../utils/levels";
+import { HandlerArguments } from "../types/continueConversation";
 
 import helpMessage from "./help";
 
-export default function handleBasic(bot, continueConversation) {
+export default function handleBasic({ bot }: HandlerArguments): void {
   bot.onText(/\/start(@lifexp_bot)?$/, async ({ send, chatId }, msg) => {
     await send(`Hello, ${msg.from.first_name}!`);
 

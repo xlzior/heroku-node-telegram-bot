@@ -1,13 +1,14 @@
 import { schedules, users } from "../../db";
 import { groupPairs, withKeyboard, REMOVE_KEYBOARD } from "../../utils/telegram";
 import { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } from "../../utils/time";
+import { HandlerArguments } from "../../types/continueConversation";
 
 // continueConversation
 const SELECT = "schedule - edit - select";
 const TIME = "schedule - edit - time";
 const QUESTIONS = "schedule - edit - questions";
 
-export default function handleEdit(bot, continueConversation) {
+export default function handleEdit({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/edit_schedule/, async ({ send, chatId }) => {
     const tz = await users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");

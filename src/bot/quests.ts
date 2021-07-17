@@ -1,11 +1,12 @@
 import { quests, users, reflections, hashtags } from "../db";
 import { clean, MARKDOWN } from "../utils/telegram";
 import { generateQuestsList } from "../utils/pagination";
+import { HandlerArguments } from "../types/continueConversation";
 
 const QUESTS = "quests";
 const QUEST_HASHTAG = "#lifexp_quest";
 
-export default function handleQuests(bot, continueConversation) {
+export default function handleQuests({ bot }: HandlerArguments): void {
   bot.onText(/\/quests/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateQuestsList(chatId, 1);
     if (!error) await send("LifeXP quests provide you with a series of question prompts around a theme. Here are some quests for you to try, depending on what you wish to reflect on.");

@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 
 import { prevCommand, sleep, progress, timezone } from "../db/users";
+import { HandlerArguments } from "../types/continueConversation";
 
 // continueConversation
 const BEDTIME = "set bedtime";
@@ -39,7 +40,7 @@ const calculateXP = (goal, now) => {
   return { xp: 0, message: "You're too late 😔 Try not to deviate too much from your goal!" };
 };
 
-export default function handleBedtime(bot, continueConversation) {
+export default function handleBedtime({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/set_bedtime/, async ({ send, chatId }) => {
     await send("Welcome to the bedtime feature. I can give you XP for going to sleep and waking up on time.");
 

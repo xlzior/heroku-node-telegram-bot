@@ -1,8 +1,9 @@
 import * as db from "../db";
 import { REFLECTION_ALREADY_OPEN } from "../db/errors";
 import { getRandomPrompt, telegram, countEmojis } from "../utils";
+import { HandlerArguments } from "../types/continueConversation";
 
-export default function handleReflections(bot, continueConversation) {
+export default function handleReflections({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/prompt/, ({ send }) => {
     send(getRandomPrompt());
   });

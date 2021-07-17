@@ -2,8 +2,9 @@ import * as db from "../db";
 import { sum, emojiChart, telegram } from "../utils";
 import { getBadgeImage, getBadgeLabel, BLANK_BADGE } from "../utils/achievements";
 import { formatStats } from "../utils/levels";
+import { HandlerArguments } from "../types/continueConversation";
 
-export default function handleStats(bot, continueConversation) {
+export default function handleStats({ bot }: HandlerArguments): void {
   bot.onText(/\/lifexp/, async ({ chatId }) => {
     const { level, xp, streak, pinnedMessageId } = await db.users.progress.get(chatId);
     bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });

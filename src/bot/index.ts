@@ -1,7 +1,9 @@
-import Bot from "./TelegramBot";
+import { Message } from "node-telegram-bot-api";
 
 import { users, reflections } from "../db";
+import { Shortcuts } from "../types/continueConversation";
 
+import Bot from "./TelegramBot";
 import handleBasic from "./basic";
 import handleBrowse from "./browse";
 import handleReflections from "./reflections";
@@ -27,16 +29,16 @@ console.info(`Bot server started in ${process.env.NODE_ENV} mode`);
 
 const continueConversation = {};
 
-handleBasic(bot, continueConversation);
-handleReflections(bot, continueConversation);
-handleIDAT(bot, continueConversation);
-handleBrowse(bot, continueConversation);
-handleStats(bot, continueConversation);
-handleSchedules(bot, continueConversation);
-handleBedtime(bot, continueConversation);
-handleQuests(bot, continueConversation);
+handleBasic({ bot, continueConversation });
+handleReflections({ bot, continueConversation });
+handleIDAT({ bot, continueConversation });
+handleBrowse({ bot, continueConversation });
+handleStats({ bot, continueConversation });
+handleSchedules({ bot, continueConversation });
+handleBedtime({ bot, continueConversation });
+handleQuests({ bot, continueConversation });
 
-bot.onMessage(async (shortcuts, msg) => {
+bot.onMessage(async (shortcuts: Shortcuts, msg: Message) => {
   const { chatId } = shortcuts;
 
   // continueConversation

@@ -1,10 +1,11 @@
 import { schedules, users, reflections } from "../../db";
 import { clean, MARKDOWN } from "../../utils/telegram";
 import { generateDateTime } from "../../utils/time";
+import { HandlerArguments } from "../../types/continueConversation";
 
 const SCHEDULED = "scheduled";
 
-export default function handleSession(bot, continueConversation) {
+export default function handleSession({ bot }: HandlerArguments): void {
   bot.onText(/\/skip/, async ({ chatId, send }) => {
     const { command } = await users.prevCommand.get(chatId);
     if (command !== SCHEDULED) return;
