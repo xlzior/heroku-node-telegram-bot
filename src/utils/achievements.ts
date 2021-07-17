@@ -63,7 +63,17 @@ const getBadgeLevel = (badgeValues: number[], value: number) => {
   }
 };
 
-export const checkForNewBadge = (type: string, previousLevel = 0, value: number) => {
+type NewBadgeData = {
+  hasNewBadge: boolean,
+  previousLevel: number,
+  currentLevel: number,
+}
+
+export const checkForNewBadge = (
+  type: string,
+  previousLevel = 0,
+  value: number
+): NewBadgeData => {
   const currentLevel = getBadgeLevel(BADGES[type].values, value);
   return {
     hasNewBadge: currentLevel > previousLevel,
@@ -72,10 +82,10 @@ export const checkForNewBadge = (type: string, previousLevel = 0, value: number)
   };
 };
 
-export const getBadgeImage = (type: string, badgeLevel: number) => {
+export const getBadgeImage = (type: string, badgeLevel: number): string => {
   return BADGES[type].images[badgeLevel];
 };
 
-export const getBadgeLabel = (type: string, badgeLevel: number) => {
+export const getBadgeLabel = (type: string, badgeLevel: number): string => {
   return `${BADGES[type].name} ${BADGE_LEVEL_EMOJIS[badgeLevel]}`;
 };

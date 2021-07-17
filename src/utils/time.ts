@@ -8,7 +8,7 @@ export const parseTime = (
   return DateTime.fromFormat(timeString, "ha", { zone });
 };
 
-export const validateTime = (rawText: string) => {
+export const validateTime = (rawText: string): false | string => {
   return parseTime(rawText).isValid && rawText;
 };
 

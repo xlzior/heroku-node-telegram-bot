@@ -49,7 +49,7 @@ const generateProgressBar = (percentageFilled: number, length: number) => {
 };
 
 // xp is cumulative, over all levels
-export const formatStats = (level: number, xp: number, streak: number) => {
+export const formatStats = (level: number, xp: number, streak: number): string => {
   const levelDisplay = `Level ${level}`;
   if (level < MAX_LEVEL) {
     const numer = xp - xpBaseForLevel(level); // display non-cumulative so progress bar is intuitive
@@ -62,18 +62,28 @@ export const formatStats = (level: number, xp: number, streak: number) => {
   return `${levelDisplay} (MAX)    ${xp} XP    🔥 ${streak}`;
 };
 
-export const incrementXP = (level: number, originalXP: number, additionalXP: number) => {
+type XPData = {
+  xp: number,
+  level: number,
+  levelledUp: boolean,
+}
+
+export const incrementXP = (
+  level: number,
+  originalXP: number,
+  additionalXP: number
+): XPData => {
   const xpThreshold = xpBaseForLevel(level + 1);
-  const newXP = originalXP + additionalXP;
-  const levelledUp = newXP >= xpThreshold;
+  const xp = originalXP + additionalXP;
+  const levelledUp = xp >= xpThreshold;
   if (level < MAX_LEVEL) {
     return {
-      xp: newXP,
+      xp,
       level: levelledUp ? level + 1 : level,
       levelledUp,
     };
   }
 
   // max level reached
-  return { newXP, newLevel: level, levelledUp: false };
+  return { xp, level, levelledUp: false };
 };

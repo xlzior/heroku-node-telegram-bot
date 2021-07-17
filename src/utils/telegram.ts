@@ -4,7 +4,9 @@ export const FORCE_REPLY: SendMessageOptions = { reply_markup: { force_reply: tr
 export const REMOVE_KEYBOARD: SendMessageOptions = { reply_markup: { remove_keyboard: true } };
 export const MARKDOWN: SendMessageOptions = { parse_mode: "MarkdownV2" };
 
-export const groupPairs = (array: any[]) => {
+type AnyKeyboardButton = InlineKeyboardButton | KeyboardButton;
+
+export const groupPairs = (array: AnyKeyboardButton[]): AnyKeyboardButton[][] => {
   const result = [];
   for (let i = 0; i < array.length; i += 2) {
     result.push(array.slice(i, i + 2));
