@@ -1,7 +1,8 @@
 import { users } from "../db";
 import { FORCE_REPLY } from "../utils/telegram";
+import { HandlerArguments } from "../types/continueConversation";
 
-export default function handleIDAT(bot, continueConversation) {
+export default function handleIDAT({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/ididathing/, async ({ send, chatId }) => {
     await send("Congrats! Whether it's a small win or a big win, let's celebrate it!");
     send("So tell me, what did you do?", FORCE_REPLY);

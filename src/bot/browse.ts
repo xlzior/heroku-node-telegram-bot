@@ -1,8 +1,9 @@
 import * as db from "../db";
 import { generateReflectionsList, generateHashtagsList, generateHashtagList } from "../utils/pagination";
 import { groupPairs, withKeyboard, REMOVE_KEYBOARD, replyTo } from "../utils/telegram";
+import { HandlerArguments } from "../types/continueConversation";
 
-export default function handleBrowse(bot, continueConversation) {
+export default function handleBrowse({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/reflections/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateReflectionsList(chatId, 1);
     if (!error) await send("All reflections");
