@@ -5,18 +5,18 @@ const intro = [
 
 const journal = [
   "📝 *Journal*",
-  "/open - start a new journal entry",
+  "/open - open a new journal entry",
   "/prompt - get a randomised prompt",
   "/echo - give yourself a prompt",
   "/ididathing - celebrate something you're proud of",
-  "/close - end off the journal entry",
+  "/close - close journal entry",
 ].join("\n");
 
 const browse = [
   "📖 *Browse*",
-  "/reflections - list all reflections",
-  "/hashtags - list all hashtags",
-  "/hashtag - browse reflections with a particular hashtag",
+  "/reflections - browse reflections",
+  "/hashtags - browse hashtags",
+  "/hashtag - browse reflections by hashtag",
 ].join("\n");
 
 const game = [
@@ -29,7 +29,7 @@ const game = [
 const quests = [
   "⚔️ *Quests*",
   "/quests - browse quests",
-];
+].join("\n");
 
 const scheduled = [
   "⏰ *Scheduled Journalling Sessions*",
@@ -41,9 +41,9 @@ const scheduled = [
 
 const bedtime = [
   "🛌 *Bedtime*",
-  "/set_bedtime",
-  "/good_morning",
-  "/good_night",
+  "/set_bedtime - set bedtime goals",
+  "/good_morning - claim XP for waking up on time",
+  "/good_night - claim XP for going to sleep on time",
 ].join("\n");
 
 const misc = [
