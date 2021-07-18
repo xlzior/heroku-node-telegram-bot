@@ -1,7 +1,7 @@
 import { schedules, users, reflections } from "../../db";
 import { clean, MARKDOWN } from "../../utils/telegram";
 import { generateDateTime } from "../../utils/time";
-import { HandlerArguments } from "../../types/continueConversation";
+import { HandlerArguments, ScheduledPartial } from "../../types/continueConversation";
 
 const SCHEDULED = "scheduled";
 
@@ -20,7 +20,7 @@ export default function handleSession({ bot }: HandlerArguments): void {
     const { command, partial } = await users.prevCommand.get(chatId);
     if (command !== SCHEDULED) return;
 
-    const { time, index } = partial;
+    const { time, index } = partial as ScheduledPartial;
     const questions = await schedules.getQuestions(chatId, time);
 
     if (index < questions.length) {

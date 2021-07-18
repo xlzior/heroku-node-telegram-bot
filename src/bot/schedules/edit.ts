@@ -1,12 +1,7 @@
 import { schedules, users } from "../../db";
 import { groupPairs, withKeyboard, REMOVE_KEYBOARD } from "../../utils/telegram";
 import { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 } from "../../utils/time";
-import { HandlerArguments } from "../../types/continueConversation";
-
-// continueConversation
-const SELECT = "schedule - edit - select";
-const TIME = "schedule - edit - time";
-const QUESTIONS = "schedule - edit - questions";
+import { HandlerArguments, EDIT_SELECT, EDIT_TIME, EDIT_QUESTIONS, EditSelectPartial, EditTimePartial, EditQuestionsPartial } from "../../types/continueConversation";
 
 export default function handleEdit({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/edit_schedule/, async ({ send, chatId }) => {
@@ -21,15 +16,16 @@ export default function handleEdit({ bot, continueConversation }: HandlerArgumen
       const { time, questions } = userSchedules[0];
       const localTime = utcToLocal(time, tz);
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nPlease send a new time for this scheduled session in 12-hour format (e.g. 9pm).`);
-      users.prevCommand.set(chatId, TIME, { time: localTime, tz });
+      users.prevCommand.set(chatId, EDIT_TIME, { time: localTime, tz });
     } else {
       const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time, tz)));
       send("Which schedule would you like to edit?", withKeyboard(keyboard));
-      users.prevCommand.set(chatId, SELECT, { tz });
+      users.prevCommand.set(chatId, EDIT_SELECT, { tz });
     }
   });
 
-  continueConversation[SELECT] = async ({ send, chatId }, msg, { tz }) => {
+  continueConversation[EDIT_SELECT] = async ({ send, chatId }, msg, partial) => {
+    const { tz } = partial as EditSelectPartial;
     const time = validateTime(msg.text);
     if (!time) return send("Please send a valid time using the keyboard provided");
 
@@ -37,13 +33,14 @@ export default function handleEdit({ bot, continueConversation }: HandlerArgumen
     if (questions.length > 0) {
       send(`You have chosen to edit the schedule at ${formatScheduleInfo(time, questions)}\n\nPlease send a new time for this scheduled session in 12-hour format (e.g. 9pm).`, REMOVE_KEYBOARD);
       // TODO: implement "no change" option?
-      users.prevCommand.set(chatId, TIME, { time, tz });
+      users.prevCommand.set(chatId, EDIT_TIME, { time, tz });
     } else {
       send(`You do not have a session at ${time}. Please send a valid time using the keyboard provided.`);
     }
   };
 
-  continueConversation[TIME] = async({ send, chatId }, msg, { time, tz }) => {
+  continueConversation[EDIT_TIME] = async({ send, chatId }, msg, partial) => {
+    const { time, tz } = partial as EditTimePartial;
     const newTime = validateTime(msg.text);
     if (!newTime) return send("Please send a valid time in 12-hour format (e.g. 9pm)");
 
@@ -53,11 +50,12 @@ export default function handleEdit({ bot, continueConversation }: HandlerArgumen
       users.prevCommand.reset(chatId);
     } else {
       send("What question prompts would you like to use in this session? You may have more than one prompt, just be sure to separate them with a line break.");
-      users.prevCommand.set(chatId, QUESTIONS, { time, tz, newTime });
+      users.prevCommand.set(chatId, EDIT_QUESTIONS, { time, tz, newTime });
     }
   };
 
-  continueConversation[QUESTIONS] = async({ send, chatId }, msg, { time, tz, newTime }) => {
+  continueConversation[EDIT_QUESTIONS] = async({ send, chatId }, msg, partial) => {
+    const { time, tz, newTime } = partial as EditQuestionsPartial;
     const newQuestions = msg.text.split("\n").filter(Boolean);
     send(`Okay, your new session will be at ${formatScheduleInfo(newTime, newQuestions)}`);
     schedules.edit(chatId, localToUTC(time, tz), localToUTC(newTime, tz), newQuestions);

@@ -1,7 +1,7 @@
 import * as db from "../db";
 import { generateReflectionsList, generateHashtagsList, generateHashtagList } from "../utils/pagination";
 import { groupPairs, withKeyboard, REMOVE_KEYBOARD, replyTo } from "../utils/telegram";
-import { HandlerArguments } from "../types/continueConversation";
+import { HandlerArguments, HASHTAG } from "../types/continueConversation";
 
 export default function handleBrowse({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/reflections/, async ({ send, chatId }) => {
@@ -40,12 +40,12 @@ export default function handleBrowse({ bot, continueConversation }: HandlerArgum
     if (hashtags.length === 0) {
       return send("You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
     }
-    db.users.prevCommand.set(chatId, "hashtag");
+    db.users.prevCommand.set(chatId, HASHTAG);
     const keyboard = groupPairs(hashtags.map(({ hashtag }) => hashtag));
     send("Alright, which hashtag would you like to browse?", withKeyboard(keyboard));
   });
 
-  continueConversation["hashtag"] = async ({ send, chatId }, msg) => {
+  continueConversation[HASHTAG] = async ({ send, chatId }, msg) => {
     const { error = false, message, options } = await generateHashtagList(chatId, msg.text, 1);
     if (!error) send(`Reflections with the hashtag ${msg.text}`, REMOVE_KEYBOARD);
     send(message, options);

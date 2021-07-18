@@ -2,7 +2,7 @@ import { schedules, users } from "../../db";
 import { handlePlural } from "../../utils";
 import { clean, MARKDOWN } from "../../utils/telegram";
 import { utcToLocal, utcToLocal24 } from "../../utils/time";
-import { HandlerArguments } from "../../types/continueConversation";
+import { HandlerArguments, SET_TIMEZONE } from "../../types/continueConversation";
 
 export default function handleManage({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/manage_schedules/, async ({ send, chatId }) => {
@@ -36,10 +36,10 @@ export default function handleManage({ bot, continueConversation }: HandlerArgum
 
   bot.onText(/\/set_timezone/, ({ send, chatId }) => {
     send("What timezone are you in? Please respond in the format 'UTC+X' or 'UTC-X', where X is your offset from UTC/GMT time.");
-    users.prevCommand.set(chatId, "set timezone");
+    users.prevCommand.set(chatId, SET_TIMEZONE);
   });
 
-  continueConversation["set timezone"] = async ({ send, chatId }, msg) => {
+  continueConversation[SET_TIMEZONE] = async ({ send, chatId }, msg) => {
     const tz = msg.text;
     if (tz.match(/UTC[+-]\d+/)) {
       send(`Alright, you have set your timezone to ${tz}. You may now make use of time-related features such as scheduled journalling sessions or bedtime. Use /add_schedule or /set_bedtime to get started.`);

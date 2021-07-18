@@ -1,7 +1,7 @@
 import * as db from "../db";
 import { REFLECTION_ALREADY_OPEN } from "../db/errors";
 import { getRandomPrompt, telegram, countEmojis } from "../utils";
-import { HandlerArguments } from "../types/continueConversation";
+import { HandlerArguments, OPEN_REFLECTION, CLOSE_REFLECTION } from "../types/continueConversation";
 
 export default function handleReflections({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/prompt/, ({ send }) => {
@@ -20,7 +20,7 @@ export default function handleReflections({ bot, continueConversation }: Handler
     try {
       await db.reflections.open(chatId, msg.message_id);
       send("Let's start a journalling session! If you need a prompt, you can use /prompt. If not, just start typing and I'll be here when you need me.");
-      await db.users.prevCommand.set(chatId, "open");
+      await db.users.prevCommand.set(chatId, OPEN_REFLECTION);
     } catch (error) {
       if (error === REFLECTION_ALREADY_OPEN) {
         send("A reflection is already in progress, please /close the reflection before opening a new one.");
@@ -40,14 +40,14 @@ export default function handleReflections({ bot, continueConversation }: Handler
     if (isOpen) {
       send("Whew! Nice journalling session. How would you like to name this reflection for future browsing?",
         telegram.FORCE_REPLY);
-      db.users.prevCommand.set(chatId, "close");
+      db.users.prevCommand.set(chatId, CLOSE_REFLECTION);
     } else {
       send("You have not started a reflection. Use /open to start a new reflection");
       db.users.prevCommand.reset(chatId);
     }
   });
 
-  continueConversation["close"] = async (shortcuts, msg) => {
+  continueConversation[CLOSE_REFLECTION] = async (shortcuts, msg) => {
     const { send, chatId } = shortcuts;
     await send(`Good job! You wrapped up the '${msg.text}' reflection. I'm proud of you!`);
     await bot.sendClosingStats(shortcuts, msg.message_id, msg.text, msg.date);

@@ -1,27 +1,27 @@
 import { users } from "../db";
 import { FORCE_REPLY } from "../utils/telegram";
-import { HandlerArguments } from "../types/continueConversation";
+import { HandlerArguments, IDAT_WHAT, IDAT_FEELING, IDAT_DIFFICULTY } from "../types/continueConversation";
 
 export default function handleIDAT({ bot, continueConversation }: HandlerArguments): void {
   bot.onText(/\/ididathing/, async ({ send, chatId }) => {
     await send("Congrats! Whether it's a small win or a big win, let's celebrate it!");
     send("So tell me, what did you do?", FORCE_REPLY);
-    users.prevCommand.set(chatId, "idat - what");
+    users.prevCommand.set(chatId, IDAT_WHAT);
   });
 
-  continueConversation["idat - what"] = ({ send, chatId }) => {
+  continueConversation[IDAT_WHAT] = ({ send, chatId }) => {
     send("Amazing! How do you feel about it now?", FORCE_REPLY);
-    users.prevCommand.set(chatId, "idat - feeling");
+    users.prevCommand.set(chatId, IDAT_FEELING);
   };
 
-  continueConversation["idat - feeling"] = ({ send, chatId }) => {
+  continueConversation[IDAT_FEELING] = ({ send, chatId }) => {
     send("Nice~ On a scale of 1 to 10, how difficult would you rate it?", FORCE_REPLY);
-    users.prevCommand.set(chatId, "idat - difficulty");
+    users.prevCommand.set(chatId, IDAT_DIFFICULTY);
   };
 
   const DIFFICULTY_XP_MULTIPLIER = 100;
 
-  continueConversation["idat - difficulty"] = async ({ send, chatId }, msg) => {
+  continueConversation[IDAT_DIFFICULTY] = async ({ send, chatId }, msg) => {
     const match = msg.text.match(/\d+/);
     if (!match) return send("Please enter a valid number between 1 and 10 (inclusive)");
 

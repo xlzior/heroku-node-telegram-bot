@@ -1,7 +1,7 @@
 import { quests, users, reflections, hashtags } from "../db";
 import { clean, MARKDOWN } from "../utils/telegram";
 import { generateQuestsList } from "../utils/pagination";
-import { HandlerArguments } from "../types/continueConversation";
+import { HandlerArguments, QuestPartial } from "../types/continueConversation";
 
 const QUESTS = "quests";
 const QUEST_HASHTAG = "#lifexp_quest";
@@ -29,8 +29,8 @@ export default function handleQuests({ bot }: HandlerArguments): void {
     }
   });
 
-  bot.onText(/\/preview_quest_(\d+)/, async ({ send }, msg, match) => {
-    const quest = await quests.get(match[1]);
+  bot.onText(/\/preview_quest_(\d+)/, async ({ send }, msg, match ) => {
+    const quest = await quests.get(parseInt(match[1]));
     if (!quest) return send("Quest not found.");
 
     const message = [
@@ -45,7 +45,7 @@ export default function handleQuests({ bot }: HandlerArguments): void {
     const isOpen = await reflections.isOpen(chatId);
     if (isOpen) return send("You already have a reflection open. Please /close the reflection before starting the quest.");
 
-    const quest = await quests.get(match[1]);
+    const quest = await quests.get(parseInt(match[1]));
     if (!quest) return send("Quest not found.");
 
     await bot.sendMessage(chatId, `You've started the quest "${quest.name}"! Here's your first prompt:`);
@@ -60,9 +60,10 @@ export default function handleQuests({ bot }: HandlerArguments): void {
   bot.onText(/\/done/, async (shortcuts, msg) => {
     const { chatId, send } = shortcuts;
     const { command, partial } = await users.prevCommand.get(chatId);
+
     if (command !== QUESTS) return;
 
-    const { questId, index } = partial;
+    const { questId, index } = partial as QuestPartial;
     const { name, questions } = await quests.get(questId);
 
     if (index < questions.length) {

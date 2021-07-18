@@ -1,9 +1,9 @@
-import { DateTime, FixedOffsetZone, Zone } from "luxon";
+import { DateTime } from "luxon";
 import { handlePlural } from "./misc";
 
 export const parseTime = (
   timeString: string,
-  zone = FixedOffsetZone.utcInstance
+  zone = "UTC"
 ): DateTime => {
   return DateTime.fromFormat(timeString, "ha", { zone });
 };
@@ -14,13 +14,13 @@ export const validateTime = (rawText: string): false | string => {
 
 export const formatTime = (timeObj: DateTime): string => timeObj.toFormat("ha");
 
-export const generateDateTime = (zone: Zone): string => {
+export const generateDateTime = (zone: string): string => {
   return DateTime.now().setZone(zone).toFormat("yyyy/MM/dd ha");
 };
 
 export const localToUTC = (
   localTimeString: string,
-  localTimeZone: Zone
+  localTimeZone: string
 ): string => {
   const parsed = parseTime(localTimeString, localTimeZone);
   return formatTime(parsed.toUTC());
@@ -28,7 +28,7 @@ export const localToUTC = (
 
 export const utcToLocal = (
   utcTimeString: string,
-  localTimeZone: Zone
+  localTimeZone: string
 ): string => {
   const parsed = parseTime(utcTimeString);
   return formatTime(parsed.setZone(localTimeZone));
@@ -36,7 +36,7 @@ export const utcToLocal = (
 
 export const utcToLocal24 = (
   utcTimeString: string,
-  localTimeZone: Zone
+  localTimeZone: string
 ): number => {
   const parsed = parseTime(utcTimeString);
   return parsed.setZone(localTimeZone).hour;

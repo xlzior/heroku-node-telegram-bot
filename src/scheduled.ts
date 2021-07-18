@@ -6,6 +6,7 @@ import { handleRequests, server } from "../web";
 import * as db from "./db";
 import { clean, MARKDOWN } from "./utils/telegram";
 import { formatTime } from "./utils/time";
+import { SCHEDULED } from "./types/continueConversation";
 
 env.config();
 const token = process.env.TOKEN;
@@ -25,7 +26,7 @@ const main = async () => {
       const message = `*${questions[0]}*\n\n✅ /done with prompt\n⏭ /skip journalling session`;
       const botMsg = await bot.sendMessage(chatId, clean(message), MARKDOWN);
       await db.reflections.open(chatId, botMsg.message_id);
-      await db.users.prevCommand.set(chatId, "scheduled", { index: 1, time: now });
+      await db.users.prevCommand.set(chatId, SCHEDULED, { index: 1, time: now });
     }
   }));
 
