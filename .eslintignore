@@ -1,3 +1,5 @@
 built
 private
 node_modules
+
+**/*.js
