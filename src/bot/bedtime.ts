@@ -1,11 +1,7 @@
 import { DateTime } from "luxon";
 
 import { prevCommand, sleep, progress, timezone } from "../db/users";
-import { HandlerArguments } from "../types/continueConversation";
-
-// continueConversation
-const BEDTIME = "set bedtime";
-const WAKEUP = "set wakeup time";
+import { HandlerArguments, BEDTIME, WAKEUP, WakeupPartial } from "../types/continueConversation";
 
 // calculateXP
 const MAX_XP = 100;
@@ -71,7 +67,8 @@ export default function handleBedtime({ bot, continueConversation }: HandlerArgu
     }
   };
 
-  continueConversation[WAKEUP] = async ({ send, chatId }, msg, { bedtime: bedtimeISO }) => {
+  continueConversation[WAKEUP] = async ({ send, chatId }, msg, partial) => {
+    const { bedtime: bedtimeISO } = partial as WakeupPartial;
     const bedtime = DateTime.fromISO(bedtimeISO);
     const wakeupTime = DateTime.fromFormat(msg.text, "h:mma");
     if (!wakeupTime.isValid) {
