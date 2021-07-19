@@ -7,5 +7,10 @@ export const pool = new Pool({
   },
 });
 
-export const getRows = (res: QueryResult<any>) => res.rows;
-export const getFirst = (res: QueryResult<any>) => res.rows[0];
+export function getRows<R>(res: QueryResult<R>): R[] {
+  return res.rows;
+}
+
+export function getFirst<R>(res: QueryResult<R>): R {
+  return res.rows[0];
+}
