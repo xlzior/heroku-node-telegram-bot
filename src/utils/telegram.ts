@@ -6,7 +6,7 @@ export const MARKDOWN: SendMessageOptions = { parse_mode: "MarkdownV2" };
 
 type AnyKeyboardButton = InlineKeyboardButton | KeyboardButton;
 
-export const groupPairs = (array: AnyKeyboardButton[]): AnyKeyboardButton[][] => {
+export const groupPairs = (array: string[]): AnyKeyboardButton[][] => {
   const result = [];
   for (let i = 0; i < array.length; i += 2) {
     result.push(array.slice(i, i + 2));

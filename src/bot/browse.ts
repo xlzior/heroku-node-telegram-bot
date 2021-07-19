@@ -69,7 +69,7 @@ export default function handleBrowse({ bot, continueConversation }: HandlerArgum
   });
 
   bot.onText(/\/goto(\d+)/, ({ send }, msg, match) => {
-    send("The reflection started here!", replyTo(match[1]))
+    send("The reflection started here!", replyTo(parseInt(match[1])))
     .catch(() => send("Reflection not found."));
   });
 }
