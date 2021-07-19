@@ -4,6 +4,7 @@ import * as questsDb from "../db/quests";
 
 import { clean, MARKDOWN, withInlineKeyboard } from "./telegram";
 import { formatReflection, formatHashtag, formatQuest } from "./misc";
+import { EditMessageTextOptions } from "node-telegram-bot-api";
 
 const pageToOffset = (perPage: number) => (page: number) => perPage * (page - 1);
 const countToNumPages = (perPage: number) => (count: number) => Math.ceil(count / perPage);
@@ -54,7 +55,7 @@ const generateList = (
     clean(list),
     `Page ${currentPage} of ${lastPage}`,
   ].join("\n\n");
-  const options = { ...MARKDOWN, ...withInlineKeyboard(keyboard) };
+  const options = { ...MARKDOWN, ...withInlineKeyboard(keyboard) } as EditMessageTextOptions;
   return { message, options };
 };
 
@@ -64,7 +65,7 @@ export const generateReflectionsList = generateList(
   () => "reflections",
   5,
   (chatId: number, data, perPage: number) =>
-    reflectionsDb.get(chatId, perPage, pageToOffset(perPage)(data[0])),
+    reflectionsDb.getAll(chatId, perPage, pageToOffset(perPage)(data[0])),
   () => "You do not have any reflections. Use /open to start a new journal entry",
   reflections => reflections.map(formatReflection).join("\n\n"),
   (chatId: number) => reflectionsDb.getCount(chatId),

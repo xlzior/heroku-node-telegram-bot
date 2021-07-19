@@ -1,3 +1,4 @@
+import { Hashtag, Reflection } from "../types/entities";
 import { pool, getRows, getFirst } from "./postgresql";
 import * as current from "./current";
 
@@ -20,7 +21,7 @@ export const getAll = async (
   chatId: number,
   limit: number,
   offset: number
-) => {
+): Promise<Hashtag[]> => {
   const res = await pool.query(
     `SELECT hashtag, COUNT(hashtag) AS count
     FROM hashtags
@@ -37,7 +38,7 @@ export const get = async (
   hashtag: string,
   limit: number,
   offset: number
-) => {
+): Promise<Reflection[]> => {
   const res = await pool.query(
     `SELECT name, reflections.start_id
     FROM hashtags
@@ -50,7 +51,7 @@ export const get = async (
   return getRows(res);
 };
 
-export const add = async (chatId: number, hashtags = []) => {
+export const add = async (chatId: number, hashtags = []): Promise<void> => {
   if (hashtags.length === 0) return;
   const startId = await current.getId(chatId);
   const promises = hashtags.map(hashtag => {
@@ -59,5 +60,5 @@ export const add = async (chatId: number, hashtags = []) => {
       ON CONFLICT DO NOTHING;`,
       [chatId, startId, hashtag]);
   });
-  return Promise.all(promises);
+  await Promise.all(promises);
 };

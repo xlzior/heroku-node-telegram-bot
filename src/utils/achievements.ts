@@ -63,7 +63,7 @@ const getBadgeLevel = (badgeValues: number[], value: number) => {
   }
 };
 
-type NewBadgeData = {
+export type NewBadgeData = {
   hasNewBadge: boolean,
   previousLevel: number,
   currentLevel: number,
