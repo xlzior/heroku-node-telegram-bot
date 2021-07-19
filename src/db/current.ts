@@ -1,3 +1,4 @@
+import { Reflection } from "../types/entities";
 import { pool, getFirst } from "./postgresql";
 import { NO_CURRENT_REFLECTION } from "./errors";
 
@@ -9,17 +10,17 @@ export const getId = async (chatId: number): Promise<number> => {
   return null;
 };
 
-export const setId = (chatId: number, start: number) => {
-  return pool.query(
+export const setId = async (chatId: number, start: number): Promise<void> => {
+  await pool.query(
     "UPDATE users SET current_reflection_id=$1 WHERE user_id=$2",
     [start, chatId]);
 };
 
-export const resetId = (chatId: number) => {
+export const resetId = (chatId: number): Promise<void> => {
   return setId(chatId, null);
 };
 
-export const get = async (chatId: number) => {
+export const get = async (chatId: number): Promise<Reflection> => {
   const startId = await getId(chatId);
   if (!startId) return Promise.reject(NO_CURRENT_REFLECTION);
   const res = await pool.query(

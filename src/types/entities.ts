@@ -10,8 +10,8 @@ export type Hashtag = {
 
 export type Reflection = {
   start_id: number,
-  end_id: number,
   name: string,
+  end_id?: number,
   hashtags?: string[],
 }
 
@@ -19,4 +19,17 @@ export type Quest = {
   id: number,
   name: string,
   questions: string[],
+}
+
+export type Achievement = {
+  user_id: number,
+  type: string,
+  level: number,
+}
+
+export type ScheduleQuestions = string[];
+
+export type Schedule = {
+  time: string,
+  questions: ScheduleQuestions,
 }

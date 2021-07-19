@@ -1,3 +1,4 @@
+import { Emoji } from "../types/entities";
 import { pool, getRows, getFirst } from "./postgresql";
 import { getId } from "./current";
 
@@ -6,7 +7,7 @@ export const getCount = async (chatId: number): Promise<number> => {
   return getFirst(res).sum;
 };
 
-export const getCurrent = async (chatId: number) => {
+export const getCurrent = async (chatId: number): Promise<Emoji[]> => {
   const startId = await getId(chatId);
   const res = await pool.query(
     `SELECT emoji, count FROM emojis
@@ -17,9 +18,7 @@ export const getCurrent = async (chatId: number) => {
   return getRows(res);
 };
 
-export const getUser = async (
-  chatId: number
-): Promise<{ emoji: string; count: number; }[]> => {
+export const getUser = async (chatId: number): Promise<Emoji[]> => {
   const res = await pool.query(
     `SELECT emoji, SUM(count) AS count FROM emojis
     WHERE user_id=$1
@@ -31,7 +30,7 @@ export const getUser = async (
     .map(({ emoji, count }) => ({ emoji, count: parseInt(count) }));
 };
 
-export const add = async (chatId: number, emojis = []) => {
+export const add = async (chatId: number, emojis: Emoji[] = []): Promise<void> => {
   if (emojis.length === 0) return;
   const startId = await getId(chatId);
   const promises = emojis.map(({ emoji, count }) => {
@@ -42,5 +41,5 @@ export const add = async (chatId: number, emojis = []) => {
       DO UPDATE SET count = emojis.count + $4;`,
       [chatId, startId, emoji, count]);
   });
-  return Promise.all(promises);
+  await Promise.all(promises);
 };

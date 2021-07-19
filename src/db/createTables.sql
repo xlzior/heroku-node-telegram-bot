@@ -19,6 +19,7 @@ CREATE TABLE reflections(
   start_id INTEGER,
   end_id INTEGER,
   name VARCHAR,
+  length INTEGER,
   PRIMARY KEY(user_id, start_id),
   CONSTRAINT foreign_key_user
     FOREIGN KEY(user_id)
