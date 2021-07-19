@@ -4,13 +4,13 @@ import { groupPairs, withKeyboard, REMOVE_KEYBOARD, replyTo } from "../utils/tel
 import { HandlerArguments, HASHTAG } from "../types/continueConversation";
 
 export default function handleBrowse({ bot, continueConversation }: HandlerArguments): void {
-  bot.onText(/\/reflections/, async ({ send, chatId }) => {
+  bot.handle(/\/reflections/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateReflectionsList(chatId, 1);
     if (!error) await send("All reflections");
     await send(message, options);
   });
 
-  bot.onText(/\/hashtags/, async ({ send, chatId }) => {
+  bot.handle(/\/hashtags/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateHashtagsList(chatId, 1);
     if (!error) await send("All hashtags");
     await send(message, options);
@@ -35,7 +35,7 @@ export default function handleBrowse({ bot, continueConversation }: HandlerArgum
     }
   });
 
-  bot.onText(/\/hashtag(@lifexp_bot)?$/, async ({ send, chatId }) => {
+  bot.handle(/\/hashtag(@lifexp_bot)?$/, async ({ send, chatId }) => {
     const hashtags = await db.hashtags.getAll(chatId, null, 0);
     if (hashtags.length === 0) {
       return send("You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
@@ -68,7 +68,7 @@ export default function handleBrowse({ bot, continueConversation }: HandlerArgum
     }
   });
 
-  bot.onText(/\/goto(\d+)/, ({ send }, msg, match) => {
+  bot.handle(/\/goto(\d+)/, ({ send }, msg, match) => {
     send("The reflection started here!", replyTo(parseInt(match[1])))
     .catch(() => send("Reflection not found."));
   });
