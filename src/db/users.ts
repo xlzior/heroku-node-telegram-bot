@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { checkForNewBadge, NewBadgeData } from "../utils/achievements";
 import { incrementXP } from "../utils/levels";
 import { EMPTY, PrevCommand } from "../types/continueConversation";
-import { Progress } from "../types/data";
+import { Progress, ProgressData } from "../types/data";
 
 import { pool, getFirst } from "./postgresql";
 import * as achievements from "./achievements";
@@ -44,7 +44,7 @@ export const progress = {
     }
     await pool.query("UPDATE users SET streak=$1, last_reflection_date=$2 WHERE user_id=$3;", [newStreak, current.toFormat("yyyy-MM-dd"), chatId]);
   },
-  addXP: async (chatId: number, additionalXP: number) => {
+  addXP: async (chatId: number, additionalXP: number): Promise<ProgressData> => {
     const currentProgress = await progress.get(chatId);
     const newProgress = incrementXP(currentProgress.level, currentProgress.xp, additionalXP);
     await progress.set(chatId, newProgress.level, newProgress.xp);
