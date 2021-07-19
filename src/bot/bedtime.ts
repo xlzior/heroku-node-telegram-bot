@@ -37,7 +37,7 @@ const calculateXP = (goal, now) => {
 };
 
 export default function handleBedtime({ bot, continueConversation }: HandlerArguments): void {
-  bot.onText(/\/set_bedtime/, async ({ send, chatId }) => {
+  bot.handle(/\/set_bedtime/, async ({ send, chatId }) => {
     await send("Welcome to the bedtime feature. I can give you XP for going to sleep and waking up on time.");
 
     const tz = await timezone.get(chatId);
@@ -80,7 +80,7 @@ export default function handleBedtime({ bot, continueConversation }: HandlerArgu
     }
   };
 
-  bot.onText(/\/good_morning/, async ({ send, chatId }, msg) => {
+  bot.handle(/\/good_morning/, async ({ send, chatId }, msg) => {
     await send("Good morning!");
     const now = DateTime.fromSeconds(msg.date);
 
@@ -97,7 +97,7 @@ export default function handleBedtime({ bot, continueConversation }: HandlerArgu
     }
   });
 
-  bot.onText(/\/good_night/, async ({ send, chatId }, msg) => {
+  bot.handle(/\/good_night/, async ({ send, chatId }, msg) => {
     await send("Goodnight! Sweet dreams~");
     const now = DateTime.fromSeconds(msg.date);
 

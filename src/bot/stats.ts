@@ -5,14 +5,14 @@ import { formatStats } from "../utils/levels";
 import { HandlerArguments } from "../types/continueConversation";
 
 export default function handleStats({ bot }: HandlerArguments): void {
-  bot.onText(/\/lifexp/, async ({ chatId }) => {
+  bot.handle(/\/lifexp/, async ({ chatId }) => {
     const { level, xp, streak } = await db.users.progress.get(chatId);
     bot.unpinChatMessage(chatId);
     const messageId = await bot.sendAndPin(chatId, formatStats(level, xp, streak));
     db.users.pinnedMessageId.set(chatId, messageId);
   });
 
-  bot.onText(/\/stats/, async ({ send, chatId }) => {
+  bot.handle(/\/stats/, async ({ send, chatId }) => {
     const { progress, idat, reflections, hashtags, emojis } = await db.stats.get(chatId);
 
     const game = [
@@ -43,7 +43,7 @@ export default function handleStats({ bot }: HandlerArguments): void {
     send(telegram.clean(message), telegram.MARKDOWN);
   });
 
-  bot.onText(/\/achievements/, async ({ send, chatId }) => {
+  bot.handle(/\/achievements/, async ({ send, chatId }) => {
     const achievements = await db.achievements.getAll(chatId);
     const achievementsCount = sum(achievements.map(a => a.level));
 

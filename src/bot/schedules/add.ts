@@ -3,7 +3,7 @@ import { validateTime, formatScheduleInfo, localToUTC } from "../../utils/time";
 import { HandlerArguments, ADD_TIME, ADD_QUESTIONS, AddTimePartial, AddQuestionsPartial } from "../../types/continueConversation";
 
 export default function handleAdd({ bot, continueConversation }: HandlerArguments): void {
-  bot.onText(/\/add_schedule/, async ({ send, chatId }) => {
+  bot.handle(/\/add_schedule/, async ({ send, chatId }) => {
     const tz = await users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 

@@ -27,7 +27,7 @@ export default class MyTelegramBot extends Bot {
     super(token, options);
   }
 
-  onText(regex: RegExp, callback: WithShortcut): void {
+  handle(regex: RegExp, callback: WithShortcut): void {
     return super.onText(regex, (msg, match) => {
       const shortcuts = generateShortcuts(this, msg);
       callback(shortcuts, msg, match);

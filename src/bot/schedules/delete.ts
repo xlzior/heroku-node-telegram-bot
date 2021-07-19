@@ -4,7 +4,7 @@ import { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 
 import { HandlerArguments, DELETE_SELECT, DELETE_CONFIRM, DeleteSelectPartial, DeleteConfirmPartial } from "../../types/continueConversation";
 
 export default function handleDelete({ bot, continueConversation }: HandlerArguments): void {
-  bot.onText(/\/delete_schedule/, async ({ send, chatId }) => {
+  bot.handle(/\/delete_schedule/, async ({ send, chatId }) => {
     const tz = await users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 
