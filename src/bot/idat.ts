@@ -41,8 +41,9 @@ export default function handleIDAT({ bot, continueConversation }: HandlerArgumen
       }
 
       // give XP
-      const xpData = await users.progress.addXP(chatId, difficulty * DIFFICULTY_XP_MULTIPLIER);
-      await bot.notifyXP(chatId, "your achievement", xpData);
+      const progressData = await users.progress.addXP(
+        chatId, difficulty * DIFFICULTY_XP_MULTIPLIER);
+      await bot.notifyXP(chatId, "your achievement", progressData);
 
       // give badge
       const { hasNewBadge, previousLevel, currentLevel } = await users.idat.increment(chatId);

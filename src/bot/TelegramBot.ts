@@ -1,46 +1,48 @@
 import Bot = require("node-telegram-bot-api");
 
 import * as db from "../db";
-import { NO_REFLECTION_OPEN } from "../db/errors";
+import { Shortcuts } from "../types/continueConversation";
+import { ProgressData } from "../types/data";
 import { sum, emojiChart } from "../utils";
 import { getBadgeImage, getBadgeLabel, checkForNewBadge } from "../utils/achievements";
 import { formatStats } from "../utils/levels";
 
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)
-const generateShortcuts = (thisBot, msg) => ({
+const generateShortcuts = (thisBot, msg: Bot.Message): Shortcuts => ({
   userId: msg.from.id,
   chatId: msg.chat.id,
-  send (...args) { return thisBot.sendMessage(msg.chat.id, ...args); },
+  send(text: string, options: Bot.SendMessageOptions = {}) {
+    return thisBot.sendMessage(msg.chat.id, text, options);
+  },
 });
 
 const MAX_PER_MEDIA_GROUP = 9;
 // Telegram media groups allow up to 10 photos in one message
 // but since achievements come in groups of 3, groups of 9 are more suitable
 
+type WithShortcut = (shortcuts: Shortcuts, msg: Bot.Message, match: RegExpExecArray) => void;
 export default class MyTelegramBot extends Bot {
-  constructor(token, options = {}) {
+  constructor(token: string, options = {}) {
     super(token, options);
   }
 
-  onText(regex, callback) {
-    const botReference = this;
-    return super.onText(regex, function(msg, match) {
-      const shortcuts = generateShortcuts(botReference, msg);
+  onText(regex: RegExp, callback: WithShortcut): void {
+    return super.onText(regex, (msg, match) => {
+      const shortcuts = generateShortcuts(this, msg);
       callback(shortcuts, msg, match);
     });
   }
 
-  onMessage(callback) {
-    const botReference = this;
-    return this.on("message", function(msg) {
-      const shortcuts = generateShortcuts(botReference, msg);
+  onMessage(callback: (shortcuts: Shortcuts, msg: Bot.Message) => void): this {
+    return this.on("message", msg => {
+      const shortcuts = generateShortcuts(this, msg);
       callback(shortcuts, msg);
     });
   }
 
-  async notifyXP(chatId, type, xpData) {
-    const { level, levelledUp, additionalXP, xp, streak, pinnedMessageId } = xpData;
+  async notifyXP(chatId: number, type: string, progressData: ProgressData): Promise<void> {
+    const { level, levelledUp, additionalXP, xp, streak, pinnedMessageId } = progressData;
     await this.sendMessage(chatId, `You earned ${additionalXP} XP for ${type}!`);
     if (levelledUp) await this.sendMessage(chatId, `You levelled up! You are now Level ${level}.`);
     await this.editMessageText(formatStats(level, xp, streak), {
@@ -49,26 +51,30 @@ export default class MyTelegramBot extends Bot {
     });
   }
 
-  async notifyBadge(chatId, type, badgeLevel) {
+  async notifyBadge(chatId: number, type: string, badgeLevel: number): Promise<Bot.Message> {
     const badgeImage = getBadgeImage(type, badgeLevel);
     return this.sendPhoto(chatId, badgeImage,
       { caption: `New Achievement! ${getBadgeLabel(type, badgeLevel)}` });
   }
 
-  async notifyBadges(chatId, type, previousLevel, currentLevel) {
+  async notifyBadges(
+    chatId: number,
+    type: string,
+    previousLevel: number,
+    currentLevel: number): Promise<void> {
     for (let i = previousLevel + 1; i <= currentLevel; i++) {
       await this.notifyBadge(chatId, type, i);
     }
   }
 
-  async sendAndPin(chatId, message) {
+  async sendAndPin(chatId: number, message: string): Promise<number> {
     const botMsg = await this.sendMessage(chatId, message);
     this.pinChatMessage(chatId, botMsg.message_id.toString());
     return botMsg.message_id;
   }
 
   // depending on the number of photos, send the appropriate number of media groups
-  async sendPhotos(chatId, photos) {
+  async sendPhotos(chatId: number, photos: Bot.InputMedia[]): Promise<void> {
     if (photos.length === 1) { // send an individual photo
       const { media, caption } = photos[0];
       await this.sendPhoto(chatId, media, { caption });
@@ -82,7 +88,11 @@ export default class MyTelegramBot extends Bot {
     }
   }
 
-  async sendClosingStats({ send, chatId }, messageId, name, date) {
+  async sendClosingStats(
+    { send, chatId }: Shortcuts,
+    messageId: number,
+    name: string,
+    date: number): Promise<void> {
     // emojis
     const emojis = await db.emojis.getCurrent(chatId);
     const emojiCounts = emojis.map(({ count }) => count);
@@ -91,18 +101,10 @@ export default class MyTelegramBot extends Bot {
     }
 
     // XP
-    const convoLength = await db.reflections.close(chatId, messageId, name)
-      .catch(error => {
-        if (error === NO_REFLECTION_OPEN) {
-          send("You have not started a reflection. Use /open to start a new reflection");
-        } else {
-          console.error("error:", error);
-        }
-      });
-
+    const convoLength = await db.reflections.close(chatId, messageId, name);
     await db.users.progress.updateStreak(chatId, date);
-    const xpData = await db.users.progress.addXP(chatId, convoLength);
-    await this.notifyXP(chatId, "this reflection", xpData);
+    const progressData = await db.users.progress.addXP(chatId, convoLength);
+    await this.notifyXP(chatId, "this reflection", progressData);
 
     // achievements
     const stats = [

@@ -1,3 +1,5 @@
+import { XPData } from "../types/data";
+
 const XP_PER_LEVEL = [ 0, // 0-indexing =/
   500,  // 1 -> 2
   1000,
@@ -61,12 +63,6 @@ export const formatStats = (level: number, xp: number, streak: number): string =
   // max level reached
   return `${levelDisplay} (MAX)    ${xp} XP    🔥 ${streak}`;
 };
-
-type XPData = {
-  xp: number,
-  level: number,
-  levelledUp: boolean,
-}
 
 export const incrementXP = (
   level: number,
