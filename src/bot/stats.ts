@@ -6,8 +6,8 @@ import { HandlerArguments } from "../types/continueConversation";
 
 export default function handleStats({ bot }: HandlerArguments): void {
   bot.onText(/\/lifexp/, async ({ chatId }) => {
-    const { level, xp, streak, pinnedMessageId } = await db.users.progress.get(chatId);
-    bot.unpinChatMessage(chatId, { message_id: pinnedMessageId });
+    const { level, xp, streak } = await db.users.progress.get(chatId);
+    bot.unpinChatMessage(chatId);
     const messageId = await bot.sendAndPin(chatId, formatStats(level, xp, streak));
     db.users.pinnedMessageId.set(chatId, messageId);
   });
@@ -45,9 +45,7 @@ export default function handleStats({ bot }: HandlerArguments): void {
 
   bot.onText(/\/achievements/, async ({ send, chatId }) => {
     const achievements = await db.achievements.getAll(chatId);
-    const achievementsCount = sum(Object.values(achievements));
-
-    // KIV: delete all previous badges sent? so that it's not so repetitive
+    const achievementsCount = sum(achievements.map(a => a.level));
 
     if (achievementsCount === 0) {
       return send("Oh no! You haven't earned any achievements yet. Keep journalling to earn some!");
