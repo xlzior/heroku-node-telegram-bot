@@ -30,21 +30,12 @@ Browse reflections by hashtag.
 
 ## Game Features
 
-`/lifexp`: Experience Points and Levels
-
-This command creates a pinned message in the chat which acts as a status bar. As you earn XP through journalling, `/ididathing` or waking up on time, the status bar will be updated with your current XP and level.
-
-Keep up a journalling streak -- journal consistently every day to maintain your streak count.
-
-Achievement Badges
-
-The achievement badges you’ve earned can be viewed under the chat’s “shared media”.
-
-Use `/achievements` to list out all your achievement badges again in sorted order.
-
-`/stats`
-
-View statistics about your journal entries with LifeXP.
+Example       | Feature
+------------- | -------------
+<img src="assets/game features.png" width="1000px">| Earn XP through journalling, `/ididathing` or waking up on time. Make full use of LifeXP's features to earn all achievement badges!
+<img src="assets/lifexp.png" width="1000px">| **`/lifexp`**: This command creates a pinned message in the chat which acts as a status bar. As you earn XP, the status bar will be updated with your current XP and level. Keep up a journalling streak -- journal consistently every day to maintain your streak count.
+<img src="assets/cabinet.png" width="1000px">| **Achievement Badges**: The achievement badges you’ve earned can be viewed under the chat’s “shared media”. Use `/achievements` to list out all your achievement badges again in sorted order.
+<img src="assets/stats.png" width="1000px">| **`/stats`**: View statistics about your journal entries with LifeXP.
 
 ## Quests
 
