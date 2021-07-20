@@ -50,6 +50,15 @@ View statistics about your journal entries with LifeXP.
 
 LifeXP quests provide you with a series of question prompts around a theme. They provide a more structured journalling session.
 
+<img src="assets/quests1.png" width="400px">
+<br/>
+<img src="assets/quests2.png" width="400px">
+<br/>
+<img src="assets/quests3.png" width="400px">
+<br/>
+<img src="assets/quests4.png" width="400px">
+<br/>
+
 ## Scheduled Journalling Sessions
 
 LifeXP can send you a fixed set of prompts every day at a time of your choosing.
