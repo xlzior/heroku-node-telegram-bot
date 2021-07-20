@@ -1,8 +1,15 @@
-# LifeXP Demo
+# LifeXP Demo<!-- omit in toc -->
 
 LifeXP combines gamification and journalling into a chatbot. It aims to provide a safe, fun and convenient way for you to pen down your thoughts and even organise them for browsing later.
 
-## Journal
+- [📝 Journal](#-journal)
+- [📖 Browse](#-browse)
+- [🎮 Game Features](#-game-features)
+- [⚔️ Quests](#️-quests)
+- [⏰ Scheduled Journalling Sessions](#-scheduled-journalling-sessions)
+- [🛌 Bedtime](#-bedtime)
+
+## 📝 Journal
 
 Example       | Feature
 ------------- | -------------
@@ -14,7 +21,7 @@ Example       | Feature
 <img src="assets/idat.png" width="1000px">| **`/ididathing`**: Even the little things in life should be celebrated. LifeXP helps you celebrate your achievements, big or small. Answer a series of simple questions about your achievement, and be rewarded with XP for it!
 <img src="assets/close.png" width="1000px">| **`/close`**: When your reflection has reached a natural close, it’s time to wrap up the conversation and give it a name for future reference.
 
-## Browse
+## 📖 Browse
 
 Example       | Feature
 ------------- | -------------
@@ -23,7 +30,7 @@ Example       | Feature
 <img src="assets/hashtag1.png" width="400px"><img src="assets/hashtag2.png" width="400px">| **`/hashtag`**: Browse reflections by hashtag.
 <img src="assets/goto.png" width="400px">| **`/goto`**: Revisit old journal entries
 
-## Game Features
+## 🎮 Game Features
 
 Example       | Feature
 ------------- | -------------
@@ -32,7 +39,7 @@ Example       | Feature
 <img src="assets/cabinet.png" width="1000px">| **Achievement Badges**: The achievement badges you’ve earned can be viewed under the chat’s “shared media”. Use `/achievements` to list out all your achievement badges again in sorted order.
 <img src="assets/stats.png" width="1000px">| **`/stats`**: View statistics about your journal entries with LifeXP.
 
-## Quests
+## ⚔️ Quests
 
 LifeXP quests provide you with a series of question prompts around a theme. They provide a more structured journalling session.
 
@@ -45,7 +52,7 @@ LifeXP quests provide you with a series of question prompts around a theme. They
 <img src="assets/quests4.png" width="400px">
 <br/>
 
-## Scheduled Journalling Sessions
+## ⏰ Scheduled Journalling Sessions
 
 LifeXP can send you a fixed set of prompts every day at a time of your choosing.
 
@@ -57,7 +64,7 @@ At your selected time, the bot will automatically start the conversation to prom
 
 <img src="assets/scheduled.png" width="400px">
 
-## Bedtime
+## 🛌 Bedtime
 
 Struggling to keep up a consistent sleep schedule? Use `/set_bedtime` to set goals for going to sleep and waking up on time.
 
