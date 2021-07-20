@@ -65,6 +65,12 @@ LifeXP can send you a fixed set of prompts every day at a time of your choosing.
 
 Use `/manage_schedules` to get started.
 
+<img src="assets/manage schedules.png" width="400px">
+
+At your selected time, the bot will automatically start the conversation to prompt you to journal.
+
+<img src="assets/scheduled.png" width="400px">
+
 ## Bedtime
 
 Struggling to keep up a consistent sleep schedule? Use `/set_bedtime` to set goals for going to sleep and waking up on time.
