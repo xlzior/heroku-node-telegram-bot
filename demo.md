@@ -10,23 +10,18 @@ Example       | Feature
 <img src="assets/prompt.png" width="1000px">| **`/prompt`**: Not sure what to journal about? LifeXP can provide you with a random prompt.
 <img src="assets/echo.png" width="1000px">| **`/echo`**: If you have a question in mind that you want to explore further, LifeXP can echo the question for you, to help visually break up the entry into sections.
 <img src="assets/emoji.png" width="1000px">| **Emojis**: Let all those emotions out however you wish — including emojis. LifeXP will use your emojis to gauge how you’re feeling.
-<img src="assets/hashtag.png" width="1000px">| **Hashtags**: You may use hashtags at any point during your entry. Possible hashtags include emotions, areas of your life, or challenges you’re facing. They’ll come in handy later!
+<img src="assets/use hashtag.png" width="1000px">| **Hashtags**: You may use hashtags at any point during your entry. Possible hashtags include emotions, areas of your life, or challenges you’re facing. They’ll come in handy later!
 <img src="assets/idat.png" width="1000px">| **`/ididathing`**: Even the little things in life should be celebrated. LifeXP helps you celebrate your achievements, big or small. Answer a series of simple questions about your achievement, and be rewarded with XP for it!
 <img src="assets/close.png" width="1000px">| **`/close`**: When your reflection has reached a natural close, it’s time to wrap up the conversation and give it a name for future reference.
 
 ## Browse
 
-`/reflections`
-
-Browse reflections in reverse chronological order.
-
-`/hashtags`
-
-Browse all hashtags used in descending order of frequency.
-
-`/hashtag`
-
-Browse reflections by hashtag.
+Example       | Feature
+------------- | -------------
+<img src="assets/reflections.png" width="400px">| **`/reflections`**: Browse reflections in reverse chronological order.
+<img src="assets/hashtags.png" width="400px">| **`/hashtags`**: Browse all hashtags used in descending order of frequency.
+<img src="assets/hashtag1.png" width="400px"><img src="assets/hashtag2.png" width="400px">| **`/hashtag`**: Browse reflections by hashtag.
+<img src="assets/goto.png" width="400px">| **`/goto`**: Revisit old journal entries
 
 ## Game Features
 
