@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import Bot = require("node-telegram-bot-api");
-import env from "dotenv";
+import dotenv = require("dotenv");
+dotenv.config();
 
 import { handleRequests, server } from "../web";
 import * as db from "./db";
@@ -8,7 +9,6 @@ import { clean, MARKDOWN } from "./utils/telegram";
 import { formatTime } from "./utils/time";
 import { SCHEDULED } from "./types/continueConversation";
 
-env.config();
 const token = process.env.TOKEN;
 const bot = new Bot(token);
 handleRequests(bot);
