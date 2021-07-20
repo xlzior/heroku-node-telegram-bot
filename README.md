@@ -4,9 +4,9 @@ LifeXP combines gamification and journalling into a chatbot. It aims to provide 
 
 ## Demo
 
-![demo](assets/readme%20demo.png)
+<img alt="demo" src="assets/readme%20demo.png" width="400px"/>
 
-For a full demo, go to [[demo.md]].
+For a full demo, go to [demo](demo.md).
 
 ## Principles
 
