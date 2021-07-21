@@ -68,4 +68,9 @@ At your selected time, the bot will automatically start the conversation to prom
 
 Struggling to keep up a consistent sleep schedule? Use `/set_bedtime` to set goals for going to sleep and waking up on time.
 
+<img src="assets/set bedtime.png" width="400px">
+
 Send `/good_morning` when you wake up and `/good_night` when you go to bed to be rewarded with XP for sticking to your goals.
+
+<img src="assets/good morning.png" width="400px">
+<img src="assets/goodnight.png" width="400px">
