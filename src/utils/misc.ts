@@ -1,6 +1,6 @@
 import * as emojiTree from "emoji-tree";
 
-import * as prompts from "../prompts.json";
+import * as prompts from "../../data/prompts.json";
 import { Emoji, Hashtag, Quest, Reflection } from "../types/entities";
 
 export const getRandomPrompt = (): string => {

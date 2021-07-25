@@ -81,25 +81,28 @@ export const DELETE_CONFIRM = "schedule - delete - confirm";
 export type DeleteConfirmPartial = { tz: string, time: string };
 type DeleteConfirmPrevCommand = { command: "schedule - delete - confirm", partial: DeleteConfirmPartial };
 
+// emotion wheel
+export const EMOTIONS = "emotions";
+export type EmotionsPartial = { path: string, selection: Selection };
+type EmotionsPrevCommand = { command: "emotions", partial: EmotionsPartial };
+
+type L3 = string;
+type L2 = L3[];
+type L1 = Record<string, L2>;
+export type Selection = Record<string, L1>;
+
 export type PrevCommand = EmptyPrevCommand |
-  OpenReflectionPrevCommand |
-  CloseReflectionPrevCommand |
-  IdatWhatPrevCommand |
-  IdatFeelingPrevCommand |
-  IdatDifficultyPrevCommand |
+  OpenReflectionPrevCommand | CloseReflectionPrevCommand |
+  IdatWhatPrevCommand | IdatFeelingPrevCommand | IdatDifficultyPrevCommand |
   HashtagPrevCommand |
   QuestPrevCommand |
-  BedtimePrevCommand |
-  WakeupPrevCommand |
-  ScheduledPrevCommand |
-  AddTimePrevCommand |
-  AddQuestionsPrevCommand |
   SetTimezonePrevCommand |
-  EditSelectPrevCommand |
-  EditTimePrevCommand |
-  EditQuestionsPrevCommand |
-  DeleteSelectPrevCommand |
-  DeleteConfirmPrevCommand;
+  ScheduledPrevCommand |
+  BedtimePrevCommand | WakeupPrevCommand |
+  AddTimePrevCommand | AddQuestionsPrevCommand |
+  EditSelectPrevCommand | EditTimePrevCommand | EditQuestionsPrevCommand |
+  DeleteSelectPrevCommand | DeleteConfirmPrevCommand |
+  EmotionsPrevCommand;
 
 export type ContinueConversationHandler = (
   shortcuts: Shortcuts,
