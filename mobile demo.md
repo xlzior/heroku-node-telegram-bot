@@ -109,9 +109,9 @@ LifeXP quests provide you with a series of question prompts around a theme. They
 
 LifeXP can send you a fixed set of prompts every day at a time of your choosing.
 
-Use `/manage_schedules` to get started.
+Use `/schedules` to get started.
 
-<img src="assets/manage schedules.png" width="400px">
+<img src="assets/schedules.png" width="400px">
 <br/><br/>
 
 At your selected time, the bot will automatically start the conversation to prompt you to journal.

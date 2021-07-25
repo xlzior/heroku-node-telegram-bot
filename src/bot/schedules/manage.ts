@@ -5,7 +5,7 @@ import { utcToLocal, utcToLocal24 } from "../../utils/time";
 import { HandlerArguments, SET_TIMEZONE } from "../../types/continueConversation";
 
 export default function handleManage({ bot, continueConversation }: HandlerArguments): void {
-  bot.handle(/\/manage_schedules/, async ({ send, chatId }) => {
+  bot.handle(/\/schedules/, async ({ send, chatId }) => {
     await send("Welcome to the scheduled journalling prompts feature. I can send you a fixed set of prompts every day at a time of your choosing.");
 
     const tz = await users.timezone.get(chatId);
