@@ -1,58 +1,39 @@
-const intro = [
-  "Welcome to LifeXP, a gamified journalling chatbot.",
-  "I'm here to help you pen down your thoughts in a safe and convenient environment.",
-].join("\n");
+export default `
+Welcome to LifeXP, a gamified journalling chatbot.
+I'm here to help you pen down your thoughts in a safe and convenient environment.
 
-const journal = [
-  "📝 *Journal*",
-  "/open - open a new journal entry",
-  "/prompt - get a randomised prompt",
-  "/echo - give yourself a prompt",
-  "/ididathing - celebrate something you're proud of",
-  "/close - close journal entry",
-].join("\n");
+✏️ *Journal*
+📝 Regular
+/open - open a new journal entry
+/close - close journal entry
 
-const browse = [
-  "📖 *Browse*",
-  "/reflections - browse reflections",
-  "/hashtags - browse hashtags",
-  "/hashtag - browse reflections by hashtag",
-].join("\n");
+⚔️ Quests
+/quests - browse quests
 
-const game = [
-  "🎮 *Game Features*",
-  "/lifexp - show level and XP",
-  "/achievements - show display cabinet of achievement badges",
-  "/stats - show statistics",
-].join("\n");
+⏰ Scheduled Journalling Sessions
+/schedules - manage journalling schedule
 
-const quests = [
-  "⚔️ *Quests*",
-  "/quests - browse quests",
-].join("\n");
+🧰 *Toolkit*
+/prompt - get a randomised prompt
+/echo - give yourself a prompt
+/ididathing - celebrate something you're proud of
+/emotion_wheel - explore emotion wheel
 
-const scheduled = [
-  "⏰ *Scheduled Journalling Sessions*",
-  "/manage_schedules",
-  "/add_schedule",
-  "/edit_schedule",
-  "/delete_schedule",
-].join("\n");
+📖 *Browse*
+/reflections - browse reflections
+/hashtags - browse hashtags
+/hashtag - browse reflections by hashtag
 
-const bedtime = [
-  "🛌 *Bedtime*",
-  "/set_bedtime - set bedtime goals",
-  "/good_morning - claim XP for waking up on time",
-  "/good_night - claim XP for going to sleep on time",
-].join("\n");
+🎮 *Game Features*
+/lifexp - show level and XP
+/achievements - show display cabinet of achievement badges
+/stats - show statistics
 
-const misc = [
-  "/emotion_wheel - explore emotion wheel",
-  "/cancel - cancel your previous command",
-].join("\n");
+🛌 *Bedtime*
+/set_bedtime - set bedtime goals
+/good_morning - claim XP for waking up on time
+/good_night - claim XP for going to sleep on time
 
-const outro = [
-  "I hope you have a meaningful journalling session. 😊",
-].join("\n");
+/cancel - cancel your previous command
 
-export default [intro, journal, browse, game, quests, scheduled, bedtime, misc, outro];
+I hope you have a meaningful journalling session. 😊`;

@@ -33,7 +33,7 @@ export default function handleBasic({ bot }: HandlerArguments): void {
   });
 
   bot.handle(/\/help/, ({ send }) => {
-    send(clean(helpMessage.join("\n\n")), MARKDOWN);
+    send(clean(helpMessage), MARKDOWN);
   });
 
   bot.handle(/\/cancel/, async ({ send, chatId }) => {
