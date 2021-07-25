@@ -47,6 +47,7 @@ const bedtime = [
 ].join("\n");
 
 const misc = [
+  "/emotion_wheel - explore emotion wheel",
   "/cancel - cancel your previous command",
 ].join("\n");
 
