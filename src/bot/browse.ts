@@ -41,7 +41,7 @@ export default function handleBrowse({ bot, continueConversation }: HandlerArgum
       return send("You have no hashtags saved. /open a reflection and use hashtags to categorise your entries.");
     }
     db.users.prevCommand.set(chatId, HASHTAG);
-    const keyboard = groupPairs(hashtags.map(({ hashtag }) => hashtag));
+    const keyboard = groupPairs(hashtags.map(({ hashtag }) => ({ text: hashtag })));
     send("Alright, which hashtag would you like to browse?", withKeyboard(keyboard));
   });
 

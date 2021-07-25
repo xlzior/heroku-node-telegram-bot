@@ -18,7 +18,8 @@ export default function handleEdit({ bot, continueConversation }: HandlerArgumen
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nPlease send a new time for this scheduled session in 12-hour format (e.g. 9pm).`);
       users.prevCommand.set(chatId, EDIT_TIME, { time: localTime, tz });
     } else {
-      const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time, tz)));
+      const rawKeys = userSchedules.map(({ time }) => ({ text: utcToLocal(time, tz) }));
+      const keyboard = groupPairs(rawKeys);
       send("Which schedule would you like to edit?", withKeyboard(keyboard));
       users.prevCommand.set(chatId, EDIT_SELECT, { tz });
     }
