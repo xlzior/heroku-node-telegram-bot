@@ -18,7 +18,8 @@ export default function handleDelete({ bot, continueConversation }: HandlerArgum
       send(`Alright, you only have one schedule at ${formatScheduleInfo(localTime, questions)}\n\nAre you sure you would like to delete this scheduled journalling session? Please send 'Yes' to confirm.`);
       users.prevCommand.set(chatId, DELETE_CONFIRM, { time: localTime, tz });
     } else {
-      const keyboard = groupPairs(userSchedules.map(({ time }) => utcToLocal(time, tz)));
+      const rawKeys = userSchedules.map(({ time }) => ({ text: utcToLocal(time, tz) }));
+      const keyboard = groupPairs(rawKeys);
       send("Which schedule would you like to delete?", withKeyboard(keyboard));
       users.prevCommand.set(chatId, DELETE_SELECT, { tz });
     }
