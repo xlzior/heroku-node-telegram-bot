@@ -43,6 +43,10 @@ LifeXP combines gamification and journalling into a chatbot. It aims to provide 
 <img src="assets/idat.png" width="400px">
 <br/><br/>
 
+**`/emotion_wheel`**: Overwhelmed by your emotions? Identifying what you're feeling is a great first step. Explore the emotion wheel with LifeXP and select the emotions that resonate with you.
+
+https://user-images.githubusercontent.com/30801910/127160025-feb12ef0-a3cc-41a3-a623-c63b373ed439.mov
+
 **`/close`**: When your reflection has reached a natural close, it’s time to wrap up the conversation and give it a name for future reference.
 
 <img src="assets/close.png" width="400px">
