@@ -1,7 +1,7 @@
 import { EditMessageCaptionOptions } from "node-telegram-bot-api";
 
 import { EMOTIONS, HandlerArguments } from "../types/continueConversation";
-import { withInlineKeyboard } from "../utils/telegram";
+import { clean, MARKDOWN, withInlineKeyboard } from "../utils/telegram";
 import {
   INTRO_TEXT, WHEEL_IMAGE,
   EMPTY_PATH, EMPTY_SELECTION,
@@ -14,7 +14,8 @@ import {
 export default function handleBasic({ bot }: HandlerArguments): void {
   bot.handle(/\/emotion_wheel/, async ({ chatId }) => {
     const keyboard = getKeyboard(EMPTY_PATH, EMPTY_SELECTION);
-    bot.sendPhoto(chatId, WHEEL_IMAGE, { caption: INTRO_TEXT, ...withInlineKeyboard(keyboard) });
+    const options = { caption: clean(INTRO_TEXT), ...withInlineKeyboard(keyboard), ...MARKDOWN };
+    bot.sendPhoto(chatId, WHEEL_IMAGE, options);
     updatePartial(chatId, EMPTY_PATH, EMPTY_SELECTION);
   });
 
@@ -26,8 +27,9 @@ export default function handleBasic({ bot }: HandlerArguments): void {
     const { path, selection } = await getPartial(chatId);
 
     const editMessage = (newMessage: string, newKeyboard: EditMessageCaptionOptions = {}) => {
-      bot.editMessageCaption(newMessage, {
+      bot.editMessageCaption(clean(newMessage), {
         ...newKeyboard,
+        ...(MARKDOWN as EditMessageCaptionOptions),
         chat_id: chatId,
         message_id: msg.message_id,
       });

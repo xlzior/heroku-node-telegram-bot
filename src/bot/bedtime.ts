@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 
 import { prevCommand, sleep, progress, timezone } from "../db/users";
 import { HandlerArguments, BEDTIME, WAKEUP, WakeupPartial } from "../types/continueConversation";
+import { clean, MARKDOWN } from "../utils/telegram";
 
 // calculateXP
 const MAX_XP = 100;
@@ -36,9 +37,11 @@ const calculateXP = (goal, now) => {
   return { xp: 0, message: "You're too late 😔 Try not to deviate too much from your goal!" };
 };
 
+const INTRO_TEXT = clean("*🛌 Bedtime*\n\nI can give you XP for going to sleep and waking up on time.");
+
 export default function handleBedtime({ bot, continueConversation }: HandlerArguments): void {
   bot.handle(/\/set_bedtime/, async ({ send, chatId }) => {
-    await send("Welcome to the bedtime feature. I can give you XP for going to sleep and waking up on time.");
+    await send(INTRO_TEXT, MARKDOWN);
 
     const tz = await timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");

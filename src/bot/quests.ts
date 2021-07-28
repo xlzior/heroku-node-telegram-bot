@@ -6,10 +6,12 @@ import { HandlerArguments, QuestPartial } from "../types/continueConversation";
 const QUESTS = "quests";
 const QUEST_HASHTAG = "#lifexp_quest";
 
+const INTRO_TEXT = clean("*⚔️ Quests*\n\nA quest is a series of question prompts centred around a theme. Here are some quests for you to try, depending on what you wish to reflect on.");
+
 export default function handleQuests({ bot }: HandlerArguments): void {
   bot.handle(/\/quests/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateQuestsList(chatId, 1);
-    if (!error) await send("LifeXP quests provide you with a series of question prompts around a theme. Here are some quests for you to try, depending on what you wish to reflect on.");
+    if (!error) await send(INTRO_TEXT, MARKDOWN);
     await send(message, options);
   });
 

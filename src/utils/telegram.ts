@@ -27,7 +27,7 @@ export const withInlineKeyboard = (keyboard: InlineKeyboardButton[][]): SendMess
 export const replyTo = (messageId: number): SendMessageOptions =>
   ({ reply_to_message_id: messageId });
 
-const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")", ".", "!"];
+const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")", ".", "!", ">"];
 export const clean = (rawText: string): string => {
   const result = RESERVED_CHARACTERS.reduce((text, char) => {
     return text.replace(new RegExp(`\\${char}`, "g"), `\\${char}`);

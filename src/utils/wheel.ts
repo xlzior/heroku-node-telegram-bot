@@ -21,7 +21,7 @@ const CANCEL_BUTTON = { text: "❌ Cancel", callback_data: `${EMOTIONS} - ${CANC
 export const DONE = "done";
 const DONE_BUTTON = { text: "✅ Done", callback_data: `${EMOTIONS} - ${DONE}` };
 
-export const INTRO_TEXT = "Welcome to the emotion wheel feature. Use the keyboard provided to navigate the emotion wheel and select emotions that resonate with you.";
+export const INTRO_TEXT = "*🎡 Emotion Wheel*\n\nUse the keyboard provided to navigate the emotion wheel and select emotions that resonate with you.";
 const GO_AGAIN = "Use /emotion_wheel to try again.";
 
 // UTILITIES
@@ -102,6 +102,7 @@ const getMessage = (path: string, selection: Selection): string => {
 const getDoneMessage = (selection: Selection) => {
   if (Object.keys(selection).length > 0) {
     return [
+      "*🎡 Emotion Wheel*",
       "Good job! Using the emotion wheel, you've identified that you're feeling these emotions:",
       format(selection),
       GO_AGAIN,

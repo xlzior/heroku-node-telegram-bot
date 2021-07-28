@@ -4,9 +4,11 @@ import { clean, MARKDOWN } from "../../utils/telegram";
 import { utcToLocal, utcToLocal24 } from "../../utils/time";
 import { HandlerArguments, SET_TIMEZONE } from "../../types/continueConversation";
 
+const INTRO_TEXT = clean("*⏰ Scheduled Journalling Sessions*\n\nI can send you a fixed set of prompts every day at a time of your choosing.");
+
 export default function handleManage({ bot, continueConversation }: HandlerArguments): void {
   bot.handle(/\/schedules/, async ({ send, chatId }) => {
-    await send("Welcome to the scheduled journalling prompts feature. I can send you a fixed set of prompts every day at a time of your choosing.");
+    await send(INTRO_TEXT, MARKDOWN);
 
     const tz = await users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
