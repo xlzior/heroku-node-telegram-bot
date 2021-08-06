@@ -25,12 +25,12 @@ export default function handleStats({ bot }: HandlerArguments): void {
       `Total: ${reflections.length.total} messages`,
       `Average: ${Math.round(reflections.length.average)} messages per reflection`,
       `Longest: ${reflections.length.maximum} messages`,
-      "<i>(use /reflections to browse)</i>",
+      "(use /reflections to browse)",
     ].join("\n");
     const hashtagsMessage = [
       `*Hashtags used*: ${hashtags.total}`,
       `${hashtags.unique} unique hashtags`,
-      "<i>(use /hashtags to browse)</i>",
+      "(use /hashtags to browse)",
     ].join("\n");
     const idatMessage = [
       `*Great things done*: ${idat}`,

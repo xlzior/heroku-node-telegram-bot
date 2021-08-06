@@ -29,8 +29,7 @@ export const replyTo = (messageId: number): SendMessageOptions =>
 
 const RESERVED_CHARACTERS = ["-", "#", "+", "_", "(", ")", ".", "!", ">"];
 export const clean = (rawText: string): string => {
-  const result = RESERVED_CHARACTERS.reduce((text, char) => {
+  return RESERVED_CHARACTERS.reduce((text, char) => {
     return text.replace(new RegExp(`\\${char}`, "g"), `\\${char}`);
   }, rawText);
-  return result.replace(/<\/?i>/g, "_");
 };
