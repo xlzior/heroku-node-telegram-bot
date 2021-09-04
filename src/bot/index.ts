@@ -14,6 +14,7 @@ import handleBedtime from "./bedtime";
 import handleQuests from "./quests";
 import handleEmotionWheel from "./emotionWheel";
 import handleResources from "./resources";
+import handleCbt from "./cbt";
 
 const token = process.env.TOKEN;
 
@@ -41,6 +42,7 @@ handleBedtime({ bot, continueConversation });
 handleQuests({ bot, continueConversation });
 handleEmotionWheel({ bot, continueConversation });
 handleResources({ bot, continueConversation });
+handleCbt({ bot, continueConversation });
 
 bot.onMessage(async (shortcuts: Shortcuts, msg: Message) => {
   const { chatId } = shortcuts;
