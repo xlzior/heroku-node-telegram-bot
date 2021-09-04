@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./built",
     "allowJs": true,
-    "target": "es2017",
+    "target": "es2019",
     "resolveJsonModule": true,
     "module": "commonjs",
   },
