@@ -13,6 +13,7 @@ import handleSchedules from "./schedules";
 import handleBedtime from "./bedtime";
 import handleQuests from "./quests";
 import handleEmotionWheel from "./emotionWheel";
+import handleResources from "./resources";
 
 const token = process.env.TOKEN;
 
@@ -39,6 +40,7 @@ handleSchedules({ bot, continueConversation });
 handleBedtime({ bot, continueConversation });
 handleQuests({ bot, continueConversation });
 handleEmotionWheel({ bot, continueConversation });
+handleResources({ bot, continueConversation });
 
 bot.onMessage(async (shortcuts: Shortcuts, msg: Message) => {
   const { chatId } = shortcuts;
