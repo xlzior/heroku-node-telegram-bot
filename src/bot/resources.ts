@@ -4,9 +4,11 @@ import { getResources } from "../utils";
 const WAITING_TIME = 2500;
 
 const SYNONYMS_LIST = {
-  "angry": ["angry"],
   "anxious": ["anxious", "anxiety"],
-  "fear": ["fear", "scared"],
+  "angry": ["angry"],
+  "stressed": ["stressed"],
+  "sad": ["sad", "down"],
+  "tired": ["tired"],
 };
 
 const SYNONYMS_MAP = {};
