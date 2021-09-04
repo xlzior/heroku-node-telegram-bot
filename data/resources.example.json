@@ -1,0 +1,11 @@
+{
+  "anxious": [
+    { "type": "yoga", "text": "yoga link" },
+    { "type": "meditation", "text": "mediation link" },
+    { "type": "article", "text": "article link" },
+    { "type": "exercise", "text": "exercise idea" },
+    { "type": "video", "text": "video link" },
+    { "type": "joke", "text": "joke" },
+    { "type": "other", "text": "other idea" }
+  ]
+}
