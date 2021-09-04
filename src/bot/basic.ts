@@ -4,7 +4,7 @@ import { clean, MARKDOWN, REMOVE_KEYBOARD } from "../utils/telegram";
 import { formatStats } from "../utils/levels";
 import { CBT, HandlerArguments, OPEN_REFLECTION } from "../types/continueConversation";
 
-import helpMessage from "./help";
+import featuresMessage from "./features";
 
 export default function handleBasic({ bot }: HandlerArguments): void {
   bot.handle(/\/start(@lifexp_bot)?$/, async ({ send, chatId }, msg) => {
@@ -12,7 +12,7 @@ export default function handleBasic({ bot }: HandlerArguments): void {
 
     const message = [
       "Welcome to LifeXP, a gamified journalling chatbot.\n",
-      "I'm here to help you pen down your thoughts in a safe and convenient environment.\n",
+      "I'm here to features you pen down your thoughts in a safe and convenient environment.\n",
       "Use /open to start a new journal entry.",
       "If you need a prompt to start off, let me know using /prompt.",
       "If you did something that you're proud of and want to celebrate it, try /ididathing.",
@@ -32,8 +32,8 @@ export default function handleBasic({ bot }: HandlerArguments): void {
     }
   });
 
-  bot.handle(/\/help/, ({ send }) => {
-    send(clean(helpMessage), MARKDOWN);
+  bot.handle(/\/features/, ({ send }) => {
+    send(clean(featuresMessage), MARKDOWN);
   });
 
   bot.handle(/\/cancel/, async ({ send, chatId }) => {
