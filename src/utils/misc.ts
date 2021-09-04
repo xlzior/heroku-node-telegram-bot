@@ -49,7 +49,7 @@ const formatResources = ({ type, text }: Resource): string => {
 
 export const getResources = (key: string): string[] => {
   const rawResources = shuffle(resources[key] || []);
-  return rawResources.slice(0, 3).map(formatResources);
+  return rawResources.slice(0, 2).map(formatResources);
 };
 
 /* EMOJIS */
