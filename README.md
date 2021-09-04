@@ -53,9 +53,7 @@ The bot was created before the MindfulHacks hackathon. During the hackathon, our
 It is highly unlikely that you will need to build, install and run the Telegram bot directly yourself, as the bot has already been deployed for public use. However, here are some overall instructions in the event that you need to do so.
 
 1. Clone the repository.
-2. Rename `data/resources.example.json` to `data/resources.json`. Optionally, add your own recommended resources.
-3. Rename `data/prompts.example.json` to `data/prompts.json`. Optionally, add your own journalling prompts.
-4. Create a Telegram bot and set up the environment variables as instructed [here](https://github.com/odditive/heroku-node-telegram-bot).
+2. Create a Telegram bot and set up the environment variables as instructed [here](https://github.com/odditive/heroku-node-telegram-bot).
 
 ## Acknowledgements
 
