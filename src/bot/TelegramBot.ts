@@ -7,6 +7,8 @@ import { sum, emojiChart } from "../utils";
 import { getBadgeImage, getBadgeLabel, checkForNewBadge } from "../utils/achievements";
 import { formatStats } from "../utils/levels";
 
+const XP_PER_MESSAGE = 50;
+
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)
 const generateShortcuts = (thisBot, msg: Bot.Message): Shortcuts => ({
@@ -103,7 +105,7 @@ export default class MyTelegramBot extends Bot {
     // XP
     const convoLength = await db.reflections.close(chatId, messageId, name);
     await db.users.progress.updateStreak(chatId, date);
-    const progressData = await db.users.progress.addXP(chatId, convoLength);
+    const progressData = await db.users.progress.addXP(chatId, convoLength * XP_PER_MESSAGE);
     await this.notifyXP(chatId, "this reflection", progressData);
 
     // achievements

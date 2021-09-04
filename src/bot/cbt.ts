@@ -58,9 +58,9 @@ async function startAlternativeStage({ send, chatId }) {
 
 export default function handleCbt({ bot, continueConversation }: HandlerArguments): void {
   bot.handle(/\/cbt/, async ({ send, chatId }) => {
-    await send(clean("*Cognitive Behavioural Therapy (CBT)* helps you deal with the automatic, emotion-filled thoughts and negative thinking patterns. Ordinarily, CBT is conducted with a counsellor in 1 hour sessions on a weekly or bi-weekly basis, for 5-6 months. While I still recommend seeking a mental health professional should you need it."), MARKDOWN);
+    await send(clean("*Cognitive Behavioural Therapy (CBT)* helps you deal with the automatic, emotion-filled thoughts and negative thinking patterns. Ordinarily, CBT is conducted with a counsellor in 1 hour sessions on a weekly or bi-weekly basis, for 5-6 months. While you should still seek help from a mental health professional if you need to, LifeXP can help you practice the techniques of CBT on your own, yet in a structured manner."), MARKDOWN);
 
-    await send("Use this chat function when you observe an unhealthy thinking pattern about yourself, or encounter a problem or difficult situation that makes you emotional.\n\nThis session might take at least 20 mins. Find a comfortable space to sit and reflect.");
+    await send("Use this function when you observe an unhealthy thinking pattern about yourself, or encounter a problem or difficult situation that makes you emotional.\n\nThis session might take at least 20 mins. Find a comfortable space to sit and reflect.");
 
     await send("Do you need an explainer on CBT?", withKeyboard(YES_NO_KEYBOARD));
     users.prevCommand.set(chatId, "cbt - explainer");
