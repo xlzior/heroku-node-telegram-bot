@@ -25,7 +25,7 @@ const allCommands = Object.values(SYNONYMS_LIST).flat().join("|");
 const resourceCommandRegex = new RegExp(`/(${allCommands})`);
 
 export default function handleResources({ bot }: HandlerArguments): void {
-  bot.handle(/\/resources/, async ({ send }) => {
+  bot.handle(/^\/resources/, async ({ send }) => {
     send(`Hey there! Here are some resources I've curated about dealing with various emotions that you may be experiencing. Click on the command(s) to find related resources:\n\n${Object.keys(SYNONYMS_LIST).map(text => `/${text}`).join("\n")}`);
   });
 

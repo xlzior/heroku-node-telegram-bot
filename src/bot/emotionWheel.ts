@@ -12,7 +12,7 @@ import {
 } from "../utils/wheel";
 
 export default function handleBasic({ bot }: HandlerArguments): void {
-  bot.handle(/\/emotion_wheel/, async ({ chatId }) => {
+  bot.handle(/^\/emotion_wheel/, async ({ chatId }) => {
     const keyboard = getKeyboard(EMPTY_PATH, EMPTY_SELECTION);
     const options = { caption: clean(INTRO_TEXT), ...withInlineKeyboard(keyboard), ...MARKDOWN };
     bot.sendPhoto(chatId, WHEEL_IMAGE, options);

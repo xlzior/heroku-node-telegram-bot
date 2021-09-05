@@ -3,7 +3,7 @@ import { FORCE_REPLY } from "../utils/telegram";
 import { HandlerArguments, IDAT_WHAT, IDAT_FEELING, IDAT_DIFFICULTY } from "../types/continueConversation";
 
 export default function handleIDAT({ bot, continueConversation }: HandlerArguments): void {
-  bot.handle(/\/ididathing/, async ({ send, chatId }) => {
+  bot.handle(/^\/ididathing/, async ({ send, chatId }) => {
     await send("Congrats! Whether it's a small win or a big win, let's celebrate it!");
     send("So tell me, what did you do?", FORCE_REPLY);
     users.prevCommand.set(chatId, IDAT_WHAT);

@@ -7,7 +7,7 @@ import { HandlerArguments, SET_TIMEZONE } from "../../types/continueConversation
 const INTRO_TEXT = clean("*⏰ Scheduled Journalling Sessions*\n\nI can send you a fixed set of prompts every day at a time of your choosing.");
 
 export default function handleManage({ bot, continueConversation }: HandlerArguments): void {
-  bot.handle(/\/schedules/, async ({ send, chatId }) => {
+  bot.handle(/^\/schedules/, async ({ send, chatId }) => {
     await send(INTRO_TEXT, MARKDOWN);
 
     const tz = await users.timezone.get(chatId);
@@ -36,7 +36,7 @@ export default function handleManage({ bot, continueConversation }: HandlerArgum
     }
   });
 
-  bot.handle(/\/set_timezone/, ({ send, chatId }) => {
+  bot.handle(/^\/set_timezone/, ({ send, chatId }) => {
     send("What timezone are you in? Please respond in the format 'UTC+X' or 'UTC-X', where X is your offset from UTC/GMT time.");
     users.prevCommand.set(chatId, SET_TIMEZONE);
   });

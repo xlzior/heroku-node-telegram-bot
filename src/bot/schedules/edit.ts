@@ -4,7 +4,7 @@ import { formatScheduleInfo, utcToLocal, localToUTC, validateTime, utcToLocal24 
 import { HandlerArguments, EDIT_SELECT, EDIT_TIME, EDIT_QUESTIONS, EditSelectPartial, EditTimePartial, EditQuestionsPartial } from "../../types/continueConversation";
 
 export default function handleEdit({ bot, continueConversation }: HandlerArguments): void {
-  bot.handle(/\/edit_schedule/, async ({ send, chatId }) => {
+  bot.handle(/^\/edit_schedule/, async ({ send, chatId }) => {
     const tz = await users.timezone.get(chatId);
     if (!tz) return send("Use /set_timezone to get started.");
 

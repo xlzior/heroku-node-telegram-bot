@@ -9,7 +9,7 @@ const QUEST_HASHTAG = "#lifexp_quest";
 const INTRO_TEXT = clean("*⚔️ Quests*\n\nA quest is a series of question prompts centred around a theme. Here are some quests for you to try, depending on what you wish to reflect on.");
 
 export default function handleQuests({ bot }: HandlerArguments): void {
-  bot.handle(/\/quests/, async ({ send, chatId }) => {
+  bot.handle(/^\/quests/, async ({ send, chatId }) => {
     const { error = false, message, options } = await generateQuestsList(chatId, 1);
     if (!error) await send(INTRO_TEXT, MARKDOWN);
     await send(message, options);
@@ -31,7 +31,7 @@ export default function handleQuests({ bot }: HandlerArguments): void {
     }
   });
 
-  bot.handle(/\/preview_quest_(\d+)/, async ({ send }, msg, match ) => {
+  bot.handle(/^\/preview_quest_(\d+)/, async ({ send }, msg, match ) => {
     const quest = await quests.get(parseInt(match[1]));
     if (!quest) return send("Quest not found.");
 
@@ -43,7 +43,7 @@ export default function handleQuests({ bot }: HandlerArguments): void {
     send(clean(message), MARKDOWN);
   });
 
-  bot.handle(/\/start_quest_(\d+)/, async ({ send, chatId }, msg, match) => {
+  bot.handle(/^\/start_quest_(\d+)/, async ({ send, chatId }, msg, match) => {
     const isOpen = await reflections.isOpen(chatId);
     if (isOpen) return send("You already have a reflection open. Please /close the reflection before starting the quest.");
 
@@ -59,7 +59,7 @@ export default function handleQuests({ bot }: HandlerArguments): void {
     await users.prevCommand.set(chatId, QUESTS, { index: 1, questId: match[1] });
   });
 
-  bot.handle(/\/done/, async (shortcuts, msg) => {
+  bot.handle(/^\/done/, async (shortcuts, msg) => {
     const { chatId, send } = shortcuts;
     const { command, partial } = await users.prevCommand.get(chatId);
 

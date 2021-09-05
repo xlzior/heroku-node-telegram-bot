@@ -5,19 +5,19 @@ import { replyTo } from "../utils/telegram";
 import { HandlerArguments, OPEN_REFLECTION, CLOSE_REFLECTION } from "../types/continueConversation";
 
 export default function handleReflections({ bot, continueConversation }: HandlerArguments): void {
-  bot.handle(/\/prompt/, ({ send }) => {
+  bot.handle(/^\/prompt/, ({ send }) => {
     send(getRandomPrompt());
   });
 
-  bot.handle(/\/echo(@lifexp_bot)? (.+)/, ({ send }, msg, match) => {
+  bot.handle(/^\/echo(@lifexp_bot)? (.+)/, ({ send }, msg, match) => {
     send(match[2]);
   });
 
-  bot.handle(/\/echo(@lifexp_bot)?$/, ({ send }) => {
+  bot.handle(/^\/echo(@lifexp_bot)?$/, ({ send }) => {
     send("Send /echo [text], and I'll repeat the [text] back at you. This can be useful for prompting yourself with a question you already have in mind, or telling yourself something you need/want to hear.");
   });
 
-  bot.handle(/\/open/, async ({ send, chatId }, msg) => {
+  bot.handle(/^\/open/, async ({ send, chatId }, msg) => {
     try {
       if (msg.reply_to_message) {
         const replyId = msg.reply_to_message.message_id;
@@ -37,7 +37,7 @@ export default function handleReflections({ bot, continueConversation }: Handler
     }
   });
 
-  bot.handle(/\/close/, async ({ send, chatId }) => {
+  bot.handle(/^\/close/, async ({ send, chatId }) => {
     const { command } = await db.users.prevCommand.get(chatId);
     if (command === "scheduled") {
       return send("You're currently doing a scheduled journalling session. When you are done with the given prompt, send /done.");

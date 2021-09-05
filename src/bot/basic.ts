@@ -7,7 +7,7 @@ import { CBT, HandlerArguments, OPEN_REFLECTION } from "../types/continueConvers
 import featuresMessage from "./features";
 
 export default function handleBasic({ bot }: HandlerArguments): void {
-  bot.handle(/\/start(@lifexp_bot)?$/, async ({ send, chatId }, msg) => {
+  bot.handle(/^\/start(@lifexp_bot)?$/, async ({ send, chatId }, msg) => {
     await send(`Hello, ${msg.from.first_name}!`);
 
     const message = [
@@ -32,11 +32,11 @@ export default function handleBasic({ bot }: HandlerArguments): void {
     }
   });
 
-  bot.handle(/\/features/, ({ send }) => {
+  bot.handle(/^\/features/, ({ send }) => {
     send(clean(featuresMessage), MARKDOWN);
   });
 
-  bot.handle(/\/cancel/, async ({ send, chatId }) => {
+  bot.handle(/^\/cancel/, async ({ send, chatId }) => {
     const { command } = await users.prevCommand.get(chatId);
     if (command) {
       send(`The command '${command}' has been cancelled.`, REMOVE_KEYBOARD);

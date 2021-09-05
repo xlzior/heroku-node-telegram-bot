@@ -6,7 +6,7 @@ import { HandlerArguments, ScheduledPartial } from "../../types/continueConversa
 const SCHEDULED = "scheduled";
 
 export default function handleSession({ bot }: HandlerArguments): void {
-  bot.handle(/\/skip/, async ({ chatId, send }) => {
+  bot.handle(/^\/skip/, async ({ chatId, send }) => {
     const { command } = await users.prevCommand.get(chatId);
     if (command !== SCHEDULED) return;
 
@@ -15,7 +15,7 @@ export default function handleSession({ bot }: HandlerArguments): void {
     send("Alright, skipping this session.");
   });
 
-  bot.handle(/\/done/, async (shortcuts, msg) => {
+  bot.handle(/^\/done/, async (shortcuts, msg) => {
     const { chatId, send } = shortcuts;
     const { command, partial } = await users.prevCommand.get(chatId);
     if (command !== SCHEDULED) return;
