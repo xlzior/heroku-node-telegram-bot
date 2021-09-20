@@ -7,7 +7,7 @@ import { sum, emojiChart } from "../utils";
 import { getBadgeImage, getBadgeLabel, checkForNewBadge } from "../utils/achievements";
 import { formatStats } from "../utils/levels";
 
-const XP_PER_MESSAGE = 50;
+const XP_PER_MESSAGE = 10;
 
 // refactor out commonly used functionality
 // e.g. bot.sendMessage(msg.chat.id, message, options) becomes send(message, options)
