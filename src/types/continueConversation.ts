@@ -91,16 +91,6 @@ type L2 = L3[];
 type L1 = Record<string, L2>;
 export type Selection = Record<string, L1>;
 
-// CBT
-export const CBT = "cbt";
-export const TRIGGER = "trigger";
-export const AUTOMATIC = "automatic";
-export const DISTORTION = "distortion";
-export const ALTERNATIVE = "alternative";
-export type CbtStage = "trigger" | "automatic" | "distortion" | "alternative";
-export type CbtPartial = { stage: CbtStage, isFirst: boolean };
-type CbtPrevCommand = { command: "cbt", partial: CbtPartial };
-
 // combine
 
 export type PrevCommand = EmptyPrevCommand |
@@ -114,8 +104,7 @@ export type PrevCommand = EmptyPrevCommand |
   AddTimePrevCommand | AddQuestionsPrevCommand |
   EditSelectPrevCommand | EditTimePrevCommand | EditQuestionsPrevCommand |
   DeleteSelectPrevCommand | DeleteConfirmPrevCommand |
-  EmotionsPrevCommand |
-  CbtPrevCommand;
+  EmotionsPrevCommand;
 
 export type ContinueConversationHandler = (
   shortcuts: Shortcuts,

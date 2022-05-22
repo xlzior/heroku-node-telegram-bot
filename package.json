@@ -7,7 +7,7 @@
     "start": "tsc && node index.js",
     "postinstall": "tsc",
     "cron": "node built/src/scheduled.js",
-    "deploy": "./private/deploy.sh",
+    "deploy": "git push heroku master",
     "lint": "eslint .",
     "set_webhook": "export $(cat .env | xargs) && curl https://api.telegram.org/bot$TOKEN/setWebhook?url=$HEROKU_URL$TOKEN"
   },

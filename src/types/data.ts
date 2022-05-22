@@ -39,10 +39,3 @@ export type Statistics = {
   },
   emojis: Emoji[]
 }
-
-type ResourceType = "yoga" | "meditation" | "article" | "exercise" | "video" | "joke" | "other";
-
-export type Resource = {
-  type: ResourceType,
-  text: string
-}

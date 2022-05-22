@@ -2,10 +2,6 @@ export default `
 Welcome to LifeXP, a gamified journalling chatbot.
 I'm here to help you pen down your thoughts in a safe and convenient environment.
 
-🧠 *MindfulHacks Hackathon*
-/cbt - guided journalling session, modelled after cognitive behavioural therapy (CBT)
-/resources - resources for dealing with various emotions
-
 ✏️ *Journal*
 📝 Regular: /open and /close
 ⚔️ Quests: /quests

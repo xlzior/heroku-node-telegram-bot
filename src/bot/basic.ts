@@ -2,7 +2,7 @@ import { users, reflections } from "../db";
 import { USER_ALREADY_EXISTS } from "../db/errors";
 import { clean, MARKDOWN, REMOVE_KEYBOARD } from "../utils/telegram";
 import { formatStats } from "../utils/levels";
-import { CBT, HandlerArguments, OPEN_REFLECTION } from "../types/continueConversation";
+import { HandlerArguments, OPEN_REFLECTION } from "../types/continueConversation";
 
 import featuresMessage from "./features";
 
@@ -40,7 +40,7 @@ export default function handleBasic({ bot }: HandlerArguments): void {
     const { command } = await users.prevCommand.get(chatId);
     if (command) {
       send(`The command '${command}' has been cancelled.`, REMOVE_KEYBOARD);
-      if (command === OPEN_REFLECTION || command === CBT) reflections.cancel(chatId);
+      if (command === OPEN_REFLECTION) reflections.cancel(chatId);
       await users.prevCommand.reset(chatId);
     } else {
       send("There was no previous command.", REMOVE_KEYBOARD);

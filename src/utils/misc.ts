@@ -1,55 +1,11 @@
 import * as emojiTree from "emoji-tree";
 
 import * as prompts from "../../data/prompts.json";
-import * as resources from "../../data/resources.json";
 import { Emoji, Hashtag, Quest, Reflection } from "../types/entities";
-import { Resource } from "../types/data";
 
 export const getRandomPrompt = (): string => {
   const index = Math.floor(Math.random() * prompts.random.length);
   return prompts.random[index];
-};
-
-function shuffle(array) {
-  let currentIndex = array.length, randomIndex;
-
-  // While there remain elements to shuffle...
-  while (currentIndex !== 0) {
-
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
-  }
-
-  return array;
-}
-
-const formatResources = ({ type, text }: Resource): string => {
-  switch (type) {
-    case "yoga":
-      return `Would you like to try some yoga? Here's a video to get you started: ${text}`;
-    case "article":
-      return `I found this article you might be interested in: ${text}`;
-    case "video":
-      return `Here's a video that might help: ${text}`;
-    case "meditation":
-      return `Meditation is a useful technique for our mental health. Here's a video that might help: ${text}`;
-    case "exercise":
-      return `Our body thrives on exercise. ${text}`;
-    case "joke":
-      return `Let me tell you a joke!\n${text}`;
-    default:
-      return text;
-  }
-};
-
-export const getResources = (key: string): string[] => {
-  const rawResources = shuffle(resources[key] || []);
-  return rawResources.slice(0, 2).map(formatResources);
 };
 
 /* EMOJIS */
